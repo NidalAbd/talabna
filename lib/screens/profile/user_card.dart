@@ -8,7 +8,8 @@ import 'package:geocoding/geocoding.dart';
 
 class UserCard extends StatefulWidget {
   final User follower;
-  const UserCard({Key? key, required this.follower}) : super(key: key);
+  final bool isFollow;
+  const UserCard({Key? key, required this.follower, required this.isFollow}) : super(key: key);
 
   @override
   State<UserCard> createState() => _UserCardState();
@@ -55,9 +56,10 @@ class _UserCardState extends State<UserCard> {
       child: ListTile(
           title: Text(widget.follower.userName!),
           subtitle: Text(city ?? 'no city', style: const TextStyle(color: Colors.white)),
-          leading: UserAvatar(userId: widget.follower.id, imageUrl: '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}', radius: 16,)
-      ),
-    );
+          leading: UserAvatar(userId: widget.follower.id, imageUrl: '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}', radius: 16,),
+          trailing: TextButton(onPressed: (){}, child: widget.isFollow? const Text('unfollow') : Text('follow')),
+        ),
+      );
   }
 }
 

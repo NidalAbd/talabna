@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/categories.dart';
-import 'package:talbna/data/repositories/service_post_repository.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
@@ -86,10 +84,9 @@ class _HomeScreenState extends State<HomeScreen>
         return Scaffold(
           appBar: AppBar(
             leading: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                LogoTitle(fontSize: 25, playAnimation: false, logoSize: 33,),
-
+                LogoTitle(fontSize: 18, playAnimation: false, logoSize: 20,),
               ],
             ),
             actions: [

@@ -101,7 +101,7 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child: UserCard(follower: follower));
+                          curve: Curves.easeIn,child: UserCard(follower: follower, isFollow: true,));
                     } else {
                       return const Center(child: Text('Invalid index'));
                     }

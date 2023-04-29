@@ -32,12 +32,12 @@ class _SplashState extends State<Splash> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         resizeToAvoidBottomInset: true,
         body: Center(
           child: CircleAvatar(
+            radius: 40,
             backgroundImage: AssetImage("assets/talabnaLogo.png"),
-
           ),
         ));
   }

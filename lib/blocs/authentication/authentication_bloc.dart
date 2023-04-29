@@ -34,12 +34,10 @@ class AuthenticationBloc
     on<GoogleSignInRequest>((event, emit) async {
       emit(AuthenticationInProgress());
       try {
-
         final result = await _authenticationRepository.signInWithGoogle();
         final userId = result['id'];
         final token = result['token'];
         print('result');
-
         print(result);
         emit(AuthenticationSuccess(userId: userId, token: token));
       } catch (e) {

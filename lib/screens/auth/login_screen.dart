@@ -79,7 +79,10 @@ class _LoginScreenState extends State<LoginScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const LogoTitle(fontSize: 50, playAnimation: true, logoSize: 60,),
+                  const LogoTitle(fontSize: 40, playAnimation: true, logoSize: 30,),
+                  const SizedBox(
+                    height: 50,
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(left: 14),
                     child: Row(
