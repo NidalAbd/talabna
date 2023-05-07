@@ -20,3 +20,4 @@ class UserFollowingRequested extends UserFollowEvent {
 
   const UserFollowingRequested({required this.user, this.page = 1});
 }
+

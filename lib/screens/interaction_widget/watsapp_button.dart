@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsAppButtonWidget extends StatelessWidget {
   final String? whatsAppNumber;
   final String username;
-
-  const WhatsAppButtonWidget({Key? key, this.whatsAppNumber, required this.username}) : super(key: key);
+  final double width;
+  const WhatsAppButtonWidget({Key? key, this.whatsAppNumber, required this.username, required this.width}) : super(key: key);
 
   String formatWhatsAppNumber(String number) {
     // Remove leading '00'
@@ -24,6 +25,41 @@ class WhatsAppButtonWidget extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(onTap: launchWhatsApp,child: Image.asset('assets/WhatsApp_logo.png', width: 24, height: 24,));
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: AppTheme.primaryColor.withOpacity(0.6),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(16),
+            ),
+          ),
+        ),
+        onPressed: launchWhatsApp,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+               SizedBox(width: width), // Add a fixed width SizedBox before the icon
+              Image.asset('assets/WhatsApp_logo.png' , width: 25, height: 25,),
+               SizedBox(width: width), // Add some space between the icon and text
+              Text(
+                whatsAppNumber!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
   }
 }

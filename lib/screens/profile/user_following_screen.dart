@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_event.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
@@ -15,6 +16,7 @@ class UserFollowingScreen extends StatefulWidget {
 class UserFollowingScreenState extends State<UserFollowingScreen> {
   final ScrollController _scrollController = ScrollController();
   late UserFollowBloc _userFollowBloc;
+  late UserActionBloc _userActionBloc;
   int _currentPage = 1;
   late bool _hasReachedMax = false;
   List<User> _following = [];
@@ -23,6 +25,7 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _userFollowBloc = context.read<UserFollowBloc>();
+    _userActionBloc = context.read<UserActionBloc>();
     _userFollowBloc.add(UserFollowingRequested(user: widget.userID, page: _currentPage));
   }
   @override
@@ -101,7 +104,7 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child: UserCard(follower: follower, isFollow: true,));
+                          curve: Curves.easeIn,child: UserCard(follower: follower, userActionBloc: _userActionBloc, isFollower: follower.isFollow!, userId: widget.userID,));
                     } else {
                       return const Center(child: Text('Invalid index'));
                     }

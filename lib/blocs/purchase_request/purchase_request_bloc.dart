@@ -27,6 +27,15 @@ class PurchaseRequestBloc extends Bloc<PurchaseRequestEvent, PurchaseRequestStat
         emit(PurchaseRequestError(e.toString()));
       }
     });
+    on<AddPointsForUser>((event, emit) async {
+      try {
+        print(event);
+        await repository.addPointsForUsers(pointsRequested: event.request, fromUser: event.fromUser, toUser: event.toUser);
+        emit(PurchaseRequestSuccess());
+      } catch (e) {
+        emit(PurchaseRequestError(e.toString()));
+      }
+    });
     on<FetchUserPointsBalance>((event, emit) async {
       emit(PurchaseRequestLoading());
       try {

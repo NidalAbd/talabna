@@ -52,14 +52,35 @@ class PurchaseRequestRepository {
         'Authorization': 'Bearer $token',
       },
     );
-    print(response.statusCode);
     if (response.statusCode == 201 || response.statusCode == 200) {
       return;
     } else {
       throw Exception('حدث خطأ أثناء إرسال طلب الشراء');
     }
   }
-
+  Future<void> addPointsForUsers(
+      {required int pointsRequested,required int fromUser,required int toUser}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/talbna_points/transfer/$pointsRequested/fromUser/$fromUser/toUser/$toUser'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+print(response.request);
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return;
+    } else {
+      throw Exception('حدث خطأ أثناء إرسال طلب الشراء');
+    }
+  }
   Future<PointBalance> getUserPointsBalance({required int userId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');

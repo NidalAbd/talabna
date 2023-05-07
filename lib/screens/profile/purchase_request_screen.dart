@@ -87,7 +87,7 @@ class _PurchaseRequestScreenState extends State<PurchaseRequestScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.userID,),
+                PointBalance(userId: widget.userID, showBalance: true,),
               ],
             ),
           ),

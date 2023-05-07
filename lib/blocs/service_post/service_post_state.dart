@@ -90,7 +90,13 @@ class ServicePostFavoriteToggled extends ServicePostState {
   List<Object?> get props => [isFavorite, servicePostId];
 }
 
+class ServicePostImageUpdatingSuccess extends ServicePostState {
+  final bool imageUpdated;
+  const ServicePostImageUpdatingSuccess({required this.imageUpdated});
 
+  @override
+  List<Object?> get props => [ imageUpdated];
+}
 class ServicePostImageDeletingSuccess extends ServicePostState {
   final int servicePostImageId;
   const ServicePostImageDeletingSuccess({required this.servicePostImageId});

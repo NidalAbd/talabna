@@ -97,7 +97,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.userId,),
+                PointBalance(userId: widget.userId, showBalance: true,),
               ],
             ),
           ),
@@ -283,12 +283,15 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                           mimeType!), // use the detected MIME type for the image file
                                     );
                                     imageFiles.add(imageFile);
+
                                   } else {
                                     print('Unsupported image format: $mimeType');
                                   }
                                 }
                               }
-                              final servicePost = ServicePost(
+                        context.read<ServicePostBloc>().add(UpdatePhotoServicePostEvent(widget.servicePostId, imageFiles));
+
+                        final servicePost = ServicePost(
                                   id: widget.servicePostId,
                                   title: _oldTitleController.text,
                                   description: _oldDescriptionController.text,
@@ -309,8 +312,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                   subCategory: _selectedSubCategory!.id
                                       .toString(), // use the subcategory ID instead of the name
                                   photos: _pickedImages);
-                              context.read<ServicePostBloc>().add(UpdateServicePostEvent(servicePost, imageFiles));
-
+                        context.read<ServicePostBloc>().add(UpdateServicePostEvent(servicePost, imageFiles));
                             },
                       child: _isLoading
                           ? const CircularProgressIndicator()

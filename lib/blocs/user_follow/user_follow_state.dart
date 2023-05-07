@@ -12,6 +12,7 @@ class UserFollowInitial extends UserFollowState {}
 
 class UserFollowLoadInProgress extends UserFollowState {}
 
+
 class UserFollowLoadFailure extends UserFollowState {
   final String error;
 
@@ -22,6 +23,7 @@ class UserFollowLoadFailure extends UserFollowState {
 }
 
 class UserFollowerFollowingSuccess extends UserFollowState {
+
   final List<User> users;
   final bool hasReachedMax;
 

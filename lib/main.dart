@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/app_theme.dart';
+import 'package:talbna/blocs/notification/notifications_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/report/report_bloc.dart';
 import 'package:talbna/blocs/service_post/bloc_observer.dart';
+import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_contact/user_contact_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
@@ -21,6 +23,7 @@ import 'blocs/purchase_request/purchase_request_bloc.dart';
 import 'blocs/service_post/service_post_bloc.dart';
 import 'blocs/user_profile/user_profile_bloc.dart';
 import 'data/repositories/authentication_repository.dart';
+import 'data/repositories/notification_repository.dart';
 import 'data/repositories/user_contact_repository.dart';
 import 'data/repositories/user_follow_repository.dart';
 import 'data/repositories/user_profile_repository.dart';
@@ -33,9 +36,7 @@ void main() async {
   await requestPermissions();
 
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: AppTheme.primaryColor,
-  ));
+
   final authenticationRepository = AuthenticationRepository();
   final servicePostRepository  = ServicePostRepository();
   final userProfileRepository = UserProfileRepository();
@@ -69,6 +70,14 @@ void main() async {
           create: (context) => UserFollowBloc(
             repository: UserFollowRepository(),
           ),
+        ),
+        BlocProvider<UserActionBloc>(
+          create: (context) => UserActionBloc(
+            repository: UserFollowRepository(),
+          ),
+        ),
+        BlocProvider<TalbnaNotificationBloc>(
+          create: (context) => TalbnaNotificationBloc(notificationRepository: NotificationRepository()),
         ),
         BlocProvider<ServicePostBloc>(
           create: (context) => ServicePostBloc(servicePostRepository: servicePostRepository),

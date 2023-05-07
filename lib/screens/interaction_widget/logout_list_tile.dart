@@ -17,6 +17,7 @@ class _LogoutListTileState extends State<LogoutListTile> {
       leading: const Icon(Icons.logout_outlined),
       title: const Text('Logout'),
       onTap: () async {
+        Navigator.pop(context);
         final authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
         final confirmed = await showDialog<bool>(
           context: context,

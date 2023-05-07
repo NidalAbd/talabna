@@ -35,7 +35,6 @@ class _ChangeBadgeState extends State<ChangeBadge> {
         badgeDuration: _selectedBadgeDuration,
       );
       context.read<ServicePostBloc>().add(ServicePostBadgeUpdateEvent(servicePost , widget.servicePostId));
-
     }
   }
 
@@ -52,7 +51,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تغيير القسم'),
+        title: const Text('تغيير التمييز'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -60,7 +59,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 PointBalance(
-                  userId: widget.userId,
+                  userId: widget.userId, showBalance: true,
                 ),
               ],
             ),

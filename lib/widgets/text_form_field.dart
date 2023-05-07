@@ -6,7 +6,7 @@ class TextFromField extends StatelessWidget {
   final bool obscureText;
   final Function validator;
   final Widget prefixIcon;
-  final Icon? suffixIcon;
+  final IconButton? suffixIcon;
   final String hintText;
   final EdgeInsets padding;
   const TextFromField(

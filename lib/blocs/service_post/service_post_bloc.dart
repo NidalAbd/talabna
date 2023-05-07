@@ -55,11 +55,16 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
         emit(state);
       }
     });
-
+    
     on<UpdateServicePostEvent>((event, emit) async {
       await for (var state in _mapUpdateServicePostEventToState(event)) {
         emit(state);
       }
+    });
+    on<UpdatePhotoServicePostEvent>((event, emit) async {
+    await for (var state in _mapUpdatePhotoServicePostEventToState(event)) {
+    emit(state);
+    }
     });
     on<ServicePostCategoryUpdateEvent>((event, emit) async {
       await for (var state in _mapServicePostCategoryUpdateEventToState(event)) {
@@ -138,7 +143,6 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
 
   Stream<ServicePostState> _mapGetServicePostsByCategoryEventToState(
       int category, int page) async* {
-
     yield const ServicePostLoading(event: 'GetServicePostsByCategoryEvent');
     if (state is ServicePostLoadSuccess && (state as ServicePostLoadSuccess).hasReachedMax) {
       return;
@@ -294,7 +298,16 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
       yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'UpdateServicePostEvent');
     }
   }
-
+  Stream<ServicePostState> _mapUpdatePhotoServicePostEventToState(
+      UpdatePhotoServicePostEvent event) async* {
+    yield const ServicePostLoading(event: 'UpdateServicePostEvent');
+    try {
+      bool updatedServicePost = await servicePostRepository.updateServicePostImage(event.imageFiles, servicePostImageId: event.servicePost );
+      yield ServicePostImageUpdatingSuccess(imageUpdated: updatedServicePost);
+    } catch (e) {
+      yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'UpdateServicePostEvent');
+    }
+  }
   Stream<ServicePostState> _mapDeleteServicePostEventToState(int id) async* {
     yield const ServicePostLoading(event: 'DeleteServicePostEvent');
     try {
@@ -317,7 +330,6 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
     yield const ServicePostLoading(event: 'ToggleFavoriteServicePostEvent');
     try {
       bool newFavoriteStatus = await servicePostRepository.toggleFavoriteServicePost(servicePostId: id);
-      print('do fav $newFavoriteStatus');
       yield ServicePostFavoriteToggled(servicePostId: id, isFavorite: newFavoriteStatus);
     } catch (e) {
       yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'ToggleFavoriteServicePostEvent');

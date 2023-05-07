@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_event.dart';
-import 'package:talbna/blocs/other_users/user_profile_state.dart';
+import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_event.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
-import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
-import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/user_card.dart';
 class UserFollowerScreen extends StatefulWidget {
@@ -19,6 +15,8 @@ class UserFollowerScreen extends StatefulWidget {
 class UserFollowerScreenState extends State<UserFollowerScreen> {
   final ScrollController _scrollController = ScrollController();
   late UserFollowBloc _userFollowBloc;
+  late UserActionBloc _userActionBloc;
+
   int _currentPage = 1;
   late bool _hasReachedMax = false;
   List<User> _followers = [];
@@ -27,6 +25,7 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _userFollowBloc = context.read<UserFollowBloc>();
+    _userActionBloc = context.read<UserActionBloc>();
     _userFollowBloc.add(UserFollowerRequested(user: widget.userID, page: _currentPage));
   }
   @override
@@ -105,7 +104,7 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child: UserCard(follower: follower, isFollow: false,));
+                          curve: Curves.easeIn,child: UserCard(follower: follower, userActionBloc: _userActionBloc, isFollower: follower.isFollow!, userId: widget.userID,));
                     } else {
                       return const Center(child: Text('Invalid index'));
                     }

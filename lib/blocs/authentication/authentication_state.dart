@@ -2,6 +2,7 @@
 abstract class AuthenticationState {}
 
 class AuthenticationInitial extends AuthenticationState {}
+class AuthenticationSignOut extends AuthenticationState {}
 
 class AuthenticationSuccess extends AuthenticationState {
   final String? token;

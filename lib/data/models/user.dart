@@ -18,6 +18,7 @@ class User {
   DateTime? updatedAt;
   int? followingCount;
   int? followersCount;
+  final bool? isFollow; // Add this field
   int? servicePostsCount;
   int? pointsBalance;
   List<Photo>? photos;
@@ -25,6 +26,7 @@ class User {
   // Update the required and non-required fields in the constructor
   User({
     required this.id,
+     this.isFollow,
      this.userName,
     this.name,
      this.gender,
@@ -78,6 +80,7 @@ class User {
       servicePostsCount: _parseNullableInt(json['service_posts_count']),
       pointsBalance: _parseNullableInt(json['pointsBalance']),
       photos: photos,
+      isFollow: json['is_follow'] ?? false,
     );
   }
   Map<String, dynamic> toJson() {

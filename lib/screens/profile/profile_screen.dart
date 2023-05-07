@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_event.dart';
 import 'package:talbna/blocs/other_users/user_profile_state.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
+import 'package:talbna/screens/profile/add_point_screen.dart';
+import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/profile/user_followers_screen.dart';
 import 'package:talbna/screens/profile/user_following_screen.dart';
 import 'package:talbna/screens/profile/user_info_widget.dart';
-import 'package:talbna/screens/service_post/create_service_post_form.dart';
 import 'package:talbna/screens/service_post/user_post_screen.dart';
 import 'package:talbna/screens/widgets/custom_tab_profile.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/utils/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key, required this.userId}) : super(key: key);
-  final int? userId;
+  const ProfileScreen({
+    Key? key,
+    required this.fromUser,
+    required this.toUser,
+  }) : super(key: key);
+  final int fromUser;
+  final int toUser;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -29,12 +36,12 @@ class _ProfileScreenState extends State<ProfileScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _userProfileBloc = context.read<OtherUserProfileBloc>();
-    _fetchUserData();
+    _userProfileBloc = context.read<OtherUserProfileBloc>()
+      ..add(OtherUserProfileRequested(id: widget.toUser));
   }
 
-  void _fetchUserData() {
-    _userProfileBloc.add(OtherUserProfileRequested(id: widget.userId!));
+  void _setClipboardData(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
   }
 
   @override
@@ -42,57 +49,85 @@ class _ProfileScreenState extends State<ProfileScreen>
     return BlocBuilder<OtherUserProfileBloc, OtherUserProfileState>(
       bloc: _userProfileBloc,
       builder: (BuildContext context, OtherUserProfileState state) {
-        if (state is OtherUserProfileLoadInProgress) {
+        if (state is OtherUserProfileInitial ||
+            state is OtherUserProfileLoadInProgress) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is OtherUserProfileLoadSuccess) {
           final user = state.user;
           return Scaffold(
             appBar: AppBar(
               elevation: 0,
-              title: Text(user.userName!),
+              title: Text(user.userName ?? 'no data'),
               actions: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundImage: NetworkImage(
-                            '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'),
+                Row(
+                  children: [
+                    Text(user.id.toString(),),
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundImage: NetworkImage(
+                          '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'),
+                    ),
+                     IconButton(
+                      icon: const Icon(
+                        Icons.more_vert,
+                        size: 30,
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.more_vert,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Wrap(
-                                children: [
-                                  ListTile(
-                                      leading: const Icon(Icons.report),
-                                      title: const Text('Report'),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        showModalBottomSheet(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return ReportTile(
-                                                type: 'user',
-                                                userId: widget.userId!,
-                                              );
-                                            });
-                                      }),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Wrap(
+                              children: [
+                                ListTile(
+                                  onLongPress: () =>
+                                      _setClipboardData(user.id.toString()),
+                                  leading: const Icon(Icons.perm_identity),
+                                  title: Text(
+                                    user.id.toString(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                ListTile(
+                                    leading: const Icon(Icons.report),
+                                    title: const Text('Report'),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return ReportTile(
+                                              type: 'user',
+                                              userId: widget.fromUser,
+                                            );
+                                          });
+                                    }),
+                                ListTile(
+                                  leading: const Icon(Icons.attach_money),
+                                  title: const Text('Add Points'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPointScreen(
+                                          fromUserID: widget.fromUser,
+                                          toUserId: widget.toUser,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
               bottom: TabBar(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/utils/constants.dart';
@@ -168,48 +169,7 @@ class ServicePostRepository {
     }
   }
 
-  Future<ServicePost> createServicePost(
-      ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
-    final request =
-        http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts'));
-    request.headers['Authorization'] = 'Bearer $token';
-    request.fields['title'] = servicePost.title?? 'null';
-    request.fields['description'] = servicePost.description?? 'null';
-    request.fields['price'] = servicePost.price.toString();
-    request.fields['priceCurrency'] = servicePost.priceCurrency?? 'null';
-    request.fields['locationLatitudes'] =
-        servicePost.locationLatitudes.toString();
-    request.fields['locationLongitudes'] =
-        servicePost.locationLongitudes.toString();
-    request.fields['userId'] = servicePost.userId.toString();
-    request.fields['type'] = servicePost.type ?? 'null';
-    request.fields['haveBadge'] = servicePost.haveBadge?? 'null';
-    request.fields['badgeDuration'] = servicePost.badgeDuration.toString();
-    request.fields['category'] = servicePost.category ?? 'null';
-    request.fields['subCategory'] = servicePost.subCategory ?? 'null';
-    if (imageFiles.isNotEmpty) {
-      request.files.addAll(imageFiles);
-    }
-    try {
-      final response =
-          await request.send().timeout(const Duration(seconds: 30));
-      final responseBody = await response.stream.bytesToString();
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServicePost.fromJson(jsonDecode(responseBody));
-      } else {
-        throw Exception(
-            'Error creating service post: ${response.reasonPhrase}. Response body: $responseBody');
-      }
-    } catch (e) {
-      throw Exception('Error occurred: $e');
-    }
-  }
+
   Future<ServicePost> updateServicePostBadge(ServicePost servicePost, int servicePostID) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
@@ -281,6 +241,50 @@ class ServicePostRepository {
       throw Exception('Error occurred: $e');
     }
   }
+
+  Future<ServicePost> createServicePost(ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final request =
+    http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts'));
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    request.fields['title'] = servicePost.title?? 'null';
+    request.fields['description'] = servicePost.description?? 'null';
+    request.fields['price'] = servicePost.price.toString();
+    request.fields['priceCurrency'] = servicePost.priceCurrency?? 'null';
+    request.fields['locationLatitudes'] =
+        servicePost.locationLatitudes.toString();
+    request.fields['locationLongitudes'] =
+        servicePost.locationLongitudes.toString();
+    request.fields['userId'] = servicePost.userId.toString();
+    request.fields['type'] = servicePost.type ?? 'null';
+    request.fields['haveBadge'] = servicePost.haveBadge?? 'null';
+    request.fields['badgeDuration'] = servicePost.badgeDuration.toString();
+    request.fields['category'] = servicePost.category ?? 'null';
+    request.fields['subCategory'] = servicePost.subCategory ?? 'null';
+    if (imageFiles.isNotEmpty) {
+      request.files.addAll(imageFiles);
+    }
+    try {
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ServicePost.fromJson(jsonDecode(responseBody));
+      } else {
+        throw Exception(
+            'Error creating service post: ${response.reasonPhrase}. Response body: $responseBody');
+      }
+    } catch (e) {
+      throw Exception('Error occurred: $e');
+    }
+  }
+
   Future<ServicePost> updateServicePost(
       ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
     final prefs = await SharedPreferences.getInstance();
@@ -291,6 +295,7 @@ class ServicePostRepository {
     }
     // Create a Map object
     Map<String, String> formData = {
+      'id': servicePost.id.toString(),
       'title': servicePost.title?? 'null',
       'description': servicePost.description?? 'null',
       'price': servicePost.price.toString(),
@@ -305,6 +310,7 @@ class ServicePostRepository {
     // Encode formData as a query string
     String encodedFormData = Uri(queryParameters: formData).query;
     // Send the request
+
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/api/service_posts/${servicePost.id}'),
@@ -326,51 +332,6 @@ class ServicePostRepository {
       throw Exception('Error occurred: $e');
     }
   }
-  // Future<ServicePost> updateServicePost(
-  //     ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final token = prefs.getString('auth_token');
-  //
-  //   final request = http.MultipartRequest(
-  //     'PUT',
-  //     Uri.parse('$_baseUrl/api/service_posts/${servicePost.id}'),
-  //   );
-  //   request.headers['Authorization'] = 'Bearer $token';
-  //   request.headers['Accept'] = 'application/json';
-  //
-  //   // Add form data to the request
-  //   request.fields['title'] = servicePost.title;
-  //   request.fields['description'] = servicePost.description;
-  //   request.fields['price'] = servicePost.price.toString();
-  //   request.fields['priceCurrency'] = servicePost.priceCurrency;
-  //   request.fields['locationLatitudes'] = servicePost.locationLatitudes.toString();
-  //   request.fields['locationLongitudes'] = servicePost.locationLongitudes.toString();
-  //   request.fields['userId'] = servicePost.userId.toString();
-  //   request.fields['type'] = servicePost.type;
-  //   request.fields['haveBadge'] = servicePost.haveBadge;
-  //   request.fields['badgeDuration'] = servicePost.badgeDuration.toString();
-  //   request.fields['category'] = servicePost.category ?? 'null';
-  //   request.fields['subCategory'] = servicePost.subCategory ?? 'null';
-  //
-  //   // Add image files to the request
-  //   if (imageFiles.isNotEmpty) {
-  //     request.files.addAll(imageFiles);
-  //   }
-  //   try {
-  //     final response = await request.send().timeout(const Duration(seconds: 30));
-  //     final responseBody = await response.stream.bytesToString();
-  //
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return ServicePost.fromJson(jsonDecode(responseBody));
-  //     } else {
-  //       throw Exception(
-  //           'Error updating service post: ${response.reasonPhrase}. Response body: $responseBody');
-  //     }
-  //   } catch (e) {
-  //     throw Exception('Error occurred: $e');
-  //   }
-  // }
-
 
   Future<void> deleteServicePost({required int servicePostId}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -484,6 +445,45 @@ class ServicePostRepository {
       throw Exception('خطا الاتصال في الخادم - المنشورات');
     }
   }
+
+  Future<bool> updateServicePostImage(List<http.MultipartFile> imageFiles, {required int servicePostImageId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    if (token == null) {
+      throw Exception('Token not found in shared preferences');
+    }
+
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts/updatePhoto/$servicePostImageId'));
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      if (imageFiles.isNotEmpty) {
+        request.files.addAll(imageFiles);
+      }
+
+      final response = await request.send();
+      print(response.statusCode);
+      if (response.statusCode == 200 || response.statusCode == 204) {
+
+        return true;
+      } else if (response.statusCode == 404) {
+        return false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw Exception('خطا الاتصال في الخادم - المنشورات');
+    }
+  }
+
+
   Future<void> deleteServicePostImage({required int servicePostImageId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');

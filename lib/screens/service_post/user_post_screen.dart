@@ -31,10 +31,8 @@ class UserPostScreenState extends State<UserPostScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _servicePostBloc.add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+    _handleRefresh(); // Reset the state when the widget is created
   }
-
-
 
   void _onScroll() {
     if (!_hasReachedMax &&
@@ -62,7 +60,7 @@ class UserPostScreenState extends State<UserPostScreen> {
     });
   }
   Future<bool> _onWillPop() async {
-    if (_scrollController.offset > 0) {
+    if (_scrollController.positions.isNotEmpty && _scrollController.offset > 0) {
       _scrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
@@ -77,6 +75,7 @@ class UserPostScreenState extends State<UserPostScreen> {
       return true;
     }
   }
+
 
   @override
   void dispose() {
@@ -124,20 +123,7 @@ class UserPostScreenState extends State<UserPostScreen> {
                           key: UniqueKey(), // Add this line
                           onPostDeleted: onPostDeleted,
                           userProfileId: widget.userID,
-                          id: servicePost.id,
-                          title: servicePost.title,
-                          description: servicePost.description,
-                          userPhoto: servicePost.userPhoto,
-                          username: servicePost.userName,
-                          postDate: servicePost.createdAt,
-                          views: servicePost.viewCount.toString(),
-                          likes: servicePost.favoritesCount.toString(),
-                          photos: servicePost.photos,
-                          isFavorited: servicePost.isFavorited!,
-                          haveBadge: servicePost.haveBadge,
-                          type: servicePost.type,
-                          category: servicePost.category,
-                          subcategory: servicePost.subCategory, userId: servicePost.userId
+                          servicePost: servicePost, canViewProfile: false,
                       ),
                     );
                   },
@@ -146,7 +132,17 @@ class UserPostScreenState extends State<UserPostScreen> {
               );
             } else if (state is ServicePostLoadFailure) {
               return Center(
-                child: Text(state.errorMessage),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: _handleRefresh,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    const Text('some error happen , press refresh button'),
+                  ],
+                ),
               );
             } else {
               return const Center(

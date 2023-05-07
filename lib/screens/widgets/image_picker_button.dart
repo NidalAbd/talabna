@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:talbna/data/models/service_post.dart';
 
 class ImagePickerButton extends StatefulWidget {
-  final void Function(List<Photo>?) onImagesPicked;
+  final  Function(List<Photo>?) onImagesPicked;
   final ValueNotifier<List<Photo>?> initialPhotosNotifier;
 
   const ImagePickerButton({Key? key, required this.onImagesPicked, required this.initialPhotosNotifier})

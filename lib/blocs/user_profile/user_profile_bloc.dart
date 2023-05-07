@@ -44,38 +44,40 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(const UserProfileUpdateInProgress());
       try {
         await _repository.updateUserProfilePhoto(event.user, event.photo);
-        emit(UserProfileUpdateSuccess(user: event.user));
+        emit(UserProfileLoadSuccess(user: event.user));
       } catch (e) {
         emit(UserProfileUpdateFailure(error: e.toString()));
       }
     });
 
-
     on<UpdateUserPassword>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
         await _repository.updateUserPassword(
-          event.userId,
+          event.user,
           event.oldPassword,
           event.newPassword,
         );
-        emit(UserPasswordUpdateSuccess());
+        emit(UserProfileUpdateSuccess(user: event.user));
+        emit(UserProfileLoadSuccess(user: event.user));
+
       } catch (e) {
-        emit(UserPasswordUpdateFailure(error: e.toString()));
+        emit(UserProfileUpdateFailure(error: e.toString()));
+        emit(UserProfileLoadSuccess(user: event.user));
+
       }
     });
     on<UpdateUserEmail>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
-        await _repository.updateUserEmail(event.userId, event.newEmail , event.password);
-        emit(UserEmailUpdateSuccess(userId: event.userId));
+        await _repository.updateUserEmail(event.user, event.newEmail , event.password);
+        emit(UserProfileUpdateSuccess(user: event.user));
+        emit(UserProfileLoadSuccess(user: event.user));
       } catch (e) {
-        emit(UserEmailUpdateFailure(error: e.toString()));
+        emit(UserProfileUpdateFailure(error: e.toString()));
+        emit(UserProfileLoadSuccess(user: event.user));
       }
     });
-
-
-
   }
 
 }

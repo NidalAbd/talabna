@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/routes.dart';
 import 'package:talbna/screens/auth/login_screen.dart';
+import 'package:talbna/screens/check_auth.dart';
 import 'package:talbna/screens/splash.dart';
 import 'package:talbna/screens/widgets/loading_widget.dart';
 import 'package:talbna/theme_cubit.dart';
@@ -37,7 +38,7 @@ class _MyAppState extends State<MyApp> {
           if (token != null && token.isNotEmpty || userId != null) {
             home = _buildHome(context, token);
           } else {
-            home = const LoginScreen();
+            home = const CheckAuthScreen();
           }
         } else {
           home = const Center(child: LoadingWidget());
@@ -71,7 +72,7 @@ class _MyAppState extends State<MyApp> {
             BlocProvider.of<AuthenticationBloc>(context).add(LoggedIn(token: token));
             return const Splash();
           } else {
-            return const LoginScreen();
+            return const CheckAuthScreen();
           }
         }
       },

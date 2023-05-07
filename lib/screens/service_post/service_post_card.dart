@@ -1,55 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
-import 'package:talbna/blocs/service_post/service_post_event.dart';
-import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/service_post/service_post_card_header.dart';
-import 'package:talbna/screens/service_post/service_post_interaction_row.dart';
+import 'package:talbna/screens/service_post/service_post_view.dart';
 import 'package:talbna/screens/widgets/image_grid.dart';
 import 'package:talbna/screens/widgets/service_post_action.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
 import 'package:talbna/utils/constants.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class ServicePostCard extends StatefulWidget {
   const ServicePostCard({
     Key? key,
-    this.userProfileId,
-    this.id,
-    this.title,
-    this.description,
-    this.userPhoto,
-    this.username,
-    this.postDate,
-    this.views,
-    this.likes,
-    this.photos,
-    this.haveBadge,
-    this.category,
-    this.subcategory,
-    this.userId,
     this.onPostDeleted,
-    this.type, required this.isFavorited,
+    required this.servicePost, required this.canViewProfile, required this.userProfileId,
   }) : super(key: key);
+  final ServicePost servicePost;
   final Function? onPostDeleted;
-  final int? id;
-  final int? userProfileId;
-  final String? title;
-  final String? description;
-  final String? userPhoto;
-  final String? username;
-  final DateTime? postDate;
-  final String? views;
-  final String? likes;
-  final List<Photo>? photos;
-  final String? haveBadge;
-  final String? category;
-  final String? subcategory;
-  final String? type;
-  final bool isFavorited; // Add this field
-  final int? userId;
+  final bool canViewProfile;
+  final int userProfileId;
 
   @override
   State<ServicePostCard> createState() => _ServicePostCardState();
@@ -58,12 +30,14 @@ class ServicePostCard extends StatefulWidget {
 class _ServicePostCardState extends State<ServicePostCard> {
   late ServicePostBloc _servicePostBloc;
   late OtherUserProfileBloc _userProfileBloc;
+
   @override
   void initState() {
     super.initState();
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
     _userProfileBloc = BlocProvider.of<OtherUserProfileBloc>(context);
   }
+
 
   String formatTimeDifference(DateTime? postDate) {
     if (postDate == null) {
@@ -105,7 +79,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          widget.haveBadge == 'عادي'
+          widget.servicePost.haveBadge == 'عادي'
               ? Container()
               : Positioned(
                   top: -18,
@@ -114,11 +88,11 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(2, 1, 0, 10),
                       child: ServicePostHeaderContainer(
-                        haveBadge: widget.haveBadge!,
+                        haveBadge: widget.servicePost.haveBadge!,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
                           child: Text(
-                            getHaveBadgeText(widget.haveBadge!),
+                            getHaveBadgeText(widget.servicePost.haveBadge!),
                             style: const TextStyle(
                               color: Color.fromARGB(255, 255, 255, 255),
                               fontSize: 12,
@@ -130,27 +104,20 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     ),
                   ]),
                 ),
-          VisibilityDetector(
-            key: Key('servicePost_${widget.id}'),
-            onVisibilityChanged: (visibilityInfo) {
-              if (visibilityInfo.visibleFraction > 0.95) {
-                _servicePostBloc.add(
-                    ViewIncrementServicePostEvent(servicePostId: widget.id!));
-              }
-            },
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  Row(
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 5),
+                  child: Row(
                     children: [
                       UserAvatar(
-                        userId: widget.userId,
                         imageUrl:
-                            '${Constants.apiBaseUrl}/storage/${widget.userPhoto}',
-                        radius: 16,
+                            '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                        radius: 16, fromUser: widget.userProfileId ,toUser: widget.servicePost.userId!, canViewProfile: widget.canViewProfile,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -159,7 +126,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              widget.username ??
+                              widget.servicePost.userName ??
                                   'Unknown', // Display full username
                               maxLines: 1, // Allow only one line of text
                               overflow: TextOverflow
@@ -170,7 +137,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                               ),
                             ),
                             Text(
-                              formatTimeDifference(widget.postDate),
+                              formatTimeDifference(widget.servicePost.createdAt),
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey,
@@ -185,7 +152,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                         child: Directionality(
                           textDirection: TextDirection.rtl,
                           child: Text(
-                            widget.title!,
+                            widget.servicePost.title!,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -196,16 +163,30 @@ class _ServicePostCardState extends State<ServicePostCard> {
                         ),
                       ),
                       ServicePostAction(
-                        key: Key('servicePost_${widget.id}'),
-                        servicePostUserId: widget.userId,
+                        key: Key('servicePost_${widget.servicePost.id}'),
+                        servicePostUserId: widget.servicePost.userId,
                         userProfileId: widget.userProfileId,
-                        servicePostId: widget.id,
+                        servicePostId: widget.servicePost.id,
                         onPostDeleted: widget.onPostDeleted!,
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ServicePostCardView(
+                            key: Key('servicePost_${widget.servicePost.id}'),
+                            onPostDeleted: widget.onPostDeleted,
+                            userProfileId: widget.userProfileId,
+                            servicePost: widget.servicePost,
+                          ),
+                        ),
+                      );
+                    },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -213,7 +194,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                         Directionality(
                           textDirection: TextDirection.rtl,
                           child: Text(
-                            widget.description!,
+                            widget.servicePost.description!,
                             textAlign: TextAlign.justify,
                             maxLines: 6,
                             textDirection: TextDirection.rtl,
@@ -221,27 +202,33 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           ),
                         ),
                         ImageGrid(
-                            imageUrls: widget.photos
+                            imageUrls: widget.servicePost.photos
                                     ?.map((photo) =>
                                         '${Constants.apiBaseUrl}/storage/${photo.src}')
                                     .toList() ??
-                                []),
+                                [], canClick: false,),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 5),
-                       ServicePostInteractionRow(
-                        key: Key('servicePost_${widget.id}'),
-                        servicePostId: widget.id,
-                        likes: widget.likes,
-                        views: widget.views,
-                        servicePostUserId: widget.userId,
-                        servicePostBloc: _servicePostBloc,
-                        userProfileBloc: _userProfileBloc,
-                        isFav: widget.isFavorited,
+                ),
+                const SizedBox(height: 5),
+                ListTile(
+                  onTap: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ServicePostCardView(
+                          key: Key('servicePost_${widget.servicePost.id}'),
+                          onPostDeleted: widget.onPostDeleted,
+                          userProfileId: widget.userProfileId,
+                          servicePost: widget.servicePost,
+                        ),
                       ),
-                ],
-              ),
+                    );
+                  },
+                  title: Text('عرض التفاصيل'),
+                  trailing: const Icon(Icons.arrow_forward),
+                )
+              ],
             ),
           ),
           Positioned(
@@ -254,8 +241,8 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 237, 237, 233),
+                    decoration:  const BoxDecoration(
+                      color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(10),
                         topLeft: Radius.circular(10),
@@ -264,9 +251,10 @@ class _ServicePostCardState extends State<ServicePostCard> {
                       ),
                     ),
                     child: Text(
-                      widget.type!,
-                      style: const TextStyle(
-                          color: Color.fromARGB(255, 11, 11, 11), fontSize: 10),
+                      widget.servicePost.type!,
+                      style:  const TextStyle(
+                        color:AppTheme.lightBackgroundColor,
+                           fontSize: 10),
                     ),
                   ),
                 ),
@@ -275,40 +263,20 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 237, 237, 233),
+                    decoration:  const BoxDecoration(
+                      color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(10),
                         topLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                        topRight: Radius.circular(10),
+                        bottomRight: Radius.circular(2),
+                        topRight: Radius.circular(2),
                       ),
                     ),
                     child: Text(
-                      widget.subcategory!,
+                      widget.servicePost.subCategory!,
                       style: const TextStyle(
-                          color: Color.fromARGB(255, 11, 11, 11), fontSize: 10),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 1, 0, 10),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 237, 237, 233),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        topLeft: Radius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      widget.category!,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 11, 11, 11),
-                        fontSize: 10,
-                      ),
+                          color:AppTheme.lightBackgroundColor,
+                         fontSize: 10),
                     ),
                   ),
                 ),

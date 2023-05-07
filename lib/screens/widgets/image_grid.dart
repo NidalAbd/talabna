@@ -5,9 +5,10 @@ import 'full_screen_image.dart';
 
 class ImageGrid extends StatelessWidget {
   final List<String> imageUrls;
+  final bool canClick;
   final Function(String)? onImageTap;
 
-  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap})
+  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap, required this.canClick})
       : super(key: key);
   void _navigateToFullScreenImage(BuildContext context, int index) {
     Navigator.push(
@@ -52,7 +53,7 @@ class ImageGrid extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return GestureDetector(
           onTap: () {
-            _navigateToFullScreenImage(context, index);
+            canClick? _navigateToFullScreenImage(context, index) : null;
           },
           child: AspectRatio(
             aspectRatio: 1 / 1,

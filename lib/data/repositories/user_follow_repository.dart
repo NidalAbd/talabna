@@ -59,4 +59,79 @@ class UserFollowRepository {
       throw Exception('خطأ في الاتصال بالخادم - المتابعين');
     }
   }
+
+  Future<void> userMakeFollow(
+      {required int userId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    try {
+      final response = await http.get(
+          Uri.parse('$_baseUrl/api/users/$userId/follow'),
+          headers: {'Authorization': 'Bearer $token'});
+      if (response.statusCode == 200) {
+        return ;
+      } else if (response.statusCode == 404) {
+        throw Exception('هذا الملف الشخصي غير موجود');
+      } else {
+        throw Exception('فشل في تحميل المتابعين');
+      }
+    } catch (e) {
+      throw Exception('خطأ في الاتصال بالخادم - المتابعين');
+    }
+  }
+  Future<void> userMakeUnFollow(
+      {required int userId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    try {
+      final response = await http.get(
+          Uri.parse('$_baseUrl/api/users/$userId/unfollow'),
+          headers: {'Authorization': 'Bearer $token'});
+      if (response.statusCode == 200) {
+        return ;
+      } else if (response.statusCode == 404) {
+        throw Exception('هذا الملف الشخصي غير موجود');
+      } else {
+        throw Exception('فشل في تحميل المتابعين');
+      }
+    } catch (e) {
+      throw Exception('خطأ في الاتصال بالخادم - المتابعين');
+    }
+  }
+
+  Future<bool> toggleUserActionFollow({required int userId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    if (token == null) {
+      throw Exception('Token not found in shared preferences');
+    }
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/users/$userId/follower'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print(data['is_follower']);
+        return data['is_follower'];
+      } else {
+        throw Exception('Error toggling follower state');
+      }
+    } catch (e) {
+      throw Exception('Server connection error - Posts');
+    }
+  }
 }

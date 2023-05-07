@@ -118,21 +118,7 @@ class FavoritePostScreenState extends State<FavoritePostScreen> {
                             key: UniqueKey(), // Add this line
                             onPostDeleted: onPostDeleted,
                             userProfileId: widget.userID,
-                            id: servicePost.id,
-                            title: servicePost.title,
-                            description: servicePost.description,
-                            userPhoto: servicePost.userPhoto,
-                            username: servicePost.userName,
-                            postDate: servicePost.createdAt,
-                            views: servicePost.viewCount.toString(),
-                            likes: servicePost.favoritesCount.toString(),
-                            photos: servicePost.photos,
-                            isFavorited: servicePost.isFavorited!,
-                            haveBadge: servicePost.haveBadge,
-                            category: servicePost.category,
-                            subcategory: servicePost.subCategory,
-                            type: servicePost.type,
-                            userId: servicePost.userId
+                            servicePost: servicePost, canViewProfile: false,
                         ),
                       );
                     },

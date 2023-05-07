@@ -27,7 +27,7 @@ class AuthenticationRepository {
           headers: headers,
           body: json.encode(data),
         );
-
+ print(response.body);
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           return responseData;
@@ -68,7 +68,6 @@ class AuthenticationRepository {
       'email': email,
       'password': password,
     });
-
     final authToken = responseData['access_token'];
     final int userId = responseData['user_id'];
 
@@ -191,36 +190,16 @@ class AuthenticationRepository {
     return authToken;
   }
 
-  Future<String> loginWithGoogle(String idToken) async {
-    final response = await http.post(
-      Uri.parse('$API_BASE_URL/googleSignIn'),
-      body: {'id_token': idToken},
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final authToken = responseData['token'];
-      await saveAuthToken(authToken);
-      return authToken;
-    } else {
-      throw Exception('Failed to login with Google: ${response.statusCode}');
-    }
-  }
-
   Future<Map<String, dynamic>> signInWithGoogle() async {
     try {
       // Trigger the authentication flow
       final GoogleSignInAccount? googleSignInAccount =
           await _googleSignIn.signIn();
-
       if (googleSignInAccount != null) {
         // Obtain the auth details from the request
-        final GoogleSignInAuthentication googleAuth =
-            await googleSignInAccount.authentication;
-
+        final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
         // Make a request to your API to authenticate the user
-        final responseData =
-            await _post('googleSignIn', {'id_token': googleAuth.idToken , 'id': googleSignInAccount.id});
+        final responseData = await _post('googleSignIn', {'id_token': googleAuth.idToken , 'id': googleSignInAccount.id});
         final authToken = responseData['id_token'];
         final userId = responseData['id'];
         await saveAuthToken(authToken);

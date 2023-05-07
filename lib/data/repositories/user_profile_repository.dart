@@ -117,7 +117,7 @@ class UserProfileRepository {
       throw Exception('خطا الاتصال في الخادم - الملف الشخصي');
     }
   }
-  Future<void> updateUserEmail(int userId, String newEmail , String password) async {
+  Future<void> updateUserEmail(User user, String newEmail , String password) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -126,7 +126,7 @@ class UserProfileRepository {
     }
     try {
       final response = await http.put(
-        Uri.parse('$_baseUrl/api/user/$userId/change-email'),
+        Uri.parse('$_baseUrl/api/user/${user.id}/change-email'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -148,7 +148,7 @@ class UserProfileRepository {
     }
   }
 
-  Future<void> updateUserPassword(int userId, String oldPassword, String newPassword) async {
+  Future<void> updateUserPassword(User user, String oldPassword, String newPassword) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -157,7 +157,7 @@ class UserProfileRepository {
     }
     try {
       final response = await http.put(
-        Uri.parse('$_baseUrl/api/user/$userId/change-password'),
+        Uri.parse('$_baseUrl/api/user/${user.id}/change-password'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -196,7 +196,6 @@ class UserProfileRepository {
       final multipartFile = http.MultipartFile('photo', stream, length, filename: basename(photo.path));
       request.files.add(multipartFile);
       final response = await request.send();
-      print(response.statusCode);
 
 
       if (response.statusCode == 200 || response.statusCode == 201) {

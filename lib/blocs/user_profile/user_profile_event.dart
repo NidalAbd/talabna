@@ -44,21 +44,21 @@ class UpdateUserProfilePhoto extends UserProfileEvent {
 
 
 class UpdateUserPassword extends UserProfileEvent {
-  final int userId;
+  final User user;
   final String oldPassword;
   final String newPassword;
 
   const UpdateUserPassword({
-    required this.userId,
+    required this.user,
     required this.oldPassword,
     required this.newPassword,
   });
 }
 
 class UpdateUserEmail extends UserProfileEvent {
-  final int userId;
+  final User user;
   final String newEmail;
   final String password;
 
-  const UpdateUserEmail({required this.userId, required this.newEmail, required this.password});
+  const UpdateUserEmail({required this.user, required this.newEmail, required this.password});
 }

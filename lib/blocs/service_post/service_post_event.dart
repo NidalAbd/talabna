@@ -63,6 +63,14 @@ class UpdateServicePostEvent extends ServicePostEvent {
   List<Object> get props => [servicePost, imageFiles];
 }
 
+class UpdatePhotoServicePostEvent extends ServicePostEvent {
+  final int servicePost;
+  final List<http.MultipartFile> imageFiles;
+  const UpdatePhotoServicePostEvent(this.servicePost, this.imageFiles);
+  @override
+  List<Object> get props => [servicePost, imageFiles];
+}
+
 class DeleteServicePostEvent extends ServicePostEvent {
   final int servicePostId;
   const DeleteServicePostEvent({required this.servicePostId});

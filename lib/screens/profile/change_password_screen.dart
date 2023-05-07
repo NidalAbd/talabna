@@ -6,7 +6,8 @@ import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final int userId;
-  const ChangePasswordScreen({Key? key, required this.userId}) : super(key: key);
+  const ChangePasswordScreen({Key? key, required this.userId})
+      : super(key: key);
 
   @override
   _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
@@ -18,6 +19,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _confirmNewPasswordController = TextEditingController();
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +28,35 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         title: const Text('Change Password'),
       ),
       body: BlocConsumer<UserProfileBloc, UserProfileState>(
-        listener: (context, state) {
-          if (state is UserPasswordUpdateSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password updated successfully.'),
-              ),
-            );
-          } else if (state is UserPasswordUpdateFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.error),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
+          listener: (context, state) {
+        if (state is UserProfileUpdateSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Password updated successfully.'),
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          _oldPasswordController.clear();
+          _newPasswordController.clear();
+          _confirmNewPasswordController.clear();
+
+        } else if (state is UserProfileUpdateFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('error happen when Email change'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+        }
+
+      }, builder: (context, state) {
+        if (state is UserProfileLoadSuccess) {
+          final user = state.user;
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -52,7 +67,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   decoration: InputDecoration(
                     labelText: 'Current Password',
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureOldPassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscureOldPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: () {
                         setState(() {
                           _obscureOldPassword = !_obscureOldPassword;
@@ -68,7 +85,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   decoration: InputDecoration(
                     labelText: 'New Password',
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureNewPassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscureNewPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: () {
                         setState(() {
                           _obscureNewPassword = !_obscureNewPassword;
@@ -84,7 +103,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   decoration: InputDecoration(
                     labelText: 'Retype New Password',
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureNewPassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscureNewPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility),
                       onPressed: () {
                         setState(() {
                           _obscureNewPassword = !_obscureNewPassword;
@@ -95,7 +116,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
                     if (_newPasswordController.text !=
                         _confirmNewPasswordController.text) {
                       showDialog(
@@ -113,24 +136,33 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         ),
                       );
                     } else {
+                      setState(() {
+                        _isLoading = true;
+                      });
                       BlocProvider.of<UserProfileBloc>(context).add(
                         UpdateUserPassword(
-                          userId: widget.userId,
+                          user: user,
                           oldPassword: _oldPasswordController.text,
                           newPassword: _newPasswordController.text,
                         ),
                       );
                     }
                   },
-                  child: const Text('Update Password'),
+                  child: _isLoading
+                      ? const SizedBox(
+                    width: 15,
+                    height: 15,
+                    child: CircularProgressIndicator(),
+                  )
+                      : const Text('Update Password'),
                 ),
               ],
             ),
-
           );
-        },
-      ),
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      }),
     );
   }
 }
-

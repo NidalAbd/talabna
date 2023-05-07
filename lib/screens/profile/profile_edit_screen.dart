@@ -149,7 +149,11 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       ),
                       Stack(
                         children: [
-                          UserAvatar(userId: user.id, imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}', radius: 100,),
+                          UserAvatar(
+                            imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+                            radius: 100,
+                            toUser: user.id, canViewProfile: false, fromUser: user.id,
+                          ),
                           Positioned(
                             bottom: 0,
                             right: 0,

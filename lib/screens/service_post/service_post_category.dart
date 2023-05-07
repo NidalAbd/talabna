@@ -34,6 +34,8 @@ class _ServicePostScreenState extends State<ServicePostScreen>
   int _currentPage = 1;
   bool _hasReachedMax = false;
   bool _showSubcategoryGridView = false;
+  late int? userId;
+
   List<ServicePost> _servicePostsCategory = [];
   late Function onPostDeleted = (int postId) {
     setState(() {
@@ -43,7 +45,6 @@ class _ServicePostScreenState extends State<ServicePostScreen>
   @override
   void initState() {
     super.initState();
-    _handleRefresh();
     _scrollController.addListener(_onScroll);
     widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
     _loadShowSubcategoryGridView().then((value) {
@@ -52,6 +53,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
       });
     });
   }
+
   Future<void> _saveShowSubcategoryGridView(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('showSubcategoryGridView', value);
@@ -68,6 +70,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
       _currentPage++;
       widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
     }
+
   }
   Future<void> _handleRefresh() async {
     _currentPage = 1;
@@ -158,24 +161,10 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                                   duration: const Duration(milliseconds: 2000),
                                   curve: Curves.easeIn,
                                   child: ServicePostCard(
-                                    key: Key('servicePost_${servicePost.id}'),
+                                    key: Key('servicePostCategory_${servicePost.id}'),
                                     onPostDeleted: onPostDeleted,
+                                    servicePost: servicePost, canViewProfile: true,
                                     userProfileId: widget.userID,
-                                    id: servicePost.id,
-                                    title: servicePost.title,
-                                    description: servicePost.description,
-                                    userPhoto: servicePost.userPhoto,
-                                    username: servicePost.userName,
-                                    postDate: servicePost.createdAt,
-                                    views: servicePost.viewCount.toString(),
-                                    likes:servicePost.favoritesCount.toString(),
-                                    photos: servicePost.photos,
-                                    haveBadge: servicePost.haveBadge,
-                                    type: servicePost.type,
-                                    isFavorited: servicePost.isFavorited!,
-                                    category: servicePost.category,
-                                    subcategory: servicePost.subCategory,
-                                    userId: servicePost.userId,
                                   ),
                                 );
                               },
@@ -195,7 +184,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                                   onPressed: _handleRefresh,
                                   icon: const Icon(Icons.refresh),
                                 ),
-                                Text(errorMessage),
+                                 Text('some error happen , $errorMessage'),
                               ],
                             ),
                           );

@@ -61,7 +61,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.userId,),
+                PointBalance(userId: widget.userId, showBalance: true,),
               ],
             ),
           ),

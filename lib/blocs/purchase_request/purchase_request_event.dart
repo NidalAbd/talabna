@@ -19,7 +19,13 @@ class CreatePurchaseRequest extends PurchaseRequestEvent {
 
   CreatePurchaseRequest({required this.request});
 }
+class AddPointsForUser extends PurchaseRequestEvent {
+  final int request;
+  final int fromUser;
+  final int toUser;
 
+  AddPointsForUser({required this.request , required this.fromUser, required this.toUser,});
+}
 class CancelPurchaseRequest extends PurchaseRequestEvent {
   final int? requestId;
 

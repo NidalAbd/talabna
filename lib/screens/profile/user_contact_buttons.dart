@@ -31,35 +31,19 @@ class _UserContactButtonsState extends State<UserContactButtons> {
       builder: (context, state) {
         if (state is UserContactLoadSuccess) {
           final user = state.user;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          return Column(
             children: [
-              EmailButton(email: user.email),
-              const SizedBox(width: 40),
-              PhoneButtonWidget(phone: user.phones),
-              const SizedBox(width: 40),
+              EmailButton(email: user.email, width: 15,),
+              const SizedBox(height: 10),
+              PhoneButtonWidget(phone: user.phones, width: 15,),
+              const SizedBox(height: 10),
               WhatsAppButtonWidget(
-                  whatsAppNumber: user.watsNumber, username: user.userName!),
+                  whatsAppNumber: user.watsNumber, username: user.userName!, width: 15),
             ],
           );
         }else {
           // Return a Visibility widget to make the row invisible while preserving its layout space
-          return Visibility(
-            visible: true,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                EmailButton(email: ''),
-                SizedBox(width: 40),
-                PhoneButtonWidget(phone: ''),
-                SizedBox(width: 40),
-                WhatsAppButtonWidget(whatsAppNumber: '', username: ''),
-              ],
-            ),
-          );
+          return Container();
         }
       },
     );

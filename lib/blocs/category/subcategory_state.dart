@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
 
 abstract class SubcategoryState extends Equatable {

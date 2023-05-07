@@ -12,7 +12,7 @@ class AuthenticationBloc
       {required AuthenticationRepository authenticationRepository})
       : _authenticationRepository = authenticationRepository,
         super(AuthenticationInitial()) {
-    print('AuthenticationBloc created: ${this.hashCode}');
+    print('AuthenticationBloc created: $hashCode');
 
     // Register the event handlers for LoginRequest and Register events
     on<LoginRequest>((event, emit) async {

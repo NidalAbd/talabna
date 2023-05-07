@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -29,6 +30,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 1;
   bool _hasReachedMax = false;
+
   List<ServicePost> _servicePostsSubCategory = [];
   late Function onPostDeleted = (int postId) {
     setState(() {
@@ -140,23 +142,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                           child: ServicePostCard(
                             key: UniqueKey(), // Add this line
                             onPostDeleted: onPostDeleted,
-                            userProfileId: widget.userID,
-                            id: servicePost.id,
-                            title: servicePost.title,
-                            description: servicePost.description,
-                            userPhoto: servicePost.userPhoto,
-                            username: servicePost.userName,
-                            postDate: servicePost.createdAt,
-                            isFavorited: servicePost.isFavorited!,
-                            views: servicePost.viewCount.toString(),
-                            likes: servicePost.favoritesCount.toString(),
-                            photos: servicePost.photos,
-                            haveBadge: servicePost.haveBadge,
-                            category: servicePost.category,
-                            subcategory: servicePost.subCategory,
-                            type: servicePost.type,
-                            userId: servicePost.userId,
-
+                            servicePost: servicePost, canViewProfile: false, userProfileId: widget.userID,
                           ),
                         );
                       },

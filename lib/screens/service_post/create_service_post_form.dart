@@ -30,6 +30,7 @@ class ServicePostFormScreen extends StatefulWidget {
 }
 
 class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
+  final GlobalKey<ImagePickerButtonState> _imagePickerButtonKey = GlobalKey<ImagePickerButtonState>();
   final _formKey = GlobalKey<FormState>();
   late String _title = '';
   late String _description= '';
@@ -38,14 +39,26 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
   late double _price = 0;
   late double _locationLatitudes = 0.0;
   late double _locationLongitudes = 0.0;
-  late final   List<Photo> _pickedImages = [];
+  late List<Photo> _pickedImages = [];
   late String _selectedPriceCurrency = 'شيكل';
   late String _selectedType = 'عرض';
   late String _selectedHaveBadge = 'عادي';
   late int _selectedBadgeDuration = _selectedHaveBadge == 'عادي' ? 0 : 1;
   late int _calculatedPoints = 0;
   final ValueNotifier<List<Photo>?> _initialPhotos = ValueNotifier(null);
-
+  Widget _buildImagePickerButton() {
+    return ImagePickerButton(
+      key: _imagePickerButtonKey,
+      onImagesPicked: (List<Photo>? pickedPhotos) {
+        if (pickedPhotos != null) {
+          setState(() {
+            _pickedImages = pickedPhotos;
+          });
+        }
+      },
+      initialPhotosNotifier: _initialPhotos,
+    );
+  }
   Future<void> _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()){
       checkBadgeAndShowMessage(context, _selectedHaveBadge, _selectedBadgeDuration);
@@ -54,7 +67,9 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         return;
       }
       final imageFiles = <http.MultipartFile>[];
+      print('_pickedImages' );
       for (final photo in _pickedImages) {
+        print('_pickedImages $_pickedImages' );
         if (photo.src != null) {
           final bytes = await File(photo.src!).readAsBytes();
           final mimeType = lookupMimeType(photo.src!);
@@ -69,6 +84,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               contentType: MediaType.parse(mimeType!), // use the detected MIME type for the image file
             );
             imageFiles.add(imageFile);
+            print(imageFiles);
           } else {
               print('Unsupported image format: $mimeType');
           }
@@ -119,7 +135,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children:  [
-                  PointBalance(userId: widget.userId,),
+                  PointBalance(userId: widget.userId, showBalance: true,),
                 ],
               ),
             ),
@@ -141,15 +157,8 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  ImagePickerButton(
-                    onImagesPicked: (List<Photo>? pickedPhotos) {
-                      if (pickedPhotos != null) {
-                        setState(() {
-                          initialPhotosNotifier: pickedPhotos;
-                        });
-                      }
-                    },   initialPhotosNotifier: _initialPhotos,
-                  ),
+                  _buildImagePickerButton(),
+
                   LocationPicker(
                     onLocationPicked: (LatLng location) {
                       setState(() {
