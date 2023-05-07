@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/blocs/category/subcategory_bloc.dart';
+import 'package:talbna/blocs/category/subcategory_event.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
+import 'package:talbna/blocs/user_action/user_action_bloc.dart';
+import 'package:talbna/blocs/user_action/user_action_event.dart';
+import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
@@ -14,14 +18,14 @@ class SubCategoryPostScreen extends StatefulWidget {
       required this.userID,
       required this.categoryId,
       required this.subcategoryId,
-      required this.servicePostBloc, required this.userProfileBloc})
+      required this.servicePostBloc,
+      required this.userProfileBloc})
       : super(key: key);
   final int userID;
   final int categoryId;
   final int subcategoryId;
   final ServicePostBloc servicePostBloc;
   final UserProfileBloc userProfileBloc;
-
   @override
   SubCategoryPostScreenState createState() => SubCategoryPostScreenState();
 }
@@ -30,6 +34,8 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 1;
   bool _hasReachedMax = false;
+  late bool isFollowing = false;
+  late String subcategoryTitle= 'تفاصيل الفرع';
 
   List<ServicePost> _servicePostsSubCategory = [];
   late Function onPostDeleted = (int postId) {
@@ -43,8 +49,11 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
     super.initState();
     _handleRefresh();
     _scrollController.addListener(_onScroll);
+    context
+        .read<UserActionBloc>()
+        .add(GetUserFollowSubcategories(subCategoryId: widget.subcategoryId));
     widget.servicePostBloc.add(GetServicePostsByCategorySubCategoryEvent(
-          widget.categoryId, widget.subcategoryId, _currentPage));
+        widget.categoryId, widget.subcategoryId, _currentPage));
   }
 
   void _onScroll() {
@@ -90,6 +99,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
       return true;
     }
   }
+
   @override
   void dispose() {
     _servicePostsSubCategory.clear();
@@ -100,7 +110,40 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل الفرع'),
+        title:  Text(subcategoryTitle),
+        actions: [
+          BlocConsumer<UserActionBloc, UserActionState>(
+            listener: (context, state) {
+              if (state is UserMakeFollowSubcategoriesSuccess) {
+                isFollowing = state.followSuccess; // Update the isFollowing variable
+                final message = state.followSuccess
+                    ? 'You are now following this subcategory'
+                    : 'You have unfollowed this subcategory';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is GetFollowSubcategoriesSuccess) {
+                isFollowing = state.followSuccess;
+              }
+              return ElevatedButton(
+                onPressed: () {
+                  // Dispatch the toggle follow event
+                  context.read<UserActionBloc>().add(
+                      UserMakeFollowSubcategories(
+                          subCategoryId: widget.subcategoryId));
+                },
+                child: Text(isFollowing ? 'Unfollow' : 'Follow'),
+              );
+            },
+          )
+
+        ],
       ),
       body: WillPopScope(
         onWillPop: _onWillPop,
@@ -115,12 +158,14 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
           child: BlocBuilder<ServicePostBloc, ServicePostState>(
             bloc: widget.servicePostBloc,
             builder: (context, state) {
-              if (state is ServicePostLoading && _servicePostsSubCategory.isEmpty) {
+              if (state is ServicePostLoading &&
+                  _servicePostsSubCategory.isEmpty) {
                 // show loading indicator
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               } else if (_servicePostsSubCategory.isNotEmpty) {
+                subcategoryTitle = _servicePostsSubCategory.first.subCategory!;
                 // show list of service posts
                 return RefreshIndicator(
                     onRefresh: _handleRefresh,
@@ -142,7 +187,8 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                           child: ServicePostCard(
                             key: UniqueKey(), // Add this line
                             onPostDeleted: onPostDeleted,
-                            servicePost: servicePost, canViewProfile: false, userProfileId: widget.userID,
+                            servicePost: servicePost, canViewProfile: false,
+                            userProfileId: widget.userID,
                           ),
                         );
                       },

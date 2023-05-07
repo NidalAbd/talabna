@@ -106,7 +106,44 @@ class UserFollowRepository {
       throw Exception('خطأ في الاتصال بالخادم - المتابعين');
     }
   }
-
+  Future<bool> toggleFollowSubcategories(int subCategoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/subcategories/$subCategoryId/toggle-follow'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonResponse = json.decode(response.body);
+      final isFollowing = jsonResponse['isFollowSubcategory'] ?? false;
+      return isFollowing;
+    } else {
+      return false;
+    }
+  }
+  Future<bool> getUserFollowSubcategories(int subCategoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/subcategories/$subCategoryId/is-following'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonResponse = json.decode(response.body);
+      final isFollowing = jsonResponse['isFollowSubcategory'] ?? false;
+      return isFollowing;
+    } else {
+      return false;
+    }
+  }
   Future<bool> toggleUserActionFollow({required int userId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');

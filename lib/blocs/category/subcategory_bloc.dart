@@ -7,7 +7,7 @@ import 'subcategory_state.dart';
 class SubcategoryBloc extends Bloc<SubcategoryEvent, SubcategoryState> {
   final CategoriesRepository categoriesRepository;
   SubcategoryBloc({required this.categoriesRepository}) : super(SubcategoryInitial()) {
-    print('SubcategoryBloc created: ${this.hashCode}');
+    print('SubcategoryBloc created: $hashCode');
 
     on<FetchSubcategories>((event, emit) async {
       emit(SubcategoryLoading());
@@ -18,5 +18,7 @@ class SubcategoryBloc extends Bloc<SubcategoryEvent, SubcategoryState> {
         emit(SubcategoryError(e.toString()));
       }
     });
+
+
   }
 }

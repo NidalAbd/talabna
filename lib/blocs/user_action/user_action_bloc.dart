@@ -19,7 +19,25 @@ class UserActionBloc extends Bloc<UserActionEvent, UserActionState> {
         emit(UserActionFailure(error: e.toString()));
       }
     });
+    on<UserMakeFollowSubcategories>((event, emit) async {
+      emit(UserActionInProgress());
+      try {
+        final bool subcategories = await _repository.toggleFollowSubcategories(event.subCategoryId);
+        emit(UserMakeFollowSubcategoriesSuccess(subcategories));
+      } catch (e) {
+        emit(UserActionFailure(error: e.toString()));
+      }
+    });
 
+    on<GetUserFollowSubcategories>((event, emit) async {
+      emit(UserActionInProgress());
+      try {
+        final bool subCategoryMenu = await _repository.getUserFollowSubcategories(event.subCategoryId);
+        emit(GetFollowSubcategoriesSuccess(subCategoryMenu));
+      } catch (e) {
+        emit(UserActionFailure(error: e.toString()));
+      }
+    });
   }
 
 }

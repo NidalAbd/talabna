@@ -15,3 +15,5 @@ class FetchSubcategories extends SubcategoryEvent {
   @override
   List<Object> get props => [categoryId];
 }
+
+

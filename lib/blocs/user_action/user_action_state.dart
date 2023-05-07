@@ -27,7 +27,22 @@ class UserFollowUnFollowToggled extends UserActionState {
 
 class UserPasswordUpdateSuccess extends UserActionState {}
 
+class UserMakeFollowSubcategoriesSuccess extends UserActionState {
+  final bool followSuccess;
 
+  const UserMakeFollowSubcategoriesSuccess(this.followSuccess);
+
+  @override
+  List<Object> get props => [followSuccess];
+}
+class GetFollowSubcategoriesSuccess extends UserActionState {
+  final bool followSuccess;
+
+  const GetFollowSubcategoriesSuccess(this.followSuccess);
+
+  @override
+  List<Object> get props => [followSuccess];
+}
 class UserEmailUpdateSuccess extends UserActionState {
   final int userId;
 

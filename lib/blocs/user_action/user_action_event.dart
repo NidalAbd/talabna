@@ -34,3 +34,18 @@ class UpdateUserEmail extends UserActionEvent {
 
   const UpdateUserEmail({required this.userId, required this.newEmail, required this.password});
 }
+class UserMakeFollowSubcategories extends UserActionEvent {
+  final int subCategoryId;
+
+  const UserMakeFollowSubcategories({required this.subCategoryId});
+
+  @override
+  List<Object> get props => [subCategoryId];
+}
+class GetUserFollowSubcategories extends UserActionEvent {
+  final int subCategoryId;
+
+  const GetUserFollowSubcategories({required this.subCategoryId});
+  @override
+  List<Object> get props => [subCategoryId];
+}

@@ -12,6 +12,15 @@ class SubcategoryInitial extends SubcategoryState {}
 
 class SubcategoryLoading extends SubcategoryState {}
 
+class UserMakeFollowSubcategoriesSuccess extends SubcategoryState {
+  final bool followSuccess;
+
+  const UserMakeFollowSubcategoriesSuccess(this.followSuccess);
+
+  @override
+  List<Object> get props => [followSuccess];
+}
+
 class SubcategoryLoaded extends SubcategoryState {
   final List<SubCategoryMenu> subcategories;
 
