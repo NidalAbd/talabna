@@ -14,6 +14,7 @@ import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/location_picker.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
+import 'package:talbna/screens/widgets/user_avatar_profile.dart';
 import 'package:talbna/utils/constants.dart';
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
@@ -113,6 +114,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       body: BlocConsumer<UserProfileBloc, UserProfileState>(
         bloc: _userProfileBloc,
         listener: (context, state) {
+          print('from Consumer $state ');
           if (state is UserProfileUpdateSuccess) {
             // Re-request user data after a successful update
             BlocProvider.of<UserProfileBloc>(context)
@@ -149,8 +151,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       ),
                       Stack(
                         children: [
-                          UserAvatar(
-                            imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+                          UserAvatarProfile(
+                            imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}?${DateTime.now().microsecondsSinceEpoch}',
                             radius: 100,
                             toUser: user.id, canViewProfile: false, fromUser: user.id,
                           ),

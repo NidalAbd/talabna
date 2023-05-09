@@ -11,13 +11,17 @@ class ServicePost {
   final String? priceCurrency;
   final double? locationLatitudes;
   final double? locationLongitudes;
+  final double? distance;
+
   final String? type;
   final String? haveBadge;
   final int? badgeDuration;
   final int? favoritesCount;
   final int? reportCount;
   final int? viewCount;
-  final bool? isFavorited; // Add this field
+  final bool? isFavorited;
+  final bool? isFollowed;
+
   final String? state;
   final int? categoriesId;
   final int? subCategoriesId;
@@ -25,7 +29,7 @@ class ServicePost {
   final DateTime? updatedAt;
   final List<Photo>? photos;
 
-  ServicePost( {
+  ServicePost(  {
      this.userName,
      this.userPhoto,
      this.id,
@@ -38,6 +42,8 @@ class ServicePost {
      this.priceCurrency,
      this.locationLatitudes,
      this.locationLongitudes,
+     this.distance,
+     this.isFollowed,
      this.type,
      this.haveBadge,
      this.badgeDuration,
@@ -68,13 +74,15 @@ class ServicePost {
       priceCurrency: json['price_currency'] ?? '',
       locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0,
       locationLongitudes: double.tryParse(json['location_longitudes'] ?? '') ?? 0,
+      distance: json['distance'] ?? 0,
       type: json['type'] ?? '',
       haveBadge: json['have_badge'] ??  '',
       badgeDuration: int.tryParse(json['badge_duration']?.toString() ?? '') ?? 0,
       favoritesCount: json['favorites_count'] ?? 0,
       reportCount: json['report_count'] ?? 0,
       viewCount: json['view_count'] ?? 0,
-      isFavorited: json['is_favorited'] ?? false, // Add this line
+      isFavorited: json['is_favorited'] ?? false,
+      isFollowed: json['isFollowed'] ?? false,
       state: json['state'] ?? '',
       categoriesId: json['categories_id'] ?? 0,
       subCategoriesId: json['sub_categories_id'] ?? 0,

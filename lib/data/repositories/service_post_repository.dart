@@ -71,6 +71,7 @@ class ServicePostRepository {
             '$_baseUrl/api/service_posts/categories/$categories?page=$page'),
         headers: {'Authorization': 'Bearer $token'},
       );
+      print(jsonDecode(response.body));
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final List<dynamic> data = responseBody['servicePosts']['data'];
@@ -81,7 +82,8 @@ class ServicePostRepository {
         throw Exception('Failed to load service posts for this category');
       }
     } catch (e) {
-      throw Exception('Failed to connect to server');
+      print(e);
+      throw Exception('Failed to connect to server ');
     }
   }
 
@@ -273,7 +275,6 @@ class ServicePostRepository {
     try {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ServicePost.fromJson(jsonDecode(responseBody));
       } else {

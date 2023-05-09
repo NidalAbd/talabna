@@ -104,7 +104,14 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child: UserCard(follower: follower, userActionBloc: _userActionBloc, isFollower: follower.isFollow!, userId: widget.userID,));
+                          curve: Curves.easeIn,child:
+                          UserCard(
+                            key: UniqueKey(),
+                            follower: follower,
+                            userActionBloc: _userActionBloc,
+                            isFollower: follower.isFollow!,
+                            userId: widget.userID,
+                          ));
                     } else {
                       return const Center(child: Text('Invalid index'));
                     }

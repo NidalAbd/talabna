@@ -196,11 +196,10 @@ class UserProfileRepository {
       final multipartFile = http.MultipartFile('photo', stream, length, filename: basename(photo.path));
       request.files.add(multipartFile);
       final response = await request.send();
-
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = jsonDecode(await response.stream.bytesToString());
-        print(responseBody);
+        print('dwd ${responseBody['photo']}');
+
         if (responseBody['photo'] != null) {
           Photo updatedPhoto = Photo.fromJson(responseBody['photo']);
           user.photos?.add(updatedPhoto);
@@ -210,7 +209,6 @@ class UserProfileRepository {
         throw Exception('Failed to update profile photo.');
       }
     } catch (e) {
-      print('Failed to update profile photo: $e');
       throw Exception('Failed to update profile photo.');
     }
   }

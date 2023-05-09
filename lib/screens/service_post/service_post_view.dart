@@ -129,7 +129,7 @@ title: const Text('عرض التفاصيل'),
                               UserAvatar(
                                 imageUrl:
                                     '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
-                                radius: 16,  toUser: widget.servicePost.userId!, canViewProfile: false, fromUser: widget.userProfileId,
+                                radius: 16,  toUser: widget.servicePost.userId!, canViewProfile: false, fromUser: widget.userProfileId
                               ),
                               const SizedBox(width: 10),
                               Expanded(

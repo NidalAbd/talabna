@@ -6,20 +6,20 @@ import 'package:talbna/screens/profile/other_profile_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/utils/constants.dart';
 
-class UserAvatar extends StatefulWidget {
+class UserAvatarProfile extends StatefulWidget {
   final int toUser;
   final bool canViewProfile;
   final String? imageUrl;
   final double? radius;
   final int fromUser;
-  const UserAvatar({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser})
+  const UserAvatarProfile({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser})
       : super(key: key);
 
   @override
-  _UserAvatarState createState() => _UserAvatarState();
+  _UserAvatarProfileState createState() => _UserAvatarProfileState();
 }
 
-class _UserAvatarState extends State<UserAvatar> {
+class _UserAvatarProfileState extends State<UserAvatarProfile> {
   late UserProfileBloc _userProfileBloc;
   late String _imageUrl;
 

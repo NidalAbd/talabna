@@ -5,8 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
-import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
-import 'package:talbna/blocs/user_profile/user_profile_event.dart';
+
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/service_post.dart';
 
@@ -67,9 +66,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         return;
       }
       final imageFiles = <http.MultipartFile>[];
-      print('_pickedImages' );
       for (final photo in _pickedImages) {
-        print('_pickedImages $_pickedImages' );
         if (photo.src != null) {
           final bytes = await File(photo.src!).readAsBytes();
           final mimeType = lookupMimeType(photo.src!);
@@ -84,7 +81,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               contentType: MediaType.parse(mimeType!), // use the detected MIME type for the image file
             );
             imageFiles.add(imageFile);
-            print(imageFiles);
           } else {
               print('Unsupported image format: $mimeType');
           }
@@ -143,6 +139,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         ),
         body: BlocListener<ServicePostBloc, ServicePostState>(
         listener: (context, state) {
+          print(state);
       if (state is ServicePostOperationSuccess) {
         SuccessWidget.show(context, 'Service Post created successfully');
         Navigator.of(context).pop();

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF007D75);
+  static const Color primaryColor = Color(0xFF0B2826);
   static const Color accentColor = Color(0xFFFFB400);
-  static const Color lightBackgroundColor = Color(0xFFFFFFFF);
-  static const Color lightForegroundColor = Color(0xFF303030);
+  static const Color lightBackgroundColor = Color(0xFFEFEFEF);
+  static const Color lightForegroundColor = Color(0xFF282828);
   static const Color lightDisabledColor = Color(0xFFC4C4C4);
-  static const Color darkBackgroundColor = Color(0xFF303030);
+  static const Color darkBackgroundColor = Color(0xFF313131);
   static const Color darkForegroundColor = Color(0xFFFFFFFF);
   static const Color darkDisabledColor = Color(0xFF6E6E6E);
 
   static final ThemeData lightTheme = ThemeData(
     primaryColor: primaryColor,
     scaffoldBackgroundColor: lightBackgroundColor,
-    cardColor: Color.lerp(lightBackgroundColor, Colors.white, 0.05),
+    cardColor: Color.lerp(darkBackgroundColor, Colors.white, 0.50),
     dialogBackgroundColor: lightBackgroundColor,
     bottomAppBarTheme: const BottomAppBarTheme(color: lightBackgroundColor),
     dividerColor: Colors.grey,
@@ -77,7 +77,7 @@ class AppTheme {
     scaffoldBackgroundColor: darkBackgroundColor,
     cardColor: Color.lerp(darkBackgroundColor, Colors.black, 0.50),
     dialogBackgroundColor: darkBackgroundColor,
-    bottomAppBarTheme: const BottomAppBarTheme(color: darkBackgroundColor),
+    bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
     dividerColor: Colors.grey,
     appBarTheme: AppBarTheme(
       color: primaryColor,
@@ -123,7 +123,7 @@ class AppTheme {
       primary: primaryColor,
       secondary: accentColor,
       background: darkBackgroundColor,
-      surface: darkBackgroundColor,
+      surface: Colors.white,
       onPrimary: darkForegroundColor,
       onSecondary: darkForegroundColor,
       onBackground: darkForegroundColor,

@@ -67,7 +67,7 @@ class _UserCardState extends State<UserCard> {
           radius: 16,  toUser: widget.follower.id, canViewProfile: true, fromUser: widget.userId,
         ),
         trailing: BlocConsumer<UserActionBloc, UserActionState>(
-      bloc: widget.userActionBloc,
+        bloc: widget.userActionBloc,
           listener: (context, state) {},
           builder: (context , state){
         bool isFollower = widget.isFollower;
