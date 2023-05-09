@@ -104,8 +104,12 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     ),
                   ]),
                 ),
-          Card(
-            shape: RoundedRectangleBorder(
+    Card(
+    color: Theme.of(context).brightness == Brightness.dark
+    ? AppTheme.lightForegroundColor
+        : AppTheme.darkForegroundColor,
+    // other card properties
+    shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -117,7 +121,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                       UserAvatar(
                         imageUrl:
                             '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
-                        radius: 16, fromUser: widget.userProfileId ,toUser: widget.servicePost.userId!, canViewProfile: widget.canViewProfile,
+                        radius: 16, fromUser: widget.userProfileId ,toUser: widget.servicePost.userId!, canViewProfile: widget.canViewProfile
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -225,7 +229,15 @@ class _ServicePostCardState extends State<ServicePostCard> {
                       ),
                     );
                   },
-                  title: Text('عرض التفاصيل'),
+                  title: const Text('عرض التفاصيل'),
+                  subtitle:
+                  Text('يبعد عنك ${widget.servicePost.distance.toString()} كم ' ,
+                    style:  TextStyle(
+                        fontSize: 12,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightDisabledColor
+                          : AppTheme.darkDisabledColor,
+                    ),),
                   trailing: const Icon(Icons.arrow_forward),
                 )
               ],

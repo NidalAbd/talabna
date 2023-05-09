@@ -97,8 +97,8 @@ class _ServicePostScreenState extends State<ServicePostScreen>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInToLinear,
       );
-      // Wait for the duration of the scrolling animation before refreshing
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // Wait for 200 milliseconds before refreshing
+      await Future.delayed(const Duration(milliseconds: 200));
       // Trigger a refresh after reaching the top
       _handleRefresh();
       return false;
@@ -106,6 +106,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
       return true;
     }
   }
+
   @override
   void dispose() {
     _servicePostsCategory.clear();

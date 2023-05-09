@@ -4,41 +4,49 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_event.dart';
 import 'package:talbna/blocs/other_users/user_profile_state.dart';
+import 'package:talbna/blocs/user_action/user_action_bloc.dart';
+import 'package:talbna/blocs/user_action/user_action_event.dart';
+import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/profile/add_point_screen.dart';
-import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/profile/user_followers_screen.dart';
 import 'package:talbna/screens/profile/user_following_screen.dart';
 import 'package:talbna/screens/profile/user_info_widget.dart';
+import 'package:talbna/screens/service_post/other_user_post_screen.dart';
 import 'package:talbna/screens/service_post/user_post_screen.dart';
 import 'package:talbna/screens/widgets/custom_tab_profile.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/utils/constants.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({
+class OtherProfileScreen extends StatefulWidget {
+  const OtherProfileScreen({
     Key? key,
     required this.fromUser,
-    required this.toUser, required this.isOtherProfile,
+    required this.toUser, required this.isOtherProfile
   }) : super(key: key);
   final bool isOtherProfile;
   final int fromUser;
   final int toUser;
+
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<OtherProfileScreen> createState() => _OtherProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen>
+class _OtherProfileScreenState extends State<OtherProfileScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   late OtherUserProfileBloc _userProfileBloc;
+  late UserActionBloc userActionBloc;
+  late bool isFollowing = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _userProfileBloc = context.read<OtherUserProfileBloc>()
-      ..add(OtherUserProfileRequested(id: widget.fromUser));
+      ..add(OtherUserProfileRequested(id: widget.toUser));
+    userActionBloc = context.read<UserActionBloc>();
+
   }
 
   void _setClipboardData(String text) async {
@@ -67,10 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       backgroundImage: NetworkImage(
                           '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'),
                     ),
-                    widget.isOtherProfile && widget.toUser == widget.toUser?  Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(),
-                    ) : IconButton(
+                    IconButton(
                       icon: const Icon(
                         Icons.more_vert,
                         size: 30,
@@ -149,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               controller: _tabController,
               children: [
                 Center(
-                  child: UserPostScreen(userID: user.id),
+                  child: OtherUserPostScreen(userID: user.id),
                 ),
                 Center(
                   child: UserFollowerScreen(

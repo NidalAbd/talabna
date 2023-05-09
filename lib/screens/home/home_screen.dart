@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
     Category(id: 3, name: 'عقارات'),
     Category(id: 4, name: 'سيارات'),
     Category(id: 5, name: 'خدمات'),
+    Category(id: 6, name: 'قريبا منك'),
   ];
   // Define a function to get the icon for a category
   Widget _getCategoryIcon(Category category) {
@@ -70,6 +71,11 @@ class _HomeScreenState extends State<HomeScreen>
       case 5:
         return const Icon(
           Icons.cleaning_services,
+          color: Colors.white,
+        );
+      case 6:
+        return const Icon(
+          Icons.my_location,
           color: Colors.white,
         );
       default:
@@ -261,6 +267,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                   .toList(),
+              selectedLabelStyle: const TextStyle(color: Colors.white),
             ),
           ),
         );

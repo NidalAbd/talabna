@@ -18,7 +18,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class NotificationsScreenState extends State<NotificationsScreen> {
-  final ScrollController _scrollController = ScrollController();
+  late ScrollController _scrollController;
   late TalbnaNotificationBloc _talbnaNotificationBloc;
   int _currentPage = 1;
   bool _hasReachedMax = false;
@@ -27,9 +27,10 @@ class NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     _talbnaNotificationBloc = BlocProvider.of<TalbnaNotificationBloc>(context);
     _talbnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
   }
   void _onScroll() {
     if (!_hasReachedMax &&
