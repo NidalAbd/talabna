@@ -294,6 +294,7 @@ class _HomeScreenState extends State<HomeScreen>
                     Column(
                       children: [
                         IconButton(
+
                           icon: _getCategoryIcon(category),
                           onPressed: () {
                             setState(() {

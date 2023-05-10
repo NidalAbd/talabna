@@ -16,7 +16,9 @@ class ServicePostCard extends StatefulWidget {
   const ServicePostCard({
     Key? key,
     this.onPostDeleted,
-    required this.servicePost, required this.canViewProfile, required this.userProfileId,
+    required this.servicePost,
+    required this.canViewProfile,
+    required this.userProfileId,
   }) : super(key: key);
   final ServicePost servicePost;
   final Function? onPostDeleted;
@@ -37,7 +39,6 @@ class _ServicePostCardState extends State<ServicePostCard> {
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
     _userProfileBloc = BlocProvider.of<OtherUserProfileBloc>(context);
   }
-
 
   String formatTimeDifference(DateTime? postDate) {
     if (postDate == null) {
@@ -104,12 +105,12 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     ),
                   ]),
                 ),
-    Card(
-    color: Theme.of(context).brightness == Brightness.dark
-    ? AppTheme.lightForegroundColor
-        : AppTheme.darkForegroundColor,
-    // other card properties
-    shape: RoundedRectangleBorder(
+          Card(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightForegroundColor
+                : AppTheme.darkForegroundColor,
+            // other card properties
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -119,10 +120,12 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   child: Row(
                     children: [
                       UserAvatar(
-                        imageUrl:
-                            '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
-                        radius: 16, fromUser: widget.userProfileId ,toUser: widget.servicePost.userId!, canViewProfile: widget.canViewProfile
-                      ),
+                          imageUrl:
+                              '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                          radius: 16,
+                          fromUser: widget.userProfileId,
+                          toUser: widget.servicePost.userId!,
+                          canViewProfile: widget.canViewProfile),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -141,7 +144,8 @@ class _ServicePostCardState extends State<ServicePostCard> {
                               ),
                             ),
                             Text(
-                              formatTimeDifference(widget.servicePost.createdAt),
+                              formatTimeDifference(
+                                  widget.servicePost.createdAt),
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey,
@@ -179,7 +183,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ServicePostCardView(
@@ -206,18 +210,25 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           ),
                         ),
                         ImageGrid(
-                            imageUrls: widget.servicePost.photos
-                                    ?.map((photo) =>
-                                        '${Constants.apiBaseUrl}/storage/${photo.src}')
-                                    .toList() ??
-                                [], canClick: false,),
+                          imageUrls: widget.servicePost.photos
+                                  ?.map((photo) =>
+                                      '${Constants.apiBaseUrl}/storage/${photo.src}')
+                                  .toList() ??
+                              [],
+                          canClick: false,
+                        ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 5),
                 ListTile(
-                  onTap: (){
+                  selected: true, // Set the tile to be selected
+                  selectedTileColor:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.darkDisabledColor.withOpacity(0.2)
+                          : AppTheme.lightDisabledColor.withOpacity(0.5), // Set the selected tile color
+                  onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => ServicePostCardView(
@@ -229,15 +240,18 @@ class _ServicePostCardState extends State<ServicePostCard> {
                       ),
                     );
                   },
-                  title: const Text('عرض التفاصيل'),
-                  subtitle:
-                  Text('يبعد عنك ${widget.servicePost.distance.toString()} كم ' ,
-                    style:  TextStyle(
-                        fontSize: 12,
+                  title:  Text('عرض التفاصيل',style: TextStyle( color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.lightDisabledColor
+                      : AppTheme.darkDisabledColor,),),
+                  subtitle: Text(
+                    'يبعد عنك ${widget.servicePost.distance.toString()} كم ',
+                    style: TextStyle(
+                      fontSize: 12,
                       color: Theme.of(context).brightness == Brightness.dark
                           ? AppTheme.lightDisabledColor
                           : AppTheme.darkDisabledColor,
-                    ),),
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_forward),
                 )
               ],
@@ -253,7 +267,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration:  const BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(10),
@@ -264,9 +278,8 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     ),
                     child: Text(
                       widget.servicePost.type!,
-                      style:  const TextStyle(
-                        color:AppTheme.lightBackgroundColor,
-                           fontSize: 10),
+                      style: const TextStyle(
+                          color: AppTheme.lightBackgroundColor, fontSize: 10),
                     ),
                   ),
                 ),
@@ -275,7 +288,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration:  const BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(10),
@@ -287,8 +300,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     child: Text(
                       widget.servicePost.subCategory!,
                       style: const TextStyle(
-                          color:AppTheme.lightBackgroundColor,
-                         fontSize: 10),
+                          color: AppTheme.lightBackgroundColor, fontSize: 10),
                     ),
                   ),
                 ),

@@ -131,7 +131,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                           subtitle: Text(DateFormat('yyyy-MM-dd | HH:mm:ss').format(notification.createdAt)),
                           trailing: notification.read
                               ? null
-                              : const Icon(Icons.fiber_new, color: Colors.blue),
+                              : const Icon(Icons.fiber_new, color: Colors.white),
                           onTap: () {
                             BlocProvider.of<TalbnaNotificationBloc>(context)
                                 .add(

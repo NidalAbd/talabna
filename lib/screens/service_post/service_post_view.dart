@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
@@ -117,6 +118,9 @@ title: const Text('عرض التفاصيل'),
               Column(
                 children: [
                   Card(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.lightForegroundColor
+                        : AppTheme.darkForegroundColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -151,8 +155,7 @@ title: const Text('عرض التفاصيل'),
                                     Text(
                                       formatTimeDifference(widget.servicePost.createdAt),
                                       style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
@@ -231,7 +234,22 @@ title: const Text('عرض التفاصيل'),
                     ),
                   ),
                   const SizedBox(height: 20,),
-
+                  SizedBox(
+                    height: 200,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(widget.servicePost.locationLatitudes!, widget.servicePost.locationLongitudes!),
+                        zoom: 15,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: const MarkerId('user-location'),
+                          position: LatLng(widget.servicePost.locationLatitudes!, widget.servicePost.locationLongitudes!),
+                          infoWindow: const InfoWindow(title: 'User Location'),
+                        ),
+                      },
+                    ),
+                  ),
                 ],
               ),
               Positioned(
