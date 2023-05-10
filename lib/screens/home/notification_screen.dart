@@ -111,8 +111,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                         }
                         final notification = _notification[index];
                         return Card(
-                          color: notification.read
-                              ? Colors.white : Colors.grey.shade400 ,
+
                         child: AnimatedOpacity(
                         opacity: 1.0,
                         duration: const Duration(milliseconds: 300),

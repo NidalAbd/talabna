@@ -8,18 +8,18 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ServicePostScreen extends StatefulWidget {
   final int category;
   final int userID;
+  late bool showSubcategoryGridView;
   final ServicePostBloc servicePostBloc;
 
-  const ServicePostScreen({
+   ServicePostScreen({
     Key? key,
     required this.category,
     required this.userID,
-    required this.servicePostBloc,
+    required this.servicePostBloc, required this.showSubcategoryGridView,
   }) : super(key: key);
 
   @override
@@ -30,10 +30,11 @@ class _ServicePostScreenState extends State<ServicePostScreen>
     with AutomaticKeepAliveClientMixin<ServicePostScreen> {
   @override
   bool get wantKeepAlive => true;
+  late  bool haveSubcategory;
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 1;
   bool _hasReachedMax = false;
-  bool _showSubcategoryGridView = false;
+
   late int? userId;
 
   List<ServicePost> _servicePostsCategory = [];
@@ -47,21 +48,10 @@ class _ServicePostScreenState extends State<ServicePostScreen>
     super.initState();
     _scrollController.addListener(_onScroll);
     widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
-    _loadShowSubcategoryGridView().then((value) {
-      setState(() {
-        _showSubcategoryGridView = value;
-      });
-    });
+
   }
 
-  Future<void> _saveShowSubcategoryGridView(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('showSubcategoryGridView', value);
-  }
-  Future<bool> _loadShowSubcategoryGridView() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('showSubcategoryGridView') ?? false;
-  }
+
   void _onScroll() {
     if (!_hasReachedMax &&
         _scrollController.offset >=
@@ -85,11 +75,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
       _servicePostsCategory = [..._servicePostsCategory, ...servicePosts];
     });
   }
-  Future<void> _toggleSubcategoryGridView() async {
-    _showSubcategoryGridView = !_showSubcategoryGridView;
-    await _saveShowSubcategoryGridView(_showSubcategoryGridView);
-    setState(() {});
-  }
+
   Future<bool> _onWillPop() async {
     if (_scrollController.offset > 0) {
       _scrollController.animateTo(
@@ -133,8 +119,13 @@ class _ServicePostScreenState extends State<ServicePostScreen>
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: _showSubcategoryGridView
-                  ? SubcategoryGridView(categoryId: widget.category, userId: widget.userID, servicePostBloc: widget.servicePostBloc, userProfileBloc: BlocProvider.of<UserProfileBloc>(context),)
+              child: widget.showSubcategoryGridView
+                  ? SubcategoryGridView(
+                categoryId: widget.category,
+                userId: widget.userID,
+                servicePostBloc: widget.servicePostBloc,
+                userProfileBloc: BlocProvider.of<UserProfileBloc>(context),
+              )
                   : BlocBuilder<ServicePostBloc, ServicePostState>(
                       bloc: widget.servicePostBloc,
                       builder: (context, state) {
@@ -196,15 +187,6 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                         }
                       },
                     ),
-            ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton(
-                backgroundColor:  AppTheme.primaryColor,
-                onPressed: _toggleSubcategoryGridView,
-                child: const Icon(Icons.grid_view_rounded , color: Colors.white, ),
-              ),
             ),
           ],
         ),

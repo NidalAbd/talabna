@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
@@ -19,8 +21,6 @@ import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/service_post/service_post_category.dart';
 import 'package:talbna/screens/service_post/create_service_post_form.dart';
 
-import 'notification_screen.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.userId}) : super(key: key);
   final int userId;
@@ -31,16 +31,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
   late UserProfileBloc _userProfileBloc;
   late ServicePostBloc _servicePostBloc;
-
+  late bool showSubcategoryGridView = false;
   int _selectedCategory = 1;
 
+  Future<void> _saveShowSubcategoryGridView(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('showSubcategoryGridView', value);
+  }
+
+  Future<void> _toggleSubcategoryGridView({required bool canToggle}) async {
+    if(canToggle == true){
+       showSubcategoryGridView = !showSubcategoryGridView ;
+    }else{
+      if(_selectedCategory == 6 || _selectedCategory == 0) showSubcategoryGridView = false;
+    }
+    await _saveShowSubcategoryGridView(showSubcategoryGridView);
+    setState(() {});
+  }
   final List<Category> _categories = [
     Category(id: 1, name: 'وظائف'),
     Category(id: 2, name: 'اجهزة'),
     Category(id: 3, name: 'عقارات'),
+    Category(id: 0, name: ''),
     Category(id: 4, name: 'سيارات'),
     Category(id: 5, name: 'خدمات'),
     Category(id: 6, name: 'قريبا منك'),
@@ -62,6 +76,10 @@ class _HomeScreenState extends State<HomeScreen>
         return const Icon(
           Icons.home,
           color: Colors.white,
+        );
+      case 0:
+        return const SizedBox(
+          width: 80,
         );
       case 4:
         return const Icon(
@@ -85,11 +103,18 @@ class _HomeScreenState extends State<HomeScreen>
         );
     }
   }
-
+  Future<bool> _loadShowSubcategoryGridView() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('showSubcategoryGridView') ?? false;
+  }
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _loadShowSubcategoryGridView().then((value) {
+      setState(() {
+        showSubcategoryGridView = value;
+      });
+    });
     _userProfileBloc = BlocProvider.of<UserProfileBloc>(context);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
     _userProfileBloc.add(UserProfileRequested(id: widget.userId)); // Added line
@@ -111,13 +136,21 @@ class _HomeScreenState extends State<HomeScreen>
           child: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              leading: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  LogoTitle(
-                    fontSize: 18,
-                    playAnimation: false,
-                    logoSize: 20,
+              title: Row(
+                children: [
+                  Text(
+                    'TALB',
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontFamily: GoogleFonts.bungee().fontFamily,
+                        color: Colors.white),
+                  ),
+                  Text(
+                    'NA',
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontFamily: GoogleFonts.bungee().fontFamily,
+                        color: Colors.yellow),
                   ),
                 ],
               ),
@@ -242,33 +275,49 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
-            body: Center(
-              child: ServicePostScreen(
-                key: ValueKey(_selectedCategory),
-                category: _selectedCategory,
-                userID: widget.userId,
-                servicePostBloc: _servicePostBloc,
+            body: ServicePostScreen(
+              key: ValueKey(_selectedCategory),
+              category: _selectedCategory,
+              userID: widget.userId,
+              servicePostBloc: _servicePostBloc,
+              showSubcategoryGridView:showSubcategoryGridView,
+            ),
+            bottomNavigationBar: BottomAppBar(
+              height: 70,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.primaryColor
+                  : AppTheme.primaryColor,
+              shape: const CircularNotchedRectangle(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: _categories.map((category) =>
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: _getCategoryIcon(category),
+                          onPressed: () {
+                            setState(() {
+                              _selectedCategory = category.id;
+                              if(_selectedCategory == 6 || _selectedCategory == 0)_toggleSubcategoryGridView(canToggle: false);
+                            });
+                          },
+                        ),
+                        Text(category.name,style: const TextStyle(color: Colors.white,fontSize: 12),)
+                      ],
+                    ),
+                ).toList(),
               ),
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _selectedCategory - 1,
-              onTap: (int index) {
-                setState(() {
-                  _selectedCategory = index + 1;
-                });
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                 await _toggleSubcategoryGridView(canToggle: true);
               },
-              items: _categories
-                  .map(
-                    (category) => BottomNavigationBarItem(
-                      icon: _getCategoryIcon(category),
-                      // Set the icon for the category
-                      label: category.name, // Set the name for the category
-                      backgroundColor: AppTheme.primaryColor,
-                    ),
-                  )
-                  .toList(),
-              selectedLabelStyle: const TextStyle(color: Colors.white),
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.primaryColor
+                  : AppTheme.primaryColor,
+              child:  Icon(showSubcategoryGridView? Icons.list : Icons.grid_view_rounded,color: Colors.white,),
             ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           ),
         );
       } else {

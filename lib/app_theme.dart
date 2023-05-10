@@ -62,7 +62,7 @@ class AppTheme {
       primary: primaryColor,
       secondary: accentColor,
       background: lightBackgroundColor,
-      surface: lightBackgroundColor,
+      surface: Colors.white,
       onPrimary: lightForegroundColor,
       onSecondary: lightForegroundColor,
       onBackground: lightForegroundColor,
