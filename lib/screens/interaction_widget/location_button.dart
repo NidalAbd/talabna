@@ -2,27 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class WhatsAppButtonWidget extends StatelessWidget {
-  final String? whatsAppNumber;
-  final String username;
+class LocationButtonWidget extends StatelessWidget {
+  final double locationLatitudes;
+  final double locationLongitudes;
   final double width;
-  const WhatsAppButtonWidget({Key? key, this.whatsAppNumber, required this.username, required this.width}) : super(key: key);
+  const LocationButtonWidget({Key? key, required this.locationLatitudes, required this.locationLongitudes, required this.width, }) : super(key: key);
 
-  String formatWhatsAppNumber(String number) {
-    // Remove leading '00'
-    number = number.replaceFirst(RegExp(r'^00'), '');
-    return number;
-  }
-
-
-  void launchWhatsApp() async {
-    final url = formatWhatsAppNumber(whatsAppNumber ?? 'لا يوجد بيانات');
-    if (await canLaunch('https://wa.me/$url')) {
-      await launch('https://wa.me/$url');
+   Future<void> launchGoogleMap() async {
+     final url =
+         'geo:$locationLatitudes,$locationLongitudes?q=$locationLatitudes,$locationLongitudes';
+     if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
     } else {
-      throw 'Could not launch WhatsApp';
+      throw 'Could not launch $url';
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -38,19 +33,19 @@ class WhatsAppButtonWidget extends StatelessWidget {
             ),
           ),
         ),
-        onPressed: launchWhatsApp,
+        onPressed: launchGoogleMap,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
                SizedBox(width: width), // Add a fixed width SizedBox before the icon
-              Image.asset('assets/WhatsApp_logo.png' , width: 25, height: 25,),
+               const Icon(Icons.location_on_outlined,size: 25,),
                SizedBox(width: width), // Add some space between the icon and text
-              Text(
-                whatsAppNumber!,
+              const Text(
+                'show location on google map',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

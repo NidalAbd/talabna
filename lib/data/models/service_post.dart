@@ -74,7 +74,7 @@ class ServicePost {
       priceCurrency: json['price_currency'] ?? '',
       locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0,
       locationLongitudes: double.tryParse(json['location_longitudes'] ?? '') ?? 0,
-      distance: json['distance'] ?? 0,
+      distance: (json['distance'] is int ? json['distance'].toDouble() : json['distance']) ?? 0,
       type: json['type'] ?? '',
       haveBadge: json['have_badge'] ??  '',
       badgeDuration: int.tryParse(json['badge_duration']?.toString() ?? '') ?? 0,

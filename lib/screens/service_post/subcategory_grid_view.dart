@@ -114,6 +114,9 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
             alignment: Alignment.bottomCenter,
             children: [
               Card(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightForegroundColor
+                    : AppTheme.darkForegroundColor,
                 child: SizedBox(
                   width: double.infinity,
                   height: 100, // Set a fixed height for the container

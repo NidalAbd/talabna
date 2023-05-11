@@ -165,6 +165,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     },
                   ),
                   TextFormField(
+                    maxLength: 20,
                     textDirection: TextDirection.rtl,
                     decoration: const InputDecoration(
                       labelText: 'العنوان',

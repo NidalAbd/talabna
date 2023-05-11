@@ -32,12 +32,17 @@ class ServicePostCard extends StatefulWidget {
 class _ServicePostCardState extends State<ServicePostCard> {
   late ServicePostBloc _servicePostBloc;
   late OtherUserProfileBloc _userProfileBloc;
-
+  late EdgeInsets padding;
   @override
   void initState() {
     super.initState();
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
     _userProfileBloc = BlocProvider.of<OtherUserProfileBloc>(context);
+    if (widget.servicePost.haveBadge == 'عادي') {
+      padding = const EdgeInsets.fromLTRB(0, 2, 0, 0);
+    } else {
+      padding = const EdgeInsets.fromLTRB(0, 30, 0, 0);
+    }
   }
 
   String formatTimeDifference(DateTime? postDate) {
@@ -76,7 +81,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+      padding: padding,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -116,7 +121,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 5),
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: Row(
                     children: [
                       UserAvatar(
@@ -132,6 +137,9 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            const SizedBox(
+                              height: 11,
+                            ),
                             Text(
                               widget.servicePost.userName ??
                                   'Unknown', // Display full username
@@ -154,19 +162,39 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 70),
                       Expanded(
                         flex: 2,
                         child: Directionality(
                           textDirection: TextDirection.rtl,
-                          child: Text(
-                            widget.servicePost.title!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
+                          child: Row(
+                            children: [
+                              Text(
+                                '${widget.servicePost.type!} ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${widget.servicePost.category!} ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              Text(
+                                '${widget.servicePost.subCategory!} ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -191,6 +219,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                             onPostDeleted: widget.onPostDeleted,
                             userProfileId: widget.userProfileId,
                             servicePost: widget.servicePost,
+                            canViewProfile: widget.canViewProfile,
                           ),
                         ),
                       );
@@ -206,7 +235,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                             textAlign: TextAlign.justify,
                             maxLines: 6,
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
                         ImageGrid(
@@ -223,11 +252,29 @@ class _ServicePostCardState extends State<ServicePostCard> {
                 ),
                 const SizedBox(height: 5),
                 ListTile(
+                  leading: SizedBox(
+                    width: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.remove_red_eye),
+                          const SizedBox(width: 5),
+                          Text(
+                            '${widget.servicePost.viewCount ?? 0}',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   selected: true, // Set the tile to be selected
                   selectedTileColor:
                       Theme.of(context).brightness == Brightness.dark
                           ? AppTheme.darkDisabledColor.withOpacity(0.2)
-                          : AppTheme.lightDisabledColor.withOpacity(0.5), // Set the selected tile color
+                          : AppTheme.lightDisabledColor
+                              .withOpacity(0.2), // Set the selected tile color
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -236,13 +283,19 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           onPostDeleted: widget.onPostDeleted,
                           userProfileId: widget.userProfileId,
                           servicePost: widget.servicePost,
+                          canViewProfile: widget.canViewProfile,
                         ),
                       ),
                     );
                   },
-                  title:  Text('عرض التفاصيل',style: TextStyle( color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.lightDisabledColor
-                      : AppTheme.darkDisabledColor,),),
+                  title: Text(
+                    'عرض التفاصيل',
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightDisabledColor
+                          : AppTheme.darkDisabledColor,
+                    ),
+                  ),
                   subtitle: Text(
                     'يبعد عنك ${widget.servicePost.distance.toString()} كم ',
                     style: TextStyle(
@@ -252,58 +305,13 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           : AppTheme.darkDisabledColor,
                     ),
                   ),
-                  trailing: const Icon(Icons.arrow_forward),
+                  trailing: Icon(
+                    Icons.arrow_forward,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.lightDisabledColor
+                        : AppTheme.darkDisabledColor,
+                  ),
                 )
-              ],
-            ),
-          ),
-          Positioned(
-            top: -22,
-            right: 0,
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 1, 0, 10),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        topLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                        topRight: Radius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      widget.servicePost.type!,
-                      style: const TextStyle(
-                          color: AppTheme.lightBackgroundColor, fontSize: 10),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 1, 0, 10),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        topLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(2),
-                        topRight: Radius.circular(2),
-                      ),
-                    ),
-                    child: Text(
-                      widget.servicePost.subCategory!,
-                      style: const TextStyle(
-                          color: AppTheme.lightBackgroundColor, fontSize: 10),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

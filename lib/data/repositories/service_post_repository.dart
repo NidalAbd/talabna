@@ -101,6 +101,7 @@ class ServicePostRepository {
             '$_baseUrl/api/service_posts/users/$userId/favorite?page=$page'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final List<dynamic> data = responseBody['servicePosts']['data'];
@@ -111,6 +112,8 @@ class ServicePostRepository {
         throw Exception('Failed to load favorite service posts for this user');
       }
     } catch (e) {
+      print(e);
+
       throw Exception('Failed to connect to server');
     }
   }

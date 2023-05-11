@@ -162,9 +162,8 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                     TextFormField(
                       controller: _oldTitleController,
                       textDirection: TextDirection.rtl,
-
+                      maxLength: 20,
                       decoration: const InputDecoration(
-
                         labelText: 'العنوان',
                       ),
                       validator: (value) {

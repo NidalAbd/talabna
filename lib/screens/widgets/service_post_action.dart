@@ -78,6 +78,7 @@ class _ServicePostActionState extends State<ServicePostAction>
       child: BlocBuilder<ServicePostBloc, ServicePostState>(
           builder: (context, state) {
         return IconButton(
+          padding: EdgeInsets.zero,
           icon: const Icon(Icons.more_vert),
           onPressed: () {
             showModalBottomSheet(
