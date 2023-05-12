@@ -9,6 +9,7 @@ import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/screens/home/notification_alert_widget.dart';
+import 'package:talbna/screens/home/search_screen.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
@@ -155,6 +156,29 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.add_circle),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ServicePostFormScreen(
+                            userId: widget.userId),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search_rounded,size: 30,),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
+                    );
+                  },
+                ),
                 NotificationsAlert(userID: widget.userId),
                 IconButton(
                   icon: const Icon(
@@ -167,20 +191,6 @@ class _HomeScreenState extends State<HomeScreen>
                       builder: (BuildContext context) {
                         return ListView(
                           children: [
-                            ListTile(
-                              leading: const Icon(Icons.add_circle),
-                              title: const Text('add post'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ServicePostFormScreen(
-                                        userId: widget.userId),
-                                  ),
-                                );
-                              },
-                            ),
                             ListTile(
                               leading: const Icon(Icons.person),
                               title: const Text('Profile'),

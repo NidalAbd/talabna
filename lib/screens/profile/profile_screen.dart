@@ -61,7 +61,6 @@ class _ProfileScreenState extends State<ProfileScreen>
               actions: [
                 Row(
                   children: [
-                    Text(user.id.toString(),),
                     CircleAvatar(
                       radius: 14,
                       backgroundImage: NetworkImage(
