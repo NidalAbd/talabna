@@ -42,6 +42,7 @@ class CategoriesRepository {
       Uri.parse('$baseUrl/api/categories_list/$categoryId/sub_categories/'),
       headers: {'Authorization': 'Bearer $token'},
     );
+    print(response.statusCode);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseJson = jsonDecode(response.body);
       final List<dynamic> subcategoriesJson = responseJson['subcategories'];

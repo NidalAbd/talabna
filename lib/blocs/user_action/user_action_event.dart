@@ -7,6 +7,7 @@ abstract class UserActionEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class UserActionEventStarted extends UserActionEvent {}
 
 class ToggleUserMakeFollowEvent extends UserActionEvent {
   final int user;
@@ -49,3 +50,10 @@ class GetUserFollowSubcategories extends UserActionEvent {
   @override
   List<Object> get props => [subCategoryId];
 }
+class UserSearchAction extends UserActionEvent {
+  final String search;
+  final int page;
+
+  const UserSearchAction({required this.search,this.page = 1});
+}
+class UserFollowerFollowingHasMaxReached extends UserActionEvent {}

@@ -8,6 +8,7 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/categories.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/home/notification_alert_widget.dart';
 import 'package:talbna/screens/home/search_screen.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
@@ -43,19 +44,21 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _toggleSubcategoryGridView({required bool canToggle}) async {
-    if(canToggle == true){
-       showSubcategoryGridView = !showSubcategoryGridView ;
-    }else{
-      if(_selectedCategory == 6 || _selectedCategory == 0) showSubcategoryGridView = false;
+    if (canToggle == true) {
+      showSubcategoryGridView = !showSubcategoryGridView;
+    } else {
+      if (_selectedCategory == 6 || _selectedCategory == 0)
+        showSubcategoryGridView = false;
     }
     await _saveShowSubcategoryGridView(showSubcategoryGridView);
     setState(() {});
   }
+
   final List<Category> _categories = [
     Category(id: 1, name: 'وظائف'),
     Category(id: 2, name: 'اجهزة'),
     Category(id: 3, name: 'عقارات'),
-    Category(id: 0, name: ''),
+    Category(id: 7, name: 'اخبار'),
     Category(id: 4, name: 'سيارات'),
     Category(id: 5, name: 'خدمات'),
     Category(id: 6, name: 'قريبا منك'),
@@ -78,9 +81,10 @@ class _HomeScreenState extends State<HomeScreen>
           Icons.home,
           color: Colors.white,
         );
-      case 0:
-        return const SizedBox(
-          width: 80,
+      case 7:
+        return const Icon(
+          Icons.tv,
+          color: Colors.white,
         );
       case 4:
         return const Icon(
@@ -104,10 +108,12 @@ class _HomeScreenState extends State<HomeScreen>
         );
     }
   }
+
   Future<bool> _loadShowSubcategoryGridView() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('showSubcategoryGridView') ?? false;
   }
+
   @override
   void initState() {
     super.initState();
@@ -121,6 +127,30 @@ class _HomeScreenState extends State<HomeScreen>
     _userProfileBloc.add(UserProfileRequested(id: widget.userId)); // Added line
   }
 
+  Future<bool> _checkDataCompletion() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userName = prefs.getString('userName');
+    String? phones = prefs.getString('phones');
+    String? watsNumber = prefs.getString('watsNumber');
+    String? city = prefs.getString('city');
+    String? gender = prefs.getString('gender');
+    String? dobString = prefs.getString('dob');
+    return userName != null &&
+        phones != null &&
+        watsNumber != null &&
+        city != null &&
+        gender != null &&
+        dobString != null;
+  }
+  Future<void> _saveDataToSharedPreferences(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userName', user.userName!);
+    prefs.setString('phones', user.phones!);
+    prefs.setString('watsNumber', user.watsNumber!);
+    prefs.setString('city', user.city!);
+    prefs.setString('gender', user.email);
+    prefs.setString('dob', user.email);
+  }
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UserProfileBloc, UserProfileState>(
@@ -132,6 +162,16 @@ class _HomeScreenState extends State<HomeScreen>
       } else if (state is UserProfileLoadFailure) {
         return Center(child: Text(state.error));
       } else if (state is UserProfileLoadSuccess) {
+        if (state.user.city == null ||
+            state.user.locationLongitudes == null ||
+            state.user.locationLatitudes == null ||
+            state.user.phones == null ||
+            state.user.watsNumber == null ||
+            state.user.gender == null ||
+            state.user.dateOfBirth == null) {
+        } else {
+          _saveDataToSharedPreferences(state.user);
+        }
         final user = state.user;
         return SafeArea(
           child: Scaffold(
@@ -158,129 +198,192 @@ class _HomeScreenState extends State<HomeScreen>
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add_circle),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ServicePostFormScreen(
-                            userId: widget.userId),
-                      ),
-                    );
+                  onPressed: () async {
+                    bool loadedUser = await _checkDataCompletion();
+                    if (loadedUser) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ServicePostFormScreen(userId: widget.userId),
+                        ),
+                      );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Builder(
+                            builder: (BuildContext dialogContext) {
+                              return AlertDialog(
+                                title: const Text('Incomplete Information'),
+                                content: const Text('Please complete your information.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(dialogContext);
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => UpdateUserProfile(
+                                            userId: user.id,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.search_rounded,size: 30,),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SearchScreen(),
-                      ),
-                    );
-                  },
-                ),
+                // IconButton(
+                //   icon: const Icon(Icons.search_rounded,size: 30,),
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) => SearchScreen( userID: widget.userId,),
+                //       ),
+                //     );
+                //   },
+                // ),
                 NotificationsAlert(userID: widget.userId),
                 IconButton(
                   icon: const Icon(
                     Icons.more_vert,
                     size: 30,
                   ),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return ListView(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.person),
-                              title: const Text('Profile'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(
-                                      fromUser: widget.userId,
-                                      toUser: widget.userId,
+                  onPressed: () async {
+                    bool loadedUser = await _checkDataCompletion();
+                    if (loadedUser) {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ListView(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.person),
+                                title: const Text('Profile'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ProfileScreen(
+                                        fromUser: widget.userId,
+                                        toUser: widget.userId,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.favorite),
-                              title: const Text('Favorite'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        FavoritePostScreen(userID: user.id),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.update),
-                              title: const Text('Update Info'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => UpdateUserProfile(
-                                      userId: user.id,
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.favorite),
+                                title: const Text('Favorite'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          FavoritePostScreen(userID: user.id),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.attach_money),
-                              title: const Text('Add Points'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => PurchaseRequestScreen(
-                                      userID: user.id,
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.update),
+                                title: const Text('Update Info'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => UpdateUserProfile(
+                                        userId: user.id,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.email),
-                              title: const Text('Change Email'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ChangeEmailScreen(
-                                      userId: user.id,
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.attach_money),
+                                title: const Text('Add Points'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PurchaseRequestScreen(
+                                        userID: user.id,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.lock),
-                              title: const Text('Change Password'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ChangePasswordScreen(
-                                      userId: user.id,
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.email),
+                                title: const Text('Change Email'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ChangeEmailScreen(
+                                        userId: user.id,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            ThemeToggleListTile(),
-                            const LogoutListTile(),
-                          ],
-                        );
-                      },
-                    );
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.lock),
+                                title: const Text('Change Password'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ChangePasswordScreen(
+                                        userId: user.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ThemeToggleListTile(),
+                              const LogoutListTile(),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      // User data is not available, display a message or take appropriate action
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Incomplete Information'),
+                            content:
+                                const Text('Please complete your information.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => UpdateUserProfile(
+                                        userId: user.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                 ),
               ],
@@ -290,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen>
               category: _selectedCategory,
               userID: widget.userId,
               servicePostBloc: _servicePostBloc,
-              showSubcategoryGridView:showSubcategoryGridView,
+              showSubcategoryGridView: showSubcategoryGridView,
             ),
             bottomNavigationBar: BottomAppBar(
               height: 70,
@@ -300,35 +403,46 @@ class _HomeScreenState extends State<HomeScreen>
               shape: const CircularNotchedRectangle(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: _categories.map((category) =>
-                    Column(
-                      children: [
-                        IconButton(
-
-                          icon: _getCategoryIcon(category),
-                          onPressed: () {
-                            setState(() {
-                              _selectedCategory = category.id;
-                              if(_selectedCategory == 6 || _selectedCategory == 0)_toggleSubcategoryGridView(canToggle: false);
-                            });
-                          },
-                        ),
-                        Text(category.name,style: const TextStyle(color: Colors.white,fontSize: 12),)
-                      ],
-                    ),
-                ).toList(),
+                children: _categories
+                    .map(
+                      (category) => Column(
+                        children: [
+                          IconButton(
+                            icon: _getCategoryIcon(category),
+                            onPressed: () {
+                              setState(() {
+                                _selectedCategory = category.id;
+                                if (_selectedCategory == 6 ||
+                                    _selectedCategory == 0)
+                                  _toggleSubcategoryGridView(canToggle: false);
+                              });
+                            },
+                          ),
+                          Text(
+                            category.name,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12),
+                          )
+                        ],
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                 await _toggleSubcategoryGridView(canToggle: true);
+                await _toggleSubcategoryGridView(canToggle: true);
               },
               backgroundColor: Theme.of(context).brightness == Brightness.dark
                   ? AppTheme.primaryColor
                   : AppTheme.primaryColor,
-              child:  Icon(showSubcategoryGridView? Icons.list : Icons.grid_view_rounded,color: Colors.white,),
+              child: Icon(
+                showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
+                color: Colors.white,
+              ),
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
           ),
         );
       } else {

@@ -6,6 +6,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
@@ -13,9 +14,9 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/location_picker.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
-import 'package:talbna/screens/widgets/user_avatar.dart';
 import 'package:talbna/screens/widgets/user_avatar_profile.dart';
 import 'package:talbna/utils/constants.dart';
+
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
   const UpdateUserProfile({Key? key, required this.userId}) : super(key: key);
@@ -27,6 +28,9 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   late UserProfileBloc _userProfileBloc;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
+  late  String _selectedPhoneCountryCode = '00970' ;
+  late  String _selectedWhatsCountryCode = '00970' ;
+
   final TextEditingController _whatsAppController = TextEditingController();
   String _selectedCity = '';
   String _gender = '';
@@ -92,17 +96,36 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     }
   }
 
+  Future<void> _saveDataToSharedPreferences(User user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userName', user.userName!);
+    prefs.setString('phones', user.phones!);
+    prefs.setString('watsNumber', user.watsNumber!);
+    prefs.setString('city', user.city!);
+    prefs.setString('gender', user.email);
+    prefs.setString('dob', user.email);
+  }
 
   void _setValues(User user) {
-    _phoneController.text = user.phones!;
-    _whatsAppController.text = user.watsNumber!;
+    if (user.phones != null && user.phones!.length >= 5) {
+      _phoneController.text = user.phones!.substring(5);
+    } else {
+      _phoneController.text = user.phones ?? '';
+    }
+
+    if (user.watsNumber != null && user.watsNumber!.length >= 5) {
+      _whatsAppController.text = user.watsNumber!.substring(5);
+    } else {
+      _whatsAppController.text = user.watsNumber ?? '';
+    }
+
     _selectedCity = _selectedCity.isEmpty ? user.city! : _selectedCity;
     _gender = _gender.isEmpty ? user.gender! : _gender;
-    _locationLatitudes = user.locationLatitudes!;
-    _locationLongitudes = user.locationLongitudes!;
-    _dateOfBirthNotifier.value = user.dateOfBirth!;
-    _selectedDateNotifier = ValueNotifier<DateTime>(user.dateOfBirth!);
-    _dateOfBirthNotifier = ValueNotifier<DateTime>(user.dateOfBirth!);
+    _locationLatitudes = user.locationLatitudes ?? 0;
+    _locationLongitudes = user.locationLongitudes ?? 0;
+    _dateOfBirthNotifier.value = user.dateOfBirth ?? DateTime.now();
+    _selectedDateNotifier = ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now());
+    _dateOfBirthNotifier = ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now());
   }
 
   @override
@@ -114,15 +137,13 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       body: BlocConsumer<UserProfileBloc, UserProfileState>(
         bloc: _userProfileBloc,
         listener: (context, state) {
-          print('from Consumer $state ');
           if (state is UserProfileUpdateSuccess) {
             // Re-request user data after a successful update
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
-            // Show a snack-bar with a success message
+            _saveDataToSharedPreferences(state.user);
             SuccessWidget.show(context, 'Profile updated successfully.');
           }else if(state is UserProfileUpdateFailure){
-            // Re-request user data after a successful update
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
             ErrorCustomWidget.show(context, 'Profile updated failed.');
@@ -132,7 +153,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
         builder: (context, state) {
           if (state is UserProfileLoadSuccess) {
             final user = state.user;
-            _dateOfBirthController.text = dateFormat.format(user.dateOfBirth!); // Add this line
+            _dateOfBirthController.text = dateFormat.format(user.dateOfBirth ?? DateTime.now()); // Add this line
             _setValues(state.user); // Call the _setValues function here
             return SingleChildScrollView(
               child: Padding(
@@ -190,16 +211,111 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           ),
                         ],
                       ),
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: const InputDecoration(labelText: 'Phone'),
-                        keyboardType: TextInputType.phone,
-                      ),
-                      TextFormField(
-                        controller: _whatsAppController,
+                SizedBox(height: 30,),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3,
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedPhoneCountryCode,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPhoneCountryCode = value!;
+                          });
+                        },
+                        items: const [
+                          DropdownMenuItem<String>(
+                            value: '00970',
+                            child: Text('00970'),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: '00972',
+                            child: Text('00972'),
+                          ),
+                        ],
                         decoration: const InputDecoration(
-                            labelText: 'WhatsApp Number'),
+                          labelText: 'Country Code',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8), // Add some spacing between the dropdown and the phone input field
+                    Expanded(
+                      child: TextFormField(
+                        controller: _phoneController,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        ),
                         keyboardType: TextInputType.phone,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a phone number';
+                          }
+                          if (value.length < 9 || value.length > 9) {
+                            return 'Phone number should be 9 digits';
+                          }
+                          if (value.startsWith('0')) {
+                            return 'Phone number cannot start with 0';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                      const SizedBox(height: 16),
+                Row(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width / 3,
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedPhoneCountryCode,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedPhoneCountryCode = value!;
+                                });
+                              },
+                              items: const [
+                                DropdownMenuItem<String>(
+                                  value: '00970',
+                                  child: Text('00970'),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: '00972',
+                                  child: Text('00972'),
+                                ),
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Country Code',
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8), // Add some spacing between the dropdown and the phone input field
+                          Expanded(
+                            child: TextFormField(
+                              controller: _whatsAppController,
+                              decoration: const InputDecoration(
+                                labelText: 'Phone',
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a phone number';
+                                }
+                                if (value.length < 9 || value.length > 9) {
+                                  return 'Phone number should be 9 digits';
+                                }
+                                if (value.startsWith('0')) {
+                                  return 'Phone number cannot start with 0';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                       DropdownButtonFormField<String>(
                         value: _selectedCity.isNotEmpty ? _selectedCity : null,
@@ -277,7 +393,9 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           return TextFormField(
                             controller: _dateOfBirthController,
                             decoration: const InputDecoration(
-                                labelText: 'Date of Birth', icon: Icon(Icons.date_range_rounded)),
+                              labelText: 'Date of Birth',
+                              icon: Icon(Icons.date_range_rounded),
+                            ),
                             onTap: () async {
                               FocusScope.of(context).requestFocus(FocusNode()); // Hide the keyboard
                               DateTime? oldDate = _dateOfBirthController.text.isNotEmpty
@@ -291,7 +409,20 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               );
                               if (selectedDate != null) {
                                 _selectedDateNotifier.value = selectedDate;
+                                _dateOfBirthController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
                               }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your date of birth';
+                              }
+                              DateTime currentDate = DateTime.now();
+                              DateTime selectedDate = DateFormat('yyyy-MM-dd').parse(value);
+                              DateTime minimumDate = currentDate.subtract(const Duration(days: 18 * 365));
+                              if (selectedDate.isAfter(minimumDate)) {
+                                return 'You must be at least 18 years old';
+                              }
+                              return null;
                             },
                           );
                         },
@@ -308,6 +439,13 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                 print('Error parsing date: $e');
                               }
                             }
+                            String countryPhoneCode = _selectedPhoneCountryCode ?? '';
+                            String phoneNumber = _phoneController.text ?? '';
+                            String fullPhoneNumber = countryPhoneCode + phoneNumber;
+                            String countryWhatsCode = _selectedPhoneCountryCode ?? '';
+                            String whatsNumber = _whatsAppController.text ?? '';
+                            String fullWhatsNumber = countryWhatsCode + whatsNumber;
+
                             // Create a new user object with updated information
                             User updatedUser = User(
                               id: user.id,
@@ -318,8 +456,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               dateOfBirth: parsedDateOfBirth,
                               locationLatitudes: _locationLatitudes,
                               locationLongitudes: _locationLongitudes,
-                              phones: _phoneController.text,
-                              watsNumber: _whatsAppController.text,
+                              phones: fullPhoneNumber,
+                              watsNumber: fullWhatsNumber,
                               email: user.email,
                               emailVerifiedAt: user.emailVerifiedAt,
                               isActive: user.isActive,

@@ -1,42 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
-import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
-import 'package:talbna/blocs/user_follow/user_follow_event.dart';
+import 'package:talbna/blocs/user_action/user_action_event.dart';
+import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/user_card.dart';
-class UserFollowerScreen extends StatefulWidget {
-  const UserFollowerScreen({Key? key, required this.userID}) : super(key: key);
-  final int userID;
-  @override
-  UserFollowerScreenState createState() => UserFollowerScreenState();
+class UserSearchResult extends StatefulWidget {
+   UserSearchResult({Key? key, required this.currentPage,required this.searchQuery,required this.userHasReachedMax,required this.usersResult, required this.userActionBloc, required this.userID}) : super(key: key);
+   final int userID;
+   late List<User> usersResult = [];
+   final UserActionBloc userActionBloc;
+   late int currentPage;
+   String searchQuery = '';
+   bool userHasReachedMax = false;
+
+   @override
+  UserSearchResultState createState() => UserSearchResultState();
 }
-class UserFollowerScreenState extends State<UserFollowerScreen> {
+class UserSearchResultState extends State<UserSearchResult> {
   final ScrollController _scrollSearchController = ScrollController();
-  late UserFollowBloc _userFollowBloc;
   late UserActionBloc _userActionBloc;
 
-  int _currentPage = 1;
-  late bool _hasReachedMax = false;
-  List<User> _followers = [];
   @override
   void initState() {
     super.initState();
     _scrollSearchController.addListener(_onScroll);
-    _userFollowBloc = context.read<UserFollowBloc>();
     _userActionBloc = context.read<UserActionBloc>();
-    _userFollowBloc.add(UserFollowerRequested(user: widget.userID, page: _currentPage));
   }
   @override
   void dispose() {
     _scrollSearchController.dispose();
-    _followers.clear();
+    widget.usersResult.clear();
     super.dispose();
   }
 
   void _onScroll() {
-    if (!_hasReachedMax &&
+    if (!widget.userHasReachedMax &&
         _scrollSearchController.offset >=
             _scrollSearchController.position.maxScrollExtent &&
         !_scrollSearchController.position.outOfRange) {
@@ -44,14 +44,16 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
     }
   }
   void _handleLoadMore() {
-    _currentPage++;
-    _userFollowBloc.add(UserFollowerRequested(user: widget.userID, page: _currentPage));
+    widget.currentPage++;
+    _userActionBloc
+        .add(UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
   }
   Future<void> _handleRefresh() async {
-    _currentPage = 1;
-    _hasReachedMax = false;
-    _followers.clear();
-    _userFollowBloc.add(UserFollowerRequested(user: widget.userID, page: _currentPage));
+    widget.currentPage = 1;
+    widget.userHasReachedMax = false;
+    widget.usersResult.clear();
+    _userActionBloc
+        .add(UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
   }
   Future<bool> _onWillPop() async {
     if (_scrollSearchController.offset > 0) {
@@ -74,33 +76,33 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: BlocListener<UserFollowBloc, UserFollowState>(
-        bloc: _userFollowBloc,
+      child: BlocListener<UserActionBloc, UserActionState>(
+        bloc: widget.userActionBloc,
         listener: (context, state) {
-          if (state is UserFollowerFollowingSuccess) {
+          if (state is UserSearchActionResult) {
             setState(() {
-              _followers = List.from(_followers)..addAll(state.users);
-              _hasReachedMax = state.hasReachedMax;
+              widget.usersResult = List.from(widget.usersResult)..addAll(state.users);
+              widget.userHasReachedMax = state.usersHasReachedMax;
             });
           }
         },
-        child: BlocBuilder<UserFollowBloc, UserFollowState>(
-          bloc: _userFollowBloc,
+        child: BlocBuilder<UserActionBloc, UserActionState>(
+          bloc: widget.userActionBloc,
           builder: (context, state) {
-            if (state is UserFollowLoadInProgress && _followers.isEmpty) {
+            if (state is UserFollowLoadInProgress && widget.usersResult.isEmpty) {
               return const Center(child: CircularProgressIndicator());
-            } else if (_followers.isNotEmpty) {
+            } else if (widget.usersResult.isNotEmpty) {
               return RefreshIndicator(
                 onRefresh: _handleRefresh,
                 child: ListView.builder(
                   controller: _scrollSearchController,
-                  itemCount: _hasReachedMax ? _followers.length : _followers.length + 1,
+                  itemCount: widget.userHasReachedMax ? widget.usersResult.length : widget.usersResult.length + 1,
                   itemBuilder: (context, index) {
-                    if (index >= _followers.length) {
+                    if (index >= widget.usersResult.length) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (index >= 0 && index < _followers.length) {
-                      final follower = _followers[index];
+                    if (index >= 0 && index < widget.usersResult.length) {
+                      final follower = widget.usersResult[index];
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
@@ -118,7 +120,7 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
                   },
                 ),
               );
-        } else if (state is UserFollowLoadFailure) {
+        } else if (state is UserActionFailure) {
           return Center(child: Text(state.error));
         } else {
           return const Center(child: Text('No followers found.'));

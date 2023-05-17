@@ -111,7 +111,11 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                         }
                         final notification = _notification[index];
                         return Card(
-
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? (notification.read
+                              ? AppTheme.lightForegroundColor: AppTheme.lightForegroundColor.withOpacity(0.3))
+                              : (notification.read
+                              ? AppTheme.darkForegroundColor:AppTheme.darkForegroundColor.withOpacity(0.3)),
                         child: AnimatedOpacity(
                         opacity: 1.0,
                         duration: const Duration(milliseconds: 300),
@@ -131,7 +135,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                           subtitle: Text(DateFormat('yyyy-MM-dd | HH:mm:ss').format(notification.createdAt)),
                           trailing: notification.read
                               ? null
-                              : const Icon(Icons.fiber_new, color: Colors.white),
+                              :  Icon(Icons.fiber_new,color:Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.darkForegroundColor: AppTheme.primaryColor),
                           onTap: () {
                             BlocProvider.of<TalbnaNotificationBloc>(context)
                                 .add(

@@ -27,7 +27,6 @@ class AuthenticationRepository {
           headers: headers,
           body: json.encode(data),
         );
- print(response.body);
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           return responseData;

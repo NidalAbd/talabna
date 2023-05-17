@@ -232,7 +232,6 @@ title: const Text('عرض التفاصيل'),
                               Text(
                                 widget.servicePost.description!,
                                 textAlign: TextAlign.justify,
-                                maxLines: 6,
                                 textDirection: TextDirection.rtl,
                                 style: const TextStyle(fontSize: 16),
                               ),

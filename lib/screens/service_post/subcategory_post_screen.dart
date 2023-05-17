@@ -136,11 +136,9 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                       UserMakeFollowSubcategories(
                           subCategoryId: widget.subcategoryId));
                 },
-                child: Text(isFollowing ? 'Unfollow' : 'Follow'),
-              );
+                child: Text(isFollowing ? 'unfollow' :'follow' , style: const TextStyle(fontSize: 16 ,color: Colors.white),) );
             },
           )
-
         ],
       ),
       body: WillPopScope(

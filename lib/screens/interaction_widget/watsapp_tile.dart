@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsAppWidget extends StatelessWidget {
@@ -25,6 +26,9 @@ class WhatsAppWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightForegroundColor
+          : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: Image.asset('assets/WhatsApp_logo.png', width: 24, height: 24),
         title: const Text('الواتساب'),

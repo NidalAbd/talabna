@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
@@ -57,10 +58,12 @@ class _UserCardState extends State<UserCard> {
       avatarUrl = widget.follower.photos![0].src;
     }
     return Card(
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightForegroundColor
+          : AppTheme.darkForegroundColor,
       child: ListTile(
         title: Text(widget.follower.userName!),
-        subtitle: Text(city ?? 'no city',
-            style: const TextStyle(color: Colors.white)),
+        subtitle: Text(city ?? widget.follower.city!,),
         leading: UserAvatar(
           imageUrl:
           '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}',
@@ -78,7 +81,7 @@ class _UserCardState extends State<UserCard> {
             onPressed: () {
               widget.userActionBloc.add(ToggleUserMakeFollowEvent(user: widget.follower.id));
             },
-            child: isFollower? const Text('unfollow') : const Text('follow'));
+            child:   Text(isFollower? 'unfollow' :'follow' , style: const TextStyle(fontSize: 16),) );
       },
       )
       ),

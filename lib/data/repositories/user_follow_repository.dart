@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -171,4 +172,42 @@ class UserFollowRepository {
       throw Exception('Server connection error - Posts');
     }
   }
+
+  Future<Map<String, dynamic>> searchUserOrPost({required String searchAction,int page = 1,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final Map<String, dynamic> requestBody = {
+      'search': searchAction,
+    };
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/search?page=$page'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestBody),
+    );
+    if (response.statusCode == 200) {
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final List<User> userResult = (data["users"]["data"] as List)
+          .map((e) => User.fromJson(e))
+          .toList();
+      final List postsResult = (data["posts"]["data"] as List)
+          .map((e) => ServicePost.fromJson(e))
+          .toList();
+      return {'users': userResult, 'posts': postsResult};
+    } else if (response.statusCode == 404) {
+      throw Exception('هذا الملف الشخصي غير موجود');
+    } else {
+      throw Exception('فشل في تحميل نتائج البحث');
+    }
+  }
+
 }

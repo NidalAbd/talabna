@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
@@ -124,13 +123,14 @@ class _ServicePostCardState extends State<ServicePostCard> {
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: Row(
                     children: [
-                      UserAvatar(
-                          imageUrl:
-                              '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                      UserAvatar
+                        (
+                          imageUrl:'${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
                           radius: 16,
                           fromUser: widget.userProfileId,
                           toUser: widget.servicePost.userId!,
-                          canViewProfile: widget.canViewProfile),
+                          canViewProfile: widget.canViewProfile
+                         ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -233,7 +233,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           child: Text(
                             widget.servicePost.description!,
                             textAlign: TextAlign.justify,
-                            maxLines: 6,
+                            maxLines: 4,
                             textDirection: TextDirection.rtl,
                             style: const TextStyle(fontSize: 14),
                           ),

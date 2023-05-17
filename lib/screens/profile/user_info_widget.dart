@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_event.dart';
-import 'package:talbna/blocs/other_users/user_profile_state.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/interaction_widget/email_tile.dart';
 import 'package:talbna/screens/interaction_widget/phone_tile.dart';
@@ -31,6 +28,9 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             PhoneWidget(phone: widget.user.phones),
             WhatsAppWidget(whatsAppNumber: widget.user.watsNumber, username: widget.user.userName!,),
             Card(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
               child: ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: const Text('الجنس'),
@@ -38,6 +38,9 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               ),
             ),
             Card(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
               child: ListTile(
                 leading: const Icon(Icons.location_city),
                 title: const Text('المدينة'),
@@ -45,6 +48,9 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               ),
             ),
             Card(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
               child: ListTile(
                 leading: const Icon(Icons.cake),
                 title: const Text('تاريخ الميلاد'),
@@ -52,6 +58,9 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               ),
             ),
             Card(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
               child: ListTile(
                 leading: const Icon(Icons.check_circle_outline),
                 title: const Text('الحالة'),

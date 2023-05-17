@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 
 abstract class UserActionState extends Equatable {
@@ -56,3 +57,21 @@ class UserActionFailure extends UserActionState {
   @override
   List<Object> get props => [error];
 }
+
+class UserSearchActionResult extends UserActionState {
+  final List<User> users;
+  final List<ServicePost> servicePosts;
+  final bool usersHasReachedMax;
+  final bool servicePostsHasReachedMax;
+
+  const UserSearchActionResult(  {
+    required this.users,
+    required this.servicePosts,
+    this.usersHasReachedMax = false,
+    this.servicePostsHasReachedMax= false,
+  });
+
+  @override
+  List<Object> get props => [users, servicePosts, usersHasReachedMax, servicePostsHasReachedMax];
+}
+class UserFollowerFollowingHasMaxReached extends UserActionState {}

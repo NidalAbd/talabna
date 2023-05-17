@@ -67,6 +67,7 @@ dependencies:
   google_fonts: ^4.0.3
   flutter_vector_icons: ^2.0.0
   share_plus: ^4.5.3
+  intl_phone_field: ^3.1.0
 
 
 

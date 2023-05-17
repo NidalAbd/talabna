@@ -154,7 +154,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
               controller: _tabController,
               children: [
                 Center(
-                  child: OtherUserPostScreen(userID: user.id),
+                  child: OtherUserPostScreen(userID: widget.toUser),
                 ),
                 Center(
                   child: UserFollowerScreen(

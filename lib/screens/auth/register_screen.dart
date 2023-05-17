@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
@@ -40,7 +41,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
   }
-
+  Future<void> clearSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
   @override
   void dispose() {
     _animationController.dispose(); // Add this line to dispose of the Ticker
@@ -187,6 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                               child: ElevatedButton(
                                 onPressed:() {
                                   if (_formKey.currentState!.validate()) {
+                                    clearSharedPreferences();
                                     context.read<AuthenticationBloc>().add(Register(
                                       name: _nameController.text,
                                       email: _emailController.text,

@@ -13,6 +13,7 @@ import 'package:talbna/utils/constants.dart';
 class SubcategoryGridView extends StatefulWidget {
   final int categoryId;
   final int userId;
+
   final ServicePostBloc servicePostBloc;
   final UserProfileBloc userProfileBloc;
 
@@ -30,6 +31,8 @@ class SubcategoryGridView extends StatefulWidget {
 
 class _SubcategoryGridViewState extends State<SubcategoryGridView> {
   late SubcategoryBloc _subcategoryBloc;
+   int user = 251155151;
+
   @override
   void initState() {
     super.initState();
@@ -50,34 +53,39 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is SubcategoryLoaded) {
           if (state.subcategories.isEmpty) {
-            return Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 80),
-                  child: IconButton(
-                    onPressed: () {},
-                    icon:  Icon(
-                      Icons.sentiment_very_dissatisfied,
-                      size: 100.0,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightDisabledColor
-                          : AppTheme.darkDisabledColor,
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 80),
+                    child: IconButton(
+                      onPressed: () {},
+                      icon:  Icon(
+                        Icons.sentiment_very_dissatisfied,
+                        size: 150.0,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightDisabledColor
+                            : AppTheme.darkDisabledColor,
+                      ),
+                      tooltip: 'Change to list view',
                     ),
-                    tooltip: 'Change to list view',
-                  ),
-                ));
+                  )),
+            );
           } else {
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 4 / 2,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 4 / 2,
+
+                ),
+                itemCount: state.subcategories.length,
+                itemBuilder: (context, index) {
+                  final subcategory = state.subcategories[index];
+                  return _buildSubcategoryCard(subcategory);
+                },
               ),
-              itemCount: state.subcategories.length,
-              itemBuilder: (context, index) {
-                final subcategory = state.subcategories[index];
-                return _buildSubcategoryCard(subcategory);
-              },
             );
           }
         } else if (state is SubcategoryError) {
@@ -88,7 +96,23 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
       },
     );
   }
-
+  String formatNumber(int number) {
+    if (number >= 1000000000) {
+      final double formattedNumber = number / 1000000;
+      const String suffix = 'B';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else if (number >= 1000000) {
+      final double formattedNumber = number / 1000000;
+      const String suffix = 'M';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else if (number >= 1000) {
+      final double formattedNumber = number / 1000;
+      const String suffix = 'K';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else {
+      return number.toString();
+    }
+  }
   Widget _buildSubcategoryCard(SubCategoryMenu subcategory) {
     return GestureDetector(
       onTap: () {
@@ -103,64 +127,64 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
                   )),
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
-          width: 200, // Set the desired width for the card
-          height: MediaQuery.of(context).size.width /
-              6, // Set the desired height for the card
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.bottomCenter,
-            children: [
-              Card(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.lightForegroundColor
-                    : AppTheme.darkForegroundColor,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 100, // Set a fixed height for the container
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          subcategory.name,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow
-                              .ellipsis, // Truncate text with ellipsis
-                          maxLines: 1, // Limit the text to 1 line
-                        ),
+      child: SizedBox(
+        width: 200, // Set the desired width for the card
+        height: MediaQuery.of(context).size.width /
+            6, // Set the desired height for the card
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.bottomCenter,
+          children: [
+            Card(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
+              child: SizedBox(
+                width: double.infinity,
+                height: 200, // Set a fixed height for the container
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 15, 15, 0),
+                      child: Text(
+                        subcategory.name,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow
+                            .ellipsis, // Truncate text with ellipsis
+                        maxLines: 1, // Limit the text to 1 line
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0, bottom: 8.0,top: 10),
                         child:
-                            Text('${subcategory.servicePostsCount} services'),
+                            Text('العدد الكلي : ${formatNumber(subcategory.servicePostsCount)}  '),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Positioned(
-                top: 5,
-                right: 5,
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: CircleAvatar(
+                backgroundColor: const Color(0xFFEEF9E6),
+                radius: 30,
                 child: CircleAvatar(
-                  backgroundColor: const Color(0xFFEEF9E6),
-                  radius: 30,
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundImage: subcategory.photos.isNotEmpty
-                        ? NetworkImage(
-                            '${Constants.apiBaseUrl}/${subcategory.photos[0].src}')
-                        : const AssetImage('assets/loading.gif')
-                            as ImageProvider<Object>?,
-                  ),
+                  radius: 28,
+                  backgroundImage: subcategory.photos.isNotEmpty
+                      ? NetworkImage(
+                          '${Constants.apiBaseUrl}/${subcategory.photos[0].src}')
+                      : const AssetImage('assets/loading.gif')
+                          as ImageProvider<Object>?,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

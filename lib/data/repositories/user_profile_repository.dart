@@ -105,6 +105,7 @@ class UserProfileRepository {
         },
         body: jsonEncode(user.toJson()),
       );
+      print(response.statusCode);
       if (response.statusCode == 200 || response.statusCode == 201) {
         return User.fromJson(jsonDecode(response.body));
       } else if (response.statusCode == 404) {

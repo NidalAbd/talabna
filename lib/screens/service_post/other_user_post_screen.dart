@@ -31,7 +31,7 @@ class OtherUserPostScreenState extends State<OtherUserPostScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _handleRefresh(); // Reset the state when the widget is created
+    _servicePostBloc.add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
   }
 
   void _onScroll() {

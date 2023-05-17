@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneWidget extends StatelessWidget {
@@ -8,6 +9,9 @@ class PhoneWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightForegroundColor
+          : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: const Icon(Icons.phone),
         title: const Text('الجوال'),

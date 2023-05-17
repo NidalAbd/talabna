@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -8,6 +7,8 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
+
+import 'news_form_widget.dart';
 
 class ServicePostScreen extends StatefulWidget {
   final int category;
@@ -137,29 +138,39 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                         } else if (_servicePostsCategory.isNotEmpty) {
                           return RefreshIndicator(
                             onRefresh: _handleRefresh,
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _hasReachedMax
-                                  ? _servicePostsCategory.length
-                                  : _servicePostsCategory.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index >= _servicePostsCategory.length) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-                                final servicePost = _servicePostsCategory[index];
-                                return AnimatedOpacity(
-                                  opacity: 1.0,
-                                  duration: const Duration(milliseconds: 2000),
-                                  curve: Curves.easeIn,
-                                  child: ServicePostCard(
-                                    key: Key('servicePostCategory_${servicePost.id}'),
-                                    onPostDeleted: onPostDeleted,
-                                    servicePost: servicePost, canViewProfile: true,
-                                    userProfileId: widget.userID,
+                            child: Column(
+                              children: [
+                               if(widget.category == 7) NewsPostForm(
+                                  onPostSubmitted: (String text, String? mediaType) {
+                                  },
+                                ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    controller: _scrollController,
+                                    itemCount: _hasReachedMax
+                                        ? _servicePostsCategory.length
+                                        : _servicePostsCategory.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index >= _servicePostsCategory.length) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                      final servicePost = _servicePostsCategory[index];
+                                      return AnimatedOpacity(
+                                        opacity: 1.0,
+                                        duration: const Duration(milliseconds: 2000),
+                                        curve: Curves.easeIn,
+                                        child: ServicePostCard(
+                                          key: Key('servicePostCategory_${servicePost.id}'),
+                                          onPostDeleted: onPostDeleted,
+                                          servicePost: servicePost, canViewProfile: true,
+                                          userProfileId: widget.userID,
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
+                                ),
+                              ],
                             ),
                           );
                         }  else if (state is ServicePostLoadFailure) {

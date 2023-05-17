@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -43,6 +44,9 @@ class UserContact extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightForegroundColor
+          : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.person)),
         title: const Text('المستخدم'),

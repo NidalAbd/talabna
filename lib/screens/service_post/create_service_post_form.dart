@@ -184,6 +184,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                   ),
                   TextFormField(
                     textDirection: TextDirection.rtl,
+                    maxLength: 5000,
                     decoration: const InputDecoration(
                       labelText: 'الوصف',
                     ),
@@ -208,7 +209,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     onSubCategorySelected: _onSubCategorySelected,
                   ),
 
-                  TextFormField(
+                  if(_selectedCategory?.id != 7)TextFormField(
                     textDirection: TextDirection.rtl,
                     decoration: const InputDecoration(
                       labelText: 'السعر',
@@ -229,7 +230,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                       });
                     },
                   ),
-                  DropdownButtonFormField<String>(
+                  if(_selectedCategory?.id != 7) DropdownButtonFormField<String>(
 
                     decoration: const InputDecoration(
                       labelText: 'العملة',
@@ -248,7 +249,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                       );
                     }).toList(),
                   ),
-                  DropdownButtonFormField<String>(
+                  if(_selectedCategory?.id != 7)DropdownButtonFormField<String>(
                     decoration:  const InputDecoration(
                       labelText: 'النوع',
                     ),
@@ -265,7 +266,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                       );
                     }).toList(),
                   ),
-                  DropdownButtonFormField<String>(
+                  if(_selectedCategory?.id != 7)DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'تمييز النشر',
                     ),

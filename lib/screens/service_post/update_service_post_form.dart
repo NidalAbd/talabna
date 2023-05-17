@@ -177,6 +177,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                       children: [
                         TextFormField(
                           controller: _oldDescriptionController,
+                          maxLength: 5000,
                           textDirection: TextDirection.rtl,
                           maxLines: 8, // set maxLines to 10 to allow up to 500 characters
                           decoration: const InputDecoration(
