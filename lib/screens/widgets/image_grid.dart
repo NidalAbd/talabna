@@ -1,14 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:better_player/better_player.dart';
+import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/screens/reel/reels_screen.dart';
+import 'package:video_player/video_player.dart';
 import 'full_screen_image.dart';
 
 class ImageGrid extends StatefulWidget {
   final List<String> imageUrls;
   final bool canClick;
   final Function(String)? onImageTap;
+  final int userId;
+  final ServicePost servicePost;
 
-  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap, required this.canClick})
+  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap, required this.canClick, required this.userId,required this.servicePost})
       : super(key: key);
 
   @override
@@ -26,42 +30,6 @@ class _ImageGridState extends State<ImageGrid> {
         ),
       ),
     );
-  }
-
-  Widget _buildMediaWidget(String url) {
-    if (url.endsWith('.mp4')) {
-      final betterPlayerDataSource = BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        url,
-      );
-      final betterPlayerController = BetterPlayerController(
-        const BetterPlayerConfiguration(
-          autoPlay: true,
-          looping: true,
-          aspectRatio: 9 / 16,
-        ),
-        betterPlayerDataSource: betterPlayerDataSource,
-      );
-      return AspectRatio(
-        aspectRatio: 9 / 16,
-        child: BetterPlayer(
-          controller: betterPlayerController,
-        ),
-      );
-    }else if (url.endsWith('.mp3')) {
-      return GestureDetector(
-        onTap: () {
-          // Handle audio file tap here if needed
-        },
-        child: const Icon(Icons.audiotrack),
-      );
-    } else {
-      return FadeInImage(
-        placeholder: const AssetImage('assets/loading.gif'),
-        image: CachedNetworkImageProvider(url),
-        fit: BoxFit.cover,
-      );
-    }
   }
 
   @override
@@ -100,9 +68,105 @@ class _ImageGridState extends State<ImageGrid> {
           },
           child: AspectRatio(
             aspectRatio: 1 / 1,
-            child: _buildMediaWidget(url),
+            child: url.endsWith('.mp4') ? VideoItem(url: url, userId: widget.userId, servicePost: widget.servicePost,) : _buildImageWidget(url),
           ),
         );
+      },
+    );
+  }
+
+  Widget _buildImageWidget(String url) {
+    return FadeInImage(
+      placeholder: const AssetImage('assets/loading.gif'),
+      image: CachedNetworkImageProvider(url),
+      fit: BoxFit.cover,
+    );
+  }
+}
+
+class VideoItem extends StatefulWidget {
+  final String url;
+  final int userId;
+  final ServicePost servicePost;
+
+  const VideoItem({super.key, required this.url, required this.userId, required this.servicePost});
+
+  @override
+  _VideoItemState createState() => _VideoItemState();
+}
+
+class _VideoItemState extends State<VideoItem> {
+  late VideoPlayerController _controller;
+  Future<void>? _initializeVideoPlayerFuture;
+  bool isPlaying = false;
+
+  @override
+  void initState() {
+    _controller = VideoPlayerController.network(widget.url);
+    _initializeVideoPlayerFuture = _controller.initialize();
+    _controller.setLooping(true);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  void _toggleVideoPlayback() {
+    setState(() {
+      if (isPlaying) {
+        _controller.pause();
+      } else {
+        _controller.play();
+      }
+      isPlaying = !isPlaying;
+    });
+  }
+  @override
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _initializeVideoPlayerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReelsHomeScreen(
+                    userId: widget.userId,  // Replace with your user id
+                    servicePost: widget.servicePost,
+                  ),
+                ),
+              );
+            },
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: VideoProgressIndicator(
+                    _controller,
+                    allowScrubbing: true,
+                    colors: const VideoProgressColors(
+                      playedColor: Colors.white,
+                      bufferedColor: Colors.white54,
+                      backgroundColor: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
       },
     );
   }

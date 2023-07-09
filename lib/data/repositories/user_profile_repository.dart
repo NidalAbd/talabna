@@ -89,6 +89,8 @@ class UserProfileRepository {
 
 
   Future<User> updateUserProfile(User user) async {
+    print('object');
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -105,14 +107,21 @@ class UserProfileRepository {
         },
         body: jsonEncode(user.toJson()),
       );
-      print(response.statusCode);
+    try{
       if (response.statusCode == 200 || response.statusCode == 201) {
         return User.fromJson(jsonDecode(response.body));
       } else if (response.statusCode == 404) {
         throw Exception('هذا الملف الشخصي غير موجود');
       } else {
+        print(response.statusCode);
+        print(response.request);
+
         throw Exception('خطا في تحديث الملف الشخصي');
       }
+    }catch (e) {
+      print('Failed to update user profile: $e');
+      throw Exception('خطا الاتصال');
+    }
     } catch (e) {
       print('Failed to update user profile: $e');
       throw Exception('خطا الاتصال في الخادم - الملف الشخصي');

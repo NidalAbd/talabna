@@ -20,7 +20,7 @@ class _SplashState extends State<Splash> {
         return;
       }
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
-        return  const CheckAuthScreen();
+        return const CheckAuthScreen();
       }));
     });
   }
@@ -37,7 +37,7 @@ class _SplashState extends State<Splash> {
         resizeToAvoidBottomInset: true,
         body: Center(
           child: CircleAvatar(
-            radius: 40,
+            radius: 50,
             backgroundColor: AppTheme.primaryColor,
             backgroundImage: AssetImage("assets/talabnaLogo.png"),
           ),

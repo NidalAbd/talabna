@@ -16,4 +16,9 @@ class FetchSubcategories extends SubcategoryEvent {
   List<Object> get props => [categoryId];
 }
 
+class FetchCategories extends SubcategoryEvent {
+  const FetchCategories();
 
+  @override
+  List<Object> get props => [];
+}

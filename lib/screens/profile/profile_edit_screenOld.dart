@@ -53,7 +53,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   late bool isLocationChanged = false;
 
   Future<void> _updateUserProfile(BuildContext context, User user) async {
-    print('user Data ${user.toJson()}');
     context.read<UserProfileBloc>().add(UserProfileUpdated(user: user));
   }
 
@@ -232,8 +231,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                             fromUser: user.id,
                           ),
                           Positioned(
-                            bottom: 10,
-                            right: 15,
+                            bottom: 0,
+                            right: 0,
                             child: Container(
                               height: 40,
                               width: 40,
@@ -255,7 +254,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               child: IconButton(
                                 icon: const Icon(
                                   Icons.camera_alt,
-                                  size: 25,
+                                  size: 20,
                                   color: Colors.black,
                                 ),
                                 onPressed: () async {

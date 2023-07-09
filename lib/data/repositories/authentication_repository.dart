@@ -17,25 +17,25 @@ class AuthenticationRepository {
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
       }
+
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
         throw Exception('لا يوجد اتصال بالإنترنت');
       }
-      try {
-        final response = await http.post(
+
+      final response = await http.post(
           Uri.parse('$API_BASE_URL/$url'),
           headers: headers,
           body: json.encode(data),
         );
-        if (response.statusCode == 200) {
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           return responseData;
         } else {
           throw Exception('Status code error: ${response.statusCode}');
         }
-      } catch (e) {
-        throw Exception('Server error: $e');
-      }
     } catch (e) {
       throw Exception('Server error: $e');
     }
@@ -160,8 +160,7 @@ class AuthenticationRepository {
 
   Future<void> removeAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-    await prefs.remove('userId');
+    await prefs.clear();
   }
 
   Future<void> resetPassword({required String email}) async {

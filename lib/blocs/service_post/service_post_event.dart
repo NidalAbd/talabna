@@ -23,7 +23,12 @@ class GetServicePostsByCategoryEvent extends ServicePostEvent {
   @override
   List<Object> get props => [category];
 }
-
+class GetServicePostsRealsEvent extends ServicePostEvent {
+  final int page;
+  const GetServicePostsRealsEvent( this.page);
+  @override
+  List<Object> get props => [page];
+}
 class GetServicePostsByCategorySubCategoryEvent extends ServicePostEvent {
   final int category;
   final int subCategory;

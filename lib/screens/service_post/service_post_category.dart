@@ -59,8 +59,8 @@ class ServicePostScreenState extends State<ServicePostScreen>
       _currentPage++;
       widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
     }
-
   }
+
   Future<void> _handleRefreshCategoryPost() async {
     _currentPage = 1;
     _hasReachedMax = false;
@@ -121,12 +121,7 @@ class ServicePostScreenState extends State<ServicePostScreen>
               child: BlocBuilder<ServicePostBloc, ServicePostState>(
                       bloc: widget.servicePostBloc,
                       builder: (context, state) {
-                        if (state is ServicePostLoading &&
-                            _servicePostsCategory.isEmpty) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (_servicePostsCategory.isNotEmpty) {
+                        if (_servicePostsCategory.isNotEmpty) {
                           return RefreshIndicator(
                             onRefresh: _handleRefreshCategoryPost,
                             child: Column(
@@ -185,7 +180,10 @@ class ServicePostScreenState extends State<ServicePostScreen>
                           );
                         } else {
                           return const Center(
-                            child: Text('No service posts found.'),
+                            child: SizedBox(
+                              width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator()),
                           );
                         }
                       },

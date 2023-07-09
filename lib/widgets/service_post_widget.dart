@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 
 class ServicePostWidget extends StatelessWidget {
   const ServicePostWidget({

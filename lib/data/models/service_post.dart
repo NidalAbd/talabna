@@ -1,3 +1,5 @@
+import 'package:talbna/utils/constants.dart';
+
 class ServicePost {
   final int? id;
   final int? userId;
@@ -12,8 +14,8 @@ class ServicePost {
   final double? locationLatitudes;
   final double? locationLongitudes;
   final double? distance;
-
   final String? type;
+  final String? country;
   final String? haveBadge;
   final int? badgeDuration;
   final int? favoritesCount;
@@ -21,7 +23,6 @@ class ServicePost {
   final int? viewCount;
   final bool? isFavorited;
   final bool? isFollowed;
-
   final String? state;
   final int? categoriesId;
   final int? subCategoriesId;
@@ -38,6 +39,7 @@ class ServicePost {
      this.description,
      this.category,
      this.subCategory,
+    this.country,
      this.price,
      this.priceCurrency,
      this.locationLatitudes,
@@ -70,6 +72,7 @@ class ServicePost {
       description: json['description'] ?? '',
       category: json['category'] ?? '',
       subCategory: json['sub_category'] ?? '',
+      country: json['country'] ?? '',
       price: (json['price'] is int ? json['price'].toDouble() : json['price']) ?? 0,
       priceCurrency: json['price_currency'] ?? '',
       locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0,
@@ -101,6 +104,8 @@ class ServicePost {
     'sub_category': subCategory,
     'categories_id': categoriesId,
     'sub_categories_id': subCategoriesId,
+    'country': country,
+
     'price': price,
     'price_currency': priceCurrency,
     'location_latitudes': locationLatitudes,
@@ -121,12 +126,13 @@ class Photo {
   bool? isVideo;
   DateTime? createdAt;
   DateTime? updatedAt;
+  Photo({this.id, this.photoableType, this.photoableId, this.src, this.type, this.isVideo, this.createdAt, this.updatedAt});
 
   Photo.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? 0;
     photoableType = json['photoable_type'] ?? '';
     photoableId = json['photoable_id'] ?? 0;
-    src = json['src'] ?? '';
+    src = '${Constants.apiBaseUrl}/storage/${json['src']}' ?? '';
     type = json['type'] ?? '';
     isVideo = json['isVideo'] == 1; // Convert integer to boolean
     createdAt = json['created_at'] != null ? DateTime.parse(json['created_at']) : null;

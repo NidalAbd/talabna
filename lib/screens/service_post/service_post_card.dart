@@ -197,16 +197,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  '${widget.servicePost.category!} ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                Text(
-                                  '${widget.servicePost.subCategory!} ',
+                                  '${widget.servicePost.title!} ',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -289,10 +280,10 @@ class _ServicePostCardState extends State<ServicePostCard> {
                         ImageGrid(
                           imageUrls: widget.servicePost.photos
                                   ?.map((photo) =>
-                                      '${Constants.apiBaseUrl}/storage/${photo.src}')
+                                      '${photo.src}')
                                   .toList() ??
                               [],
-                          canClick: false,
+                          canClick: false, userId: widget.userProfileId, servicePost: widget.servicePost,
                         ),
                       ],
                     ),

@@ -67,6 +67,9 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     return ImagePickerButton(
       key: _imagePickerButtonKey,
       onImagesPicked: (List<Photo>? pickedPhotos) {
+        print(pickedPhotos);
+        print(_initialPhotos);
+
         if (pickedPhotos != null) {
           setState(() {
             _pickedImages = pickedPhotos;
@@ -162,9 +165,9 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                     TextFormField(
                       controller: _oldTitleController,
                       textDirection: TextDirection.rtl,
-                      maxLength: 20,
+                      maxLength: 14,
                       decoration: const InputDecoration(
-                        labelText: 'العنوان',
+                        labelText: ' العنوان',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -272,9 +275,10 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                       await File(photo.src!).readAsBytes();
                                   final mimeType = lookupMimeType(photo.src!);
                                   if (mimeType == 'image/jpeg' ||
-                                      mimeType == 'image/jpg' ||
-                                      mimeType == 'image/png' ||
-                                      mimeType == 'image/gif') {
+                                      mimeType == 'image/jpg'  ||
+                                      mimeType == 'image/png'  ||
+                                      mimeType == 'image/gif'  ||
+                                      mimeType == 'video/mp4')  {
                                     final imageFile = http.MultipartFile.fromBytes(
                                       'images[]',
                                       bytes,

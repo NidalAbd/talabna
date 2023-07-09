@@ -44,7 +44,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               child: ListTile(
                 leading: const Icon(Icons.location_city),
                 title: const Text('المدينة'),
-                subtitle: Text(widget.user.city!),
+                subtitle: Text(widget.user.city!.name),
               ),
             ),
             Card(

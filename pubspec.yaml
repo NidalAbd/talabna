@@ -76,6 +76,8 @@ dependencies:
   firebase_messaging: ^14.6.1
   video_compress: ^3.1.2
   video_thumbnail: ^0.5.3
+  pull_to_refresh: ^2.0.0
+  ffmpeg_kit_flutter: ^5.1.0
 
 
 

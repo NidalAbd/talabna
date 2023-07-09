@@ -158,11 +158,7 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
                     ),
                     Directionality(
                       textDirection: TextDirection.rtl,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8.0, bottom: 8.0,top: 10),
-                        child:
-                            Text('العدد الكلي : ${formatNumber(subcategory.servicePostsCount)}  '),
-                      ),
+                      child: Text('العدد الكلي : ${formatNumber(subcategory.servicePostsCount)}  '),
                     ),
                   ],
                 ),
@@ -173,7 +169,7 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
               left: 10,
               child: Container(
                 width: 64,
-                height: 64,
+                height: 70,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
@@ -190,7 +186,7 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
                 child: ClipOval(
                   child: Container(
                     width: 60,
-                    height: 60,
+                    height: 70,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(

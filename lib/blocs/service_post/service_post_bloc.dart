@@ -11,7 +11,7 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
 
   ServicePostBloc({required this.servicePostRepository})
       : super(ServicePostInitial()) {
-    print('ServicePostBloc created: ${this.hashCode}');
+    // print('ServicePostBloc created: ${this.hashCode}');
 
     // Add a Set to store deleted post IDs
     on<GetAllServicePostsEvent>((event, emit) async {
@@ -37,6 +37,11 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
     });
     on<GetServicePostsByCategoryEvent>((event, emit) async {
       await for (var state in _mapGetServicePostsByCategoryEventToState(event.category, event.page)) {
+        emit(state);
+      }
+    });
+    on<GetServicePostsRealsEvent>((event, emit) async {
+      await for (var state in _mapGetServicePostsRealsEventToState( event.page)) {
         emit(state);
       }
     });
@@ -141,6 +146,30 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
   }
 
 
+  Stream<ServicePostState> _mapGetServicePostsRealsEventToState(
+       int page) async* {
+    yield const ServicePostLoading(event: 'GetServicePostsByCategoryEvent');
+    if (state is ServicePostLoadSuccess && (state as ServicePostLoadSuccess).hasReachedMax) {
+      return;
+    }
+    try {
+      if (state is! ServicePostLoadSuccess) {
+        final servicePosts = await servicePostRepository.getServicePostsForReals(page: page);
+        yield ServicePostLoadSuccess(servicePosts: servicePosts, hasReachedMax: servicePosts.length < 3, event: 'GetServicePostsForReals');
+        return;
+      }
+      final currentState = state as ServicePostLoadSuccess;
+      final servicePosts = await servicePostRepository.getServicePostsForReals(page:page );
+      yield servicePosts.isEmpty
+          ? currentState.copyWith(hasReachedMax: true)
+          : currentState.copyWith(
+        servicePosts: currentState.servicePosts + servicePosts,
+        hasReachedMax: false,
+      );
+    } catch (e) {
+      yield ServicePostLoadFailure(errorMessage: e.toString(), event: 'GetServicePostsForReals', );
+    }
+  }
   Stream<ServicePostState> _mapGetServicePostsByCategoryEventToState(
       int category, int page) async* {
     yield const ServicePostLoading(event: 'GetServicePostsByCategoryEvent');

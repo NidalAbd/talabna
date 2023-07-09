@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
+import 'package:talbna/data/models/category_menu.dart';
 
 abstract class SubcategoryState extends Equatable {
   const SubcategoryState();
@@ -20,7 +21,13 @@ class UserMakeFollowSubcategoriesSuccess extends SubcategoryState {
   @override
   List<Object> get props => [followSuccess];
 }
+class CategoryLoaded extends SubcategoryState {
+  final List<CategoryMenu> categories;
+  const CategoryLoaded(this.categories);
 
+  @override
+  List<Object> get props => [categories];
+}
 class SubcategoryLoaded extends SubcategoryState {
   final List<SubCategoryMenu> subcategories;
 

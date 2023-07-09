@@ -4,7 +4,7 @@ class CustomTab extends StatelessWidget {
   final String title;
   final int count;
 
-  CustomTab({Key? key, required this.title, int? count})
+  const CustomTab({Key? key, required this.title, int? count})
       : this.count = count ?? 0,
         super(key: key);
 
@@ -13,7 +13,7 @@ class CustomTab extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(title),
+        Text(title , style: const TextStyle(fontSize: 12),),
         Text(formatCount(count)),
       ],
     );

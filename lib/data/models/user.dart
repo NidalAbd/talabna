@@ -1,15 +1,17 @@
 import 'package:intl/intl.dart';
+import 'package:talbna/data/models/countries.dart';
 
 class User {
   int id;
   String? userName;
   String? name;
   String? gender;
-  String? city;
+  City? city;
+  Country? country;
   String? device_token;
   DateTime? dateOfBirth;
-   double? locationLatitudes;
-   double? locationLongitudes;
+  double? locationLatitudes;
+  double? locationLongitudes;
   String? phones;
   String? watsNumber;
   String email;
@@ -24,41 +26,36 @@ class User {
   int? pointsBalance;
   List<Photo>? photos;
 
-  // Update the required and non-required fields in the constructor
   User({
     required this.id,
-     this.isFollow,
-     this.userName,
+    this.isFollow,
+    this.userName,
     this.name,
-     this.gender,
-     this.city,
+    this.gender,
+    this.city,
+    this.country,
     this.device_token,
     this.dateOfBirth,
-     this.locationLatitudes,
-     this.locationLongitudes,
+    this.locationLatitudes,
+    this.locationLongitudes,
     this.phones,
     this.watsNumber,
     required this.email,
     this.emailVerifiedAt,
-     this.isActive,
-     this.createdAt,
-     this.updatedAt,
-     this.followingCount,
-     this.followersCount,
-     this.servicePostsCount,
-     this.pointsBalance,
-     this.photos,
+    this.isActive,
+    this.createdAt,
+    this.updatedAt,
+    this.followingCount,
+    this.followersCount,
+    this.servicePostsCount,
+    this.pointsBalance,
+    this.photos,
   });
+
   factory User.fromJson(Map<String, dynamic> json) {
     List<Photo>? photos;
     if (json['photos'] != null) {
       photos = List<Photo>.from(json['photos'].map((photo) => Photo.fromJson(photo)));
-    }
-    String? city;
-    if (json['location_latitudes'] != null && json['location_longitudes'] != null) {
-      double lat = double.tryParse(json['location_latitudes'].toString()) ?? 0.0;
-      double lng = double.tryParse(json['location_longitudes'].toString()) ?? 0.0;
-      city = _getCityName(lat, lng);
     }
 
     return User(
@@ -66,7 +63,8 @@ class User {
       userName: json['user_name'] ?? '',
       name: json['name'] ?? '',
       gender: json['gender'] ?? '',
-      city: json['city'] ?? city ?? '',
+      city: json['city'] != null ? City.fromJson(json['city']) : null,
+      country: json['country'] != null ? Country.fromJson(json['country']) : null,
       device_token: json['device_token'] ?? '',
       dateOfBirth: json['date_of_birth'] != null ? DateTime.parse(json['date_of_birth']) : null,
       locationLatitudes: double.tryParse(json['location_latitudes']?.toString() ?? '') ?? 0,
@@ -86,6 +84,7 @@ class User {
       isFollow: json['is_follow'] ?? false,
     );
   }
+
   Map<String, dynamic> toJson() {
     final DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -93,7 +92,8 @@ class User {
     data['user_name'] = userName ?? '';
     data['name'] = name ?? '';
     data['gender'] = gender ?? '';
-    data['city'] = city ?? '';
+    data['city'] = city?.toJson();
+    data['country'] = country?.toJson();
     data['device_token'] = device_token ?? '';
     if (dateOfBirth != null) {
       data['date_of_birth'] = format.format(dateOfBirth!);
@@ -115,19 +115,12 @@ class User {
     return data;
   }
 
-
-  static String? _getCityName(double lat, double lng) {
-// TODO: Implement a reverse geocoding API to get the city name based on the latitude and longitude coordinates
-    return null;
-  }
-
   static int? _parseNullableInt(dynamic value) {
     if (value == null) {
       return null;
     }
     return int.tryParse(value.toString());
   }
-
 }
 
 class Photo {
@@ -160,7 +153,6 @@ class Photo {
 
   Map<String, dynamic> toJson() {
     final DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
-
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['photoable_type'] = photoableType;

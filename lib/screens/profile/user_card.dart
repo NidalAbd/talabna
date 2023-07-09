@@ -46,55 +46,69 @@ class _UserCardState extends State<UserCard> {
           ? AppTheme.lightForegroundColor
           : AppTheme.darkForegroundColor,
       child: ListTile(
-          title: Text(widget.follower.userName!),
-          subtitle: Text(
-             widget.follower.city!,
+        leading: UserAvatar(
+          imageUrl: avatarUrl,
+          radius: 24,
+          toUser: widget.follower.id,
+          canViewProfile: true,
+          fromUser: widget.userId,
+        ),
+        title: Text(
+          widget.follower.userName!,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
-          leading: UserAvatar(
-            imageUrl: avatarUrl,
-            radius: 24,
-            toUser: widget.follower.id,
-            canViewProfile: true,
-            fromUser: widget.userId,
+        ),
+        subtitle: Text(
+          '${widget.follower.country!.name} من ${widget.follower.city!.name}',
+          style: const TextStyle(
+            fontSize: 14,
           ),
-          trailing: BlocConsumer<UserActionBloc, UserActionState>(
-            bloc: widget.userActionBloc,
-            listener: (context, state) {
-              if (state is UserFollowUnFollowFromListToggled &&
-                  state.userId == widget.follower.id) {
-                isFollowThisUser = state.isFollower; // Update the isFollowing variable
-                final message = state.isFollower
-                    ? 'You are now following ${widget.follower.userName}'
-                    : 'You have unfollowed ${widget.follower.userName}';
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(message),
-                    duration: const Duration(seconds: 1),
-                  ),
+        ),
+        trailing: BlocConsumer<UserActionBloc, UserActionState>(
+          bloc: widget.userActionBloc,
+          listener: (context, state) {
+            // Listener code...
+          },
+          builder: (context, state) {
+            if (state is UserFollowUnFollowFromListToggled &&
+                state.userId == widget.follower.id) {
+              isFollowThisUser = state.isFollower; // Update the isFollowing variable
+              final message = state.isFollower
+                  ? 'You are now following ${widget.follower.userName}'
+                  : 'You have unfollowed ${widget.follower.userName}';
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+            return TextButton(
+              onPressed: () {
+                widget.userActionBloc.add(
+                  ToggleUserMakeFollowFromListEvent(user: widget.follower.id),
                 );
-              }
-            },
-            builder: (context, state) {
-              if (state is UserFollowUnFollowFromListToggled &&
-                  state.userId == widget.follower.id) {
-                isFollowThisUser = state.isFollower;
-              }
-              return TextButton(
-                  onPressed: () {
-                    widget.userActionBloc.add(
-                        ToggleUserMakeFollowFromListEvent(user: widget.follower.id));
-                  },
-                  child: Text(
-                    isFollowThisUser! ? 'unfollow' : 'follow',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.darkForegroundColor
-                          : AppTheme.lightForegroundColor,
-                    ),
-                  ));
-            },
-          )),
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                  isFollowThisUser!
+                      ? Colors.red // Change to the desired color for unfollow button
+                      : Colors.blue, // Change to the desired color for follow button
+                ),
+              ),
+              child: Text(
+                isFollowThisUser! ? 'Unfollow' : 'Follow',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

@@ -9,7 +9,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       : _repository = repository,
         super(UserProfileInitial()) {
     print('UserProfileBloc created: ${this.hashCode}');
-
     on<UserProfileRequested>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
@@ -19,6 +18,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         emit(UserProfileLoadFailure(error: e.toString()));
       }
     });
+
     on<UserProfileContactRequested>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
@@ -28,7 +28,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         emit(UserProfileLoadFailure(error: e.toString()));
       }
     });
-
 
     on<UserProfileUpdated>((event, emit) async {
       emit(const UserProfileUpdateInProgress());
@@ -67,6 +66,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
       }
     });
+
     on<UpdateUserEmail>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {

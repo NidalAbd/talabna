@@ -56,7 +56,35 @@ class ServicePostRepository {
       throw Exception('$eخطا الاتصال في الخادم - المنشورات ');
     }
   }
-
+  Future<List<ServicePost>> getServicePostsForReals(
+      { required int page}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '$_baseUrl/api/service_posts/reels?page=$page'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      print(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final List<dynamic> data = responseBody['servicePosts']['data'];
+        final List<ServicePost> servicePosts =
+        data.map((e) => ServicePost.fromJson(e)).toList();
+        return servicePosts;
+      } else {
+        throw Exception('Failed to load service posts for this category');
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('Failed to connect to server ');
+    }
+  }
   Future<List<ServicePost>> getServicePostsByCategory(
       {required int categories, required int page}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -284,14 +312,19 @@ class ServicePostRepository {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ServicePost.fromJson(jsonDecode(responseBody));
       }else if (response.statusCode == 400 ) {
+        print(  'error : $responseBody',);
         throw Exception(
           'error : $responseBody',
+
         );
       }  else {
+        print( 'Error creating service post: ${response.reasonPhrase}. Response body: $responseBody');
         throw Exception(
             'Error creating service post: ${response.reasonPhrase}. Response body: $responseBody');
       }
     } catch (e) {
+      print('Error occurred: $e');
+
       throw Exception('Error occurred: $e');
     }
   }

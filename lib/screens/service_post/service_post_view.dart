@@ -191,7 +191,7 @@ title: const Text('عرض التفاصيل'),
 
                                       ),
                                       Text(
-                                        '${widget.servicePost.category!} ',
+                                        '${widget.servicePost.title!} ',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -199,15 +199,7 @@ title: const Text('عرض التفاصيل'),
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                       ),
-                                      Text(
-                                        '${widget.servicePost.subCategory!} ',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
+
                                     ],
                                   ),
                                 ),
@@ -237,9 +229,9 @@ title: const Text('عرض التفاصيل'),
                               ImageGrid(
                                   imageUrls: widget.servicePost.photos
                                           ?.map((photo) =>
-                                              '${Constants.apiBaseUrl}/storage/${photo.src}')
+                                              '${photo.src}')
                                           .toList() ??
-                                      [], canClick: true,),
+                                      [], canClick: true, userId: widget.userProfileId,servicePost: widget.servicePost,),
                             ],
                           ),
                         ),

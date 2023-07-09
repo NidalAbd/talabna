@@ -40,6 +40,7 @@ void main() async {
   await requestPermissions();
   final authenticationRepository = AuthenticationRepository();
   final servicePostRepository  = ServicePostRepository();
+
   final userProfileRepository = UserProfileRepository();
   final subcategoryRepository  = CategoriesRepository();
   AppTheme.setSystemBarColors(Brightness.light, AppTheme.primaryColor,AppTheme.primaryColor);
@@ -83,6 +84,7 @@ void main() async {
         BlocProvider<ServicePostBloc>(
           create: (context) => ServicePostBloc(servicePostRepository: servicePostRepository),
         ),
+
         BlocProvider<UserContactBloc>(
           create: (context) => UserContactBloc(repository: UserContactRepository()),
         ),

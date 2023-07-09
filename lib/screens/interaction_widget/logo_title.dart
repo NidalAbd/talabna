@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:talbna/app_theme.dart';
 
 class LogoTitle extends StatefulWidget {
-  const LogoTitle(
-      {Key? key,
-      required this.fontSize,
-      required this.playAnimation,
-      required this.logoSize})
-      : super(key: key);
+  const LogoTitle({
+    Key? key,
+    required this.fontSize,
+    required this.playAnimation,
+    required this.logoSize,
+  }) : super(key: key);
+
   final double fontSize;
   final bool playAnimation;
   final double logoSize;
+
   @override
   State<LogoTitle> createState() => _LogoTitleState();
 }
@@ -20,84 +21,86 @@ class _LogoTitleState extends State<LogoTitle>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  double logoTopMargin = 100.0; // Default value
 
   @override
   void initState() {
     super.initState();
     _animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
-    _animation = Tween<double>(begin: 0, end: 1).animate(_animationController);
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController
-        .dispose(); // Add this line to dispose of the Ticker object
-    super.dispose();
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _animation = Tween<double>(begin: 100, end: 20).animate(_animationController)
+      ..addListener(() {
+        setState(() {
+          logoTopMargin = _animation.value;
+        });
+      });
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.playAnimation
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: widget.logoSize,
-                backgroundImage: const AssetImage('assets/talabnaLogo.png'),
-              ),
-              FadeTransition(
-                opacity: _animation,
-                child: Text(
-                  'TALB',
-                  style: TextStyle(
-                      fontSize: widget.fontSize,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(2.0, 2.0),
-                          blurRadius: 3.0,
-                          color: Colors.grey.withOpacity(0.9),
-                        ),
-                      ],
-                      decoration: TextDecoration.none,
-                      fontFamily: GoogleFonts.acme().fontFamily,
-                      color: AppTheme.primaryColor),
-                ),
-              ),
-              FadeTransition(
-                opacity: _animation,
-                child: Text(
-                  'NA',
-                  style: TextStyle(
-                      fontSize: widget.fontSize,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(2.0, 2.0),
-                          blurRadius: 3.0,
-                          color: Colors.grey.withOpacity(0.9),
-                        ),
-                      ],
-                      decoration: TextDecoration.none,
-                      fontFamily: GoogleFonts.acme().fontFamily,
-                      color: Colors.white),
-                ),
-              ),
-            ],
-          )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(width: 10,),
-              CircleAvatar(
-                radius: widget.logoSize,
-                backgroundColor: AppTheme.primaryColor,
-                backgroundImage: const AssetImage('assets/talabnaLogo.png'),
-              ),
-            ],
-          );
+    if (MediaQuery.of(context).viewInsets.bottom != 0 && !_animationController.isAnimating) {
+      // If keyboard is open and animation is not playing, animate the logo position
+      _animationController.forward();
+    } else if (MediaQuery.of(context).viewInsets.bottom == 0 && !_animationController.isAnimating) {
+      // If keyboard is closed and animation is not playing, animate the logo position back to initial
+      _animationController.reverse();
+    }
+
+    return Stack(
+      children: [
+        ClipPath(
+          clipper: CustomShapeClipper(),
+          child: Container(
+            color: AppTheme.primaryColor,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+          ),
+        ),
+        Positioned(
+          left: MediaQuery.of(context).size.width / 2 - widget.logoSize, // To center the logo horizontally
+          top: logoTopMargin, // Adjusted when keyboard is opened/closed
+          child: CircleAvatar(
+            radius: widget.logoSize,
+            backgroundColor: AppTheme.primaryColor,
+            backgroundImage: const AssetImage('assets/talabnaLogo.png'),
+          ),
+        ),
+      ],
+    );
   }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+}
+
+
+class CustomShapeClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height / 4.2);
+
+    var firstControlPoint = Offset(size.width / 4, size.height / 5);
+    var firstEndPoint = Offset(size.width / 2, size.height / 4.2);
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
+        firstEndPoint.dx, firstEndPoint.dy);
+
+    var secondControlPoint =
+    Offset(size.width - (size.width / 4), size.height / 3.5);
+    var secondEndPoint = Offset(size.width, size.height / 4.2);
+    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
+        secondEndPoint.dx, secondEndPoint.dy);
+
+    path.lineTo(size.width, 0);
+    path.lineTo(0, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

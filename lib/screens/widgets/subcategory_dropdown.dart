@@ -7,10 +7,12 @@ class SubCategoriesDropdown extends StatefulWidget {
   final Category? selectedCategory;
   final Function(SubCategory) onSubCategorySelected;
   final SubCategory? initialSubCategory;
+
   const SubCategoriesDropdown({
     Key? key,
     required this.selectedCategory,
-    required this.onSubCategorySelected, this.initialSubCategory,
+    required this.onSubCategorySelected,
+    this.initialSubCategory,
   }) : super(key: key);
 
   @override
