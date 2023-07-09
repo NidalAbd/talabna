@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/icon_data.dart';
 
 class Notifications {
   final int id;
@@ -63,9 +62,9 @@ class Notifications {
       case 'photo':
         return Icons.photo;
       case 'pointIn':
-        return Icons.arrow_circle_up;
-      case 'pointOut':
         return Icons.arrow_circle_down;
+      case 'pointOut':
+        return Icons.arrow_circle_up;
       case 'sub_category':
         return Icons.category;
       default:

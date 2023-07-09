@@ -10,16 +10,16 @@ import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/home/notification_alert_widget.dart';
-import 'package:talbna/screens/home/search_screen.dart';
-import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
 import 'package:talbna/screens/profile/change_email_screen.dart';
 import 'package:talbna/screens/profile/change_password_screen.dart';
+import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/favorite_post_screen.dart';
 import 'package:talbna/screens/profile/profile_edit_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
+import 'package:talbna/screens/service_post/main_post_menu.dart';
 import 'package:talbna/screens/service_post/service_post_category.dart';
 import 'package:talbna/screens/service_post/create_service_post_form.dart';
 
@@ -61,7 +61,8 @@ class _HomeScreenState extends State<HomeScreen>
     Category(id: 7, name: 'اخبار'),
     Category(id: 4, name: 'سيارات'),
     Category(id: 5, name: 'خدمات'),
-    Category(id: 6, name: 'قريبا منك'),
+    Category(id: 6, name: 'بقربك'),
+
   ];
   // Define a function to get the icon for a category
   Widget _getCategoryIcon(Category category) {
@@ -86,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen>
           Icons.tv,
           color: Colors.white,
         );
+
       case 4:
         return const Icon(
           Icons.car_rental,
@@ -110,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<bool> _loadShowSubcategoryGridView() async {
+
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('showSubcategoryGridView') ?? false;
   }
@@ -142,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen>
         gender != null &&
         dobString != null;
   }
+
   Future<void> _saveDataToSharedPreferences(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('userName', user.userName!);
@@ -150,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen>
     prefs.setString('city', user.city!);
     prefs.setString('gender', user.email);
     prefs.setString('dob', user.email);
+
   }
   @override
   Widget build(BuildContext context) {
@@ -173,100 +178,104 @@ class _HomeScreenState extends State<HomeScreen>
           _saveDataToSharedPreferences(state.user);
         }
         final user = state.user;
-        return SafeArea(
-          child: Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              title: Row(
-                children: [
-                  Text(
-                    'TALB',
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: GoogleFonts.bungee().fontFamily,
-                        color: Colors.white),
-                  ),
-                  Text(
-                    'NA',
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: GoogleFonts.bungee().fontFamily,
-                        color: Colors.yellow),
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.add_circle),
-                  onPressed: () async {
-                    bool loadedUser = await _checkDataCompletion();
-                    if (loadedUser) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ServicePostFormScreen(userId: widget.userId),
-                        ),
-                      );
-                    } else {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Builder(
-                            builder: (BuildContext dialogContext) {
-                              return AlertDialog(
-                                title: const Text('Incomplete Information'),
-                                content: const Text('Please complete your information.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(dialogContext);
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => UpdateUserProfile(
-                                            userId: user.id,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text('OK'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    }
-                  },
+
+        return Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            title: Row(
+              children: [
+                Text(
+                  'TALB',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontFamily: GoogleFonts.bungee().fontFamily,
+                      color: Colors.white),
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.search_rounded,size: 30,),
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) => SearchScreen( userID: widget.userId,),
-                //       ),
-                //     );
-                //   },
-                // ),
-                NotificationsAlert(userID: widget.userId),
-                IconButton(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    size: 30,
+                Text(
+                  'NA',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontFamily: GoogleFonts.bungee().fontFamily,
+                      color: AppTheme.accentColor
                   ),
-                  onPressed: () async {
-                    bool loadedUser = await _checkDataCompletion();
-                    if (loadedUser) {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return ListView(
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.add_circle),
+                onPressed: () async {
+                  bool loadedUser = await _checkDataCompletion();
+                  if (loadedUser) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ServicePostFormScreen(userId: widget.userId),
+                      ),
+                    );
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Builder(
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Incomplete Information'),
+                              content: const Text('Please complete your information.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(dialogContext);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => UpdateUserProfile(
+                                          userId: user.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('OK',style: TextStyle(color: Colors.white),),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+              // IconButton(
+              //   icon: const Icon(Icons.search_rounded,size: 30,),
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) => SearchScreen( userID: widget.userId,),
+              //       ),
+              //     );
+              //   },
+              // ),
+              NotificationsAlert(userID: widget.userId),
+              IconButton(
+                icon: const Icon(
+                  Icons.more_vert,
+                  size: 30,
+                ),
+                onPressed: () async {
+                  bool loadedUser = await _checkDataCompletion();
+                  if (loadedUser) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          color: AppTheme.primaryColor,
+                          child: ListView(
                             children: [
                               ListTile(
-                                leading: const Icon(Icons.person),
-                                title: const Text('Profile'),
+
+                                leading: const Icon(Icons.person,color: Colors.white,),
+                                title: const Text('Profile',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -280,8 +289,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.favorite),
-                                title: const Text('Favorite'),
+                                leading: const Icon(Icons.favorite,color: Colors.white,),
+                                title: const Text('Favorite',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -293,8 +302,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.update),
-                                title: const Text('Update Info'),
+                                leading: const Icon(Icons.update,color: Colors.white,),
+                                title: const Text('Update Info',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -307,8 +316,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.attach_money),
-                                title: const Text('Add Points'),
+                                leading: const Icon(Icons.attach_money,color: Colors.white,),
+                                title: const Text('Add Points',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -322,8 +331,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.email),
-                                title: const Text('Change Email'),
+                                leading: const Icon(Icons.email,color: Colors.white,),
+                                title: const Text('Change Email',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -336,8 +345,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.lock),
-                                title: const Text('Change Password'),
+                                leading: const Icon(Icons.lock,color: Colors.white,),
+                                title: const Text('Change Password',style: TextStyle(color: Colors.white),),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.of(context).push(
@@ -350,100 +359,132 @@ class _HomeScreenState extends State<HomeScreen>
                                   );
                                 },
                               ),
+
                               ThemeToggleListTile(),
                               const LogoutListTile(),
                             ],
-                          );
-                        },
-                      );
-                    } else {
-                      // User data is not available, display a message or take appropriate action
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Incomplete Information'),
-                            content:
-                                const Text('Please complete your information.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => UpdateUserProfile(
-                                        userId: user.id,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-            body: ServicePostScreen(
-              key: ValueKey(_selectedCategory),
-              category: _selectedCategory,
-              userID: widget.userId,
-              servicePostBloc: _servicePostBloc,
-              showSubcategoryGridView: showSubcategoryGridView,
-            ),
-            bottomNavigationBar: BottomAppBar(
-              height: 70,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.primaryColor
-                  : AppTheme.primaryColor,
-              shape: const CircularNotchedRectangle(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: _categories
-                    .map(
-                      (category) => Column(
-                        children: [
-                          IconButton(
-                            icon: _getCategoryIcon(category),
-                            onPressed: () {
-                              setState(() {
-                                _selectedCategory = category.id;
-                                if (_selectedCategory == 6 ||
-                                    _selectedCategory == 0)
-                                  _toggleSubcategoryGridView(canToggle: false);
-                              });
-                            },
                           ),
-                          Text(
-                            category.name,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 12),
-                          )
-                        ],
-                      ),
-                    )
-                    .toList(),
+                        );
+                      },
+                    );
+                  } else {
+                    // User data is not available, display a message or take appropriate action
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Incomplete Information'),
+                          content:
+                              const Text('Please complete your information.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdateUserProfile(
+                                      userId: user.id,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text('OK',style: TextStyle(color: Colors.white),),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () async {
-                await _toggleSubcategoryGridView(canToggle: true);
-              },
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.primaryColor
-                  : AppTheme.primaryColor,
-              child: Icon(
-                showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
-                color: Colors.white,
-              ),
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
+            ],
           ),
+          body: MainMenuPostScreen(
+            key: ValueKey(_selectedCategory),
+            category: _selectedCategory,
+            userID: widget.userId,
+            servicePostBloc: _servicePostBloc,
+            showSubcategoryGridView: showSubcategoryGridView,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            height: 70,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.primaryColor
+                : AppTheme.primaryColor,
+            shape: const CircularNotchedRectangle(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _categories
+                  .map(
+                    (category) => Column(
+                      children: [
+                        IconButton(
+                          icon: _getCategoryIcon(category),
+                          onPressed: () {
+                            setState(() {
+                              _selectedCategory = category.id;
+                              if (_selectedCategory == 6 ||
+                                  _selectedCategory == 0) {
+                                _toggleSubcategoryGridView(canToggle: false);
+                              }
+                            });
+                          },
+                        ),
+                        Text(
+                          category.name,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 12),
+                        )
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          floatingActionButton: Stack(
+            children: [
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    await _toggleSubcategoryGridView(canToggle: true);
+                  },
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.primaryColor
+                      : AppTheme.primaryColor,
+                  child: Icon(
+                    showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 60,
+                right: 0,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ReelsHomeScreen(
+                          userId: user.id,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.primaryColor
+                      : AppTheme.primaryColor,
+                  child: const Icon(
+                    Icons.play_circle,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         );
       } else {
         return const Center(child: Text('No user home data found.'));

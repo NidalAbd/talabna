@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "808302489355",
+    "project_id": "pal-service-378303",
+    "storage_bucket": "pal-service-378303.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808302489355:android:8a9a35d5355efde5837c0e",
+        "android_client_info": {
+          "package_name": "com.example.talbna"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "808302489355-007npsgqhdq2oin03km0pnkpurpaima0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfHtr_Wt7TAo0QUBLXSfUX5zLaSlgQ6I0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "808302489355-007npsgqhdq2oin03km0pnkpurpaima0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

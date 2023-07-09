@@ -19,12 +19,15 @@ class UserPointLoadSuccess extends PurchaseRequestState {
 
   List<Object> get props => [pointBalance];
 }
-class PurchaseRequestSuccess extends PurchaseRequestState {} // Add this line
+class PurchaseRequestSuccess extends PurchaseRequestState {
+
+} // Add this line
 
 class PurchaseRequestError extends PurchaseRequestState {
   final String message;
 
   PurchaseRequestError(this.message);
+  List<Object> get props => [message];
 }
 
 class UserPointLoadFailure extends PurchaseRequestState {
@@ -32,6 +35,5 @@ class UserPointLoadFailure extends PurchaseRequestState {
 
    UserPointLoadFailure({required this.error});
 
-  @override
   List<Object> get props => [error];
 }

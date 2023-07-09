@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
 
@@ -60,9 +61,10 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
       items: _subCategories
           .map((subCategory) => DropdownMenuItem<SubCategory>(
         value: subCategory,
-        child: Text(subCategory.name),
+        child: Text(subCategory.name , style: const TextStyle(color: Colors.white),),
       ))
           .toList(),
+      dropdownColor: AppTheme.primaryColor,
       onChanged: (SubCategory? newSubCategory) {
         if (newSubCategory != null) {
           setState(() {

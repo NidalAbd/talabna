@@ -19,6 +19,8 @@ class ReportRepository {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonData = jsonDecode(response.body);
       if (jsonData.containsKey('report') && jsonData['report'] != null) {
+        print(jsonData['report']);
+
         return Reports.fromJson(jsonData['report']);
       } else {
         throw Exception('JSON response does not contain userData');

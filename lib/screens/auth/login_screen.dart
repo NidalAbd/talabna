@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-          decoration: const BoxDecoration(
+          decoration:  BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -84,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen>
                               children: [
 
                                 TextFromField(
+                                  maxLength: 150,
                                   padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                                   controller: _emailController,
                                   obscureText: false,
@@ -104,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 ),
                                 const SizedBox(height: 20),
                                 TextFromField(
+                                  maxLength: 50,
                                   padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
@@ -207,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ],
                           ),
-                          child: const CircleAvatar(
+                          child:  CircleAvatar(
                             backgroundColor: AppTheme.primaryColor,
                             radius: 40,
                             child: Icon(Icons.lock, size: 60,color: AppTheme.accentColor,),

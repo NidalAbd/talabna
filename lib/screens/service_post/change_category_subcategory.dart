@@ -61,7 +61,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.userId, showBalance: true,),
+                PointBalance(userId: widget.userId, showBalance: true, canClick: true,),
               ],
             ),
           ),
@@ -95,7 +95,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
 
                 ElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('تحويل'),
+                  child: const Text('تحويل',style: TextStyle(color: Colors.white),),
                 ),
               ],
             ),

@@ -74,10 +74,11 @@ class PurchaseRequestRepository {
         'Authorization': 'Bearer $token',
       },
     );
-print(response.request);
+print(response.statusCode);
     if (response.statusCode == 201 || response.statusCode == 200) {
       return;
-    } else {
+    }
+    else {
       throw Exception('حدث خطأ أثناء إرسال طلب الشراء');
     }
   }

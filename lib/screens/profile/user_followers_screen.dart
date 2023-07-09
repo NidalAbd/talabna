@@ -109,7 +109,6 @@ class UserFollowerScreenState extends State<UserFollowerScreen> {
                             key: UniqueKey(),
                             follower: follower,
                             userActionBloc: _userActionBloc,
-                            isFollower: follower.isFollow!,
                             userId: widget.userID,
                           ));
                     } else {

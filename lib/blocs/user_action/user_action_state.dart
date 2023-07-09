@@ -25,7 +25,15 @@ class UserFollowUnFollowToggled extends UserActionState {
   @override
   List<Object> get props => [isFollower, userId];
 }
+class UserFollowUnFollowFromListToggled extends UserActionState {
+  final bool isFollower;
+  final int userId;
 
+  const UserFollowUnFollowFromListToggled({required this.isFollower , required this.userId, });
+
+  @override
+  List<Object> get props => [isFollower, userId];
+}
 class UserPasswordUpdateSuccess extends UserActionState {}
 
 class UserMakeFollowSubcategoriesSuccess extends UserActionState {
@@ -40,6 +48,14 @@ class GetFollowSubcategoriesSuccess extends UserActionState {
   final bool followSuccess;
 
   const GetFollowSubcategoriesSuccess(this.followSuccess);
+
+  @override
+  List<Object> get props => [followSuccess];
+}
+class GetFollowUserSuccess extends UserActionState {
+  final bool followSuccess;
+
+  const GetFollowUserSuccess(this.followSuccess);
 
   @override
   List<Object> get props => [followSuccess];

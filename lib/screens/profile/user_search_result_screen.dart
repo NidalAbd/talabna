@@ -111,7 +111,6 @@ class UserSearchResultState extends State<UserSearchResult> {
                             key: UniqueKey(),
                             follower: follower,
                             userActionBloc: _userActionBloc,
-                            isFollower: follower.isFollow!,
                             userId: widget.userID,
                           ));
                     } else {

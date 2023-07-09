@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     return Scaffold(
       resizeToAvoidBottomInset: false, // Add this line
       body: Container(
-          decoration: const BoxDecoration(
+          decoration:  BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -94,6 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextFromField(
+                            maxLength: 150,
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                             controller: _emailController,
                             validator: (value) {
@@ -113,6 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                             obscureText: false,
                           ),
                           TextFromField(
+                            maxLength: 20,
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                             controller: _nameController,
                             validator: (value) {
@@ -132,6 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           ),
                           TextFromField(
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                            maxLength: 50,
                             controller: _passwordController,
                             validator: (value) {
                               if (value!.isEmpty) {
@@ -159,6 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           ),
                           TextFromField(
                             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                            maxLength: 50,
                             controller: _confirmPasswordController,
                             validator: (value) {
                               if (value!.isEmpty) {
@@ -244,7 +248,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       ),
                     ],
                   ),
-                  child: const CircleAvatar(
+                  child:  CircleAvatar(
                     backgroundColor: AppTheme.primaryColor,
                     radius: 40,
                     child: Icon(Icons.lock, size: 60, color: AppTheme.accentColor,),

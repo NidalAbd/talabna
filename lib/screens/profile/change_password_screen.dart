@@ -154,7 +154,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     height: 15,
                     child: CircularProgressIndicator(),
                   )
-                      : const Text('Update Password'),
+                      : const Text('Update Password',style: TextStyle(color: Colors.white),),
                 ),
               ],
             ),

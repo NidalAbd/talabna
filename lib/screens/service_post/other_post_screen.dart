@@ -15,53 +15,53 @@ class UserPostScreen extends StatefulWidget {
 }
 
 class UserPostScreenState extends State<UserPostScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollOtherUserController = ScrollController();
   late ServicePostBloc _servicePostBloc;
   int _currentPage = 1;
   bool _hasReachedMax = false;
-  List<ServicePost> _servicePostsUser = [];
+  List<ServicePost> _servicePostsOtherUser = [];
   late Function onPostDeleted = (int postId) {
     setState(() {
-      _servicePostsUser.removeWhere((post) => post.id == postId);
+      _servicePostsOtherUser.removeWhere((post) => post.id == postId);
     });
   };
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _scrollOtherUserController.addListener(_onScrollOtherUserPost);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _handleRefresh(); // Reset the state when the widget is created
+    _handleRefreshOtherUserPost(); // Reset the state when the widget is created
   }
 
-  void _onScroll() {
+  void _onScrollOtherUserPost() {
     if (!_hasReachedMax &&
-        _scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+        _scrollOtherUserController.offset >=
+            _scrollOtherUserController.position.maxScrollExtent &&
+        !_scrollOtherUserController.position.outOfRange) {
       _currentPage++;
       _servicePostBloc
           .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
     }
   }
 
-  Future<void> _handleRefresh() async {
+  Future<void> _handleRefreshOtherUserPost() async {
     _currentPage = 1;
     _hasReachedMax = false;
-    _servicePostsUser.clear();
+    _servicePostsOtherUser.clear();
     _servicePostBloc
         .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
   }
-  void _handleServicePostLoadSuccess(
+  void _handleOtherUserPostLoadSuccess(
       List<ServicePost> servicePosts, bool hasReachedMax) {
     setState(() {
       _hasReachedMax = hasReachedMax;
-      _servicePostsUser = [..._servicePostsUser, ...servicePosts];
+      _servicePostsOtherUser = [..._servicePostsOtherUser, ...servicePosts];
     });
   }
-  Future<bool> _onWillPop() async {
-    if (_scrollController.positions.isNotEmpty && _scrollController.offset > 0) {
-      _scrollController.animateTo(
+  Future<bool> _onWillPopOtherUserPost() async {
+    if (_scrollOtherUserController.positions.isNotEmpty && _scrollOtherUserController.offset > 0) {
+      _scrollOtherUserController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInToLinear,
@@ -69,7 +69,7 @@ class UserPostScreenState extends State<UserPostScreen> {
       // Wait for the duration of the scrolling animation before refreshing
       await Future.delayed(const Duration(milliseconds: 1000));
       // Trigger a refresh after reaching the top
-      _handleRefresh();
+      _handleRefreshOtherUserPost();
       return false;
     } else {
       return true;
@@ -79,42 +79,43 @@ class UserPostScreenState extends State<UserPostScreen> {
 
   @override
   void dispose() {
-    _servicePostsUser.clear();
+    _servicePostsOtherUser.clear();
+    _scrollOtherUserController.dispose();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
+      onWillPop: _onWillPopOtherUserPost,
       child: BlocListener<ServicePostBloc, ServicePostState>(
         bloc: _servicePostBloc,
         listener: (context, state) {
           if (state is ServicePostLoadSuccess) {
-            _handleServicePostLoadSuccess(state.servicePosts, state.hasReachedMax);
+            _handleOtherUserPostLoadSuccess(state.servicePosts, state.hasReachedMax);
           }
         },
         child: BlocBuilder<ServicePostBloc, ServicePostState>(
           bloc: _servicePostBloc,
           builder: (context, state) {
-            if (state is ServicePostLoading && _servicePostsUser.isEmpty) {
+            if (state is ServicePostLoading && _servicePostsOtherUser.isEmpty) {
               // show loading indicator
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (_servicePostsUser.isNotEmpty) {
+            } else if (_servicePostsOtherUser.isNotEmpty) {
               // show list of service posts
               return RefreshIndicator(
-                onRefresh: _handleRefresh,
+                onRefresh: _handleRefreshOtherUserPost,
                 child: ListView.builder(
-                  controller: _scrollController,
+                  controller: _scrollOtherUserController,
                   itemCount: _hasReachedMax
-                      ? _servicePostsUser.length
-                      : _servicePostsUser.length + 1,
+                      ? _servicePostsOtherUser.length
+                      : _servicePostsOtherUser.length + 1,
                   itemBuilder: (context, index) {
-                    if (index >= _servicePostsUser.length) {
+                    if (index >= _servicePostsOtherUser.length) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    final servicePost = _servicePostsUser[index];
+                    final servicePost = _servicePostsOtherUser[index];
                     return AnimatedOpacity(
                       opacity: 1.0,
                       duration: const Duration(milliseconds: 300),
@@ -137,7 +138,7 @@ class UserPostScreenState extends State<UserPostScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: _handleRefresh,
+                      onPressed: _handleRefreshOtherUserPost,
                       icon: const Icon(Icons.refresh),
                     ),
                     const Text('some error happen , press refresh button'),

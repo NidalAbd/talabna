@@ -6,6 +6,7 @@ class User {
   String? name;
   String? gender;
   String? city;
+  String? device_token;
   DateTime? dateOfBirth;
    double? locationLatitudes;
    double? locationLongitudes;
@@ -31,6 +32,7 @@ class User {
     this.name,
      this.gender,
      this.city,
+    this.device_token,
     this.dateOfBirth,
      this.locationLatitudes,
      this.locationLongitudes,
@@ -65,6 +67,7 @@ class User {
       name: json['name'] ?? '',
       gender: json['gender'] ?? '',
       city: json['city'] ?? city ?? '',
+      device_token: json['device_token'] ?? '',
       dateOfBirth: json['date_of_birth'] != null ? DateTime.parse(json['date_of_birth']) : null,
       locationLatitudes: double.tryParse(json['location_latitudes']?.toString() ?? '') ?? 0,
       locationLongitudes: double.tryParse(json['location_longitudes']?.toString() ?? '') ?? 0,
@@ -91,6 +94,7 @@ class User {
     data['name'] = name ?? '';
     data['gender'] = gender ?? '';
     data['city'] = city ?? '';
+    data['device_token'] = device_token ?? '';
     if (dateOfBirth != null) {
       data['date_of_birth'] = format.format(dateOfBirth!);
     }

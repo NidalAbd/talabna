@@ -44,7 +44,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(const UserProfileUpdateInProgress());
       try {
         await _repository.updateUserProfilePhoto(event.user, event.photo);
-        emit(UserProfileLoadSuccess(user: event.user));
+        emit(UserProfileUpdateSuccess(user: event.user));
       } catch (e) {
         emit(UserProfileUpdateFailure(error: e.toString()));
       }

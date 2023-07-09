@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/blocs/purchase_request/purchase_request_bloc.dart';
 import 'package:talbna/blocs/purchase_request/purchase_request_event.dart';
 import 'package:talbna/blocs/purchase_request/purchase_request_state.dart';
@@ -20,11 +21,26 @@ class _AddPointScreenState extends State<AddPointScreen> {
   final _formKey = GlobalKey<FormState>();
   final _pointsController = TextEditingController();
   late PurchaseRequestBloc _purchaseRequestBloc;
+  late int? currentUserId = 0;
   @override
   void initState() {
     super.initState();
     _purchaseRequestBloc = context.read<PurchaseRequestBloc>();
+    initializeUserId();
   }
+  void initializeUserId() {
+    getUserId().then((userId) {
+      setState(() {
+        currentUserId = userId;
+      });
+    });
+  }
+
+  Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userId');
+  }
+
   @override
   void dispose() {
     _pointsController.dispose();
@@ -84,7 +100,7 @@ class _AddPointScreenState extends State<AddPointScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.fromUserID, showBalance: false, ),
+                PointBalance(userId: widget.fromUserID, showBalance: false,canClick: false, ),
               ],
             ),
           ),
@@ -94,7 +110,25 @@ class _AddPointScreenState extends State<AddPointScreen> {
         bloc: _purchaseRequestBloc,
         listener: (context, state) {
           if (state is PurchaseRequestSuccess) {
+            String message = 'You have transfer ${_pointsController.text} to ${widget.toUserId}';
+            ScaffoldMessenger.of(context).showSnackBar(
+               SnackBar(
+                content: Text(message),
+                duration: const Duration(seconds: 2),
+              ),
+            );
             context.read<PurchaseRequestBloc>().add(FetchPurchaseRequests(userId: widget.fromUserID));
+            _pointsController.clear();
+          }else if(state is PurchaseRequestError){
+            const message = 'You don\'t have balance on you account';
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(message),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            _pointsController.clear();
+            return print(state.message);
           }
         },
         child: BlocBuilder<PurchaseRequestBloc, PurchaseRequestState>(
@@ -140,10 +174,9 @@ class _AddPointScreenState extends State<AddPointScreen> {
                                       .read<PurchaseRequestBloc>()
                                       .add(AddPointsForUser(
                                       request: points, fromUser: widget.fromUserID, toUser: widget.toUserId),);
-                                  _pointsController.clear();
                                 }
                               },
-                              child: const Text('تحويل النقاط لهذا المستخدم'),
+                              child: const Text('تحويل النقاط لهذا المستخدم' , style: TextStyle(color: Colors.white),),
                             ),
                           ],
                         ),

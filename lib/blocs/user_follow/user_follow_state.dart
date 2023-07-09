@@ -33,5 +33,14 @@ class UserFollowerFollowingSuccess extends UserFollowState {
   List<Object> get props => [users, hasReachedMax];
 }
 
+class UserSellerSuccessState extends UserFollowState {
+
+  final List<User> users;
+  final bool hasReachedMax;
+  const UserSellerSuccessState({required this.users, this.hasReachedMax = false});
+
+  @override
+  List<Object> get props => [users, hasReachedMax];
+}
 class UserFollowerFollowingHasMaxReached extends UserFollowState {}
 

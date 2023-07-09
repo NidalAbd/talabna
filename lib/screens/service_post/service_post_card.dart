@@ -32,6 +32,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
   late ServicePostBloc _servicePostBloc;
   late OtherUserProfileBloc _userProfileBloc;
   late EdgeInsets padding;
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +62,24 @@ class _ServicePostCardState extends State<ServicePostCard> {
       return '${(difference.inDays / 30).round()}M ago';
     } else {
       return '${(difference.inDays / 365).round()}Y ago';
+    }
+  }
+
+  String formatNumber(int number) {
+    if (number >= 1000000000) {
+      final double formattedNumber = number / 1000000;
+      const String suffix = 'B';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else if (number >= 1000000) {
+      final double formattedNumber = number / 1000000;
+      const String suffix = 'M';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else if (number >= 1000) {
+      final double formattedNumber = number / 1000;
+      const String suffix = 'K';
+      return '${formattedNumber.toStringAsFixed(1)}$suffix';
+    } else {
+      return number.toString();
     }
   }
 
@@ -115,7 +134,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
                 : AppTheme.darkForegroundColor,
             // other card properties
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(5),
             ),
             child: Column(
               children: [
@@ -162,42 +181,43 @@ class _ServicePostCardState extends State<ServicePostCard> {
                           ],
                         ),
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Row(
-                            children: [
-                              Text(
-                                '${widget.servicePost.type!} ',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                      if (widget.servicePost.categoriesId != 7)
+                        Expanded(
+                          flex: 2,
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${widget.servicePost.type!} ',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                '${widget.servicePost.category!} ',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                Text(
+                                  '${widget.servicePost.category!} ',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                              Text(
-                                '${widget.servicePost.subCategory!} ',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                Text(
+                                  '${widget.servicePost.subCategory!} ',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       ServicePostAction(
                         key: Key('servicePost_${widget.servicePost.id}'),
                         servicePostUserId: widget.servicePost.userId,
@@ -238,6 +258,34 @@ class _ServicePostCardState extends State<ServicePostCard> {
                             style: const TextStyle(fontSize: 14),
                           ),
                         ),
+                        Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ServicePostCardView(
+                                    key: Key('servicePost_${widget.servicePost.id}'),
+                                    onPostDeleted: widget.onPostDeleted,
+                                    userProfileId: widget.userProfileId,
+                                    servicePost: widget.servicePost,
+                                    canViewProfile: widget.canViewProfile,
+                                  ),
+                                ),
+                              );
+                            },
+                            child:  Text(
+                              'مزيد من التفاصيل',
+                              style: TextStyle(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? AppTheme.accentColor
+                                    : AppTheme.lightForegroundColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
                         ImageGrid(
                           imageUrls: widget.servicePost.photos
                                   ?.map((photo) =>
@@ -253,28 +301,36 @@ class _ServicePostCardState extends State<ServicePostCard> {
                 const SizedBox(height: 5),
                 ListTile(
                   leading: SizedBox(
-                    width: 40,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.remove_red_eye),
-                          const SizedBox(width: 5),
-                          Text(
-                            '${widget.servicePost.viewCount ?? 0}',
+                    width: 50,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.remove_red_eye,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.lightBackgroundColor
+                              : AppTheme.lightForegroundColor,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          formatNumber(widget.servicePost.viewCount ?? 0),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppTheme.lightBackgroundColor
+                                    : AppTheme.lightForegroundColor,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  selected: true, // Set the tile to be selected
+                  selected: true,
                   selectedTileColor:
                       Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.darkDisabledColor.withOpacity(0.2)
-                          : AppTheme.lightDisabledColor
-                              .withOpacity(0.2), // Set the selected tile color
+                          ? AppTheme.lightForegroundColor.withOpacity(0.5)
+                          : AppTheme.darkForegroundColor.withOpacity(0.5),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -288,23 +344,20 @@ class _ServicePostCardState extends State<ServicePostCard> {
                       ),
                     );
                   },
-                  title: Text(
-                    'عرض التفاصيل',
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightDisabledColor
-                          : AppTheme.darkDisabledColor,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'يبعد عنك ${widget.servicePost.distance.toString()} كم ',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightDisabledColor
-                          : AppTheme.darkDisabledColor,
-                    ),
-                  ),
+                  title: widget.servicePost.categoriesId != 7
+                      ? Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            '${widget.servicePost.distance.toString()} كم',
+                            style: TextStyle(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppTheme.lightDisabledColor
+                                  : AppTheme.darkDisabledColor,
+                            ),
+                          ),
+                        )
+                      : null,
                   trailing: Icon(
                     Icons.arrow_forward,
                     color: Theme.of(context).brightness == Brightness.dark

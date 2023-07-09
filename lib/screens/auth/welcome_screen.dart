@@ -10,7 +10,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration:  const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -51,7 +51,6 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 30),
               const LogoTitle(fontSize: 350, playAnimation: false , logoSize: 80,),
               const SizedBox(height: 30),
-
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(

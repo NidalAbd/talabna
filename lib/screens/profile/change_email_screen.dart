@@ -115,7 +115,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                     },
                     child: _isLoading
                         ? const CircularProgressIndicator()
-                        : const Text('Update Email'),
+                        : const Text('Update Email',style: TextStyle(color: Colors.white),),
                   ),
                 ],
               );

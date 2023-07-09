@@ -17,7 +17,7 @@ void checkBadgeAndShowMessage(BuildContext context, String selectedHaveBadge, in
     final int balance = userProfileState.pointBalance.totalPoint;
     if (balance < minBalance) {
       final message = 'لا يوجد رصيد كافي لتمييز النشر بـ $selectedHaveBadge لمدة $selectedBadgeDuration يوم';
-      ErrorCustomWidget.show(context, message);
+      ErrorCustomWidget.show(context,  message: message);
     }
   }
 }

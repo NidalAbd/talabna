@@ -6,9 +6,10 @@ import 'package:talbna/blocs/purchase_request/purchase_request_state.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 
 class PointBalance extends StatefulWidget {
-  const PointBalance({Key? key, required this.userId, required this.showBalance,}) : super(key: key);
+  const PointBalance({Key? key, required this.userId, required this.showBalance, required this.canClick,}) : super(key: key);
   final int userId;
   final bool showBalance;
+  final bool canClick;
   @override
   State<PointBalance> createState() => _PointBalanceState();
 }
@@ -36,61 +37,49 @@ class _PointBalanceState extends State<PointBalance> {
           final pointBalance = state.pointBalance;
           return Directionality(
             textDirection: TextDirection.rtl,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PurchaseRequestScreen(
-                          userID: widget.userId,
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.stars,
+            child: ElevatedButton.icon(
+              onPressed: () {
+               widget.canClick? Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PurchaseRequestScreen(
+                      userID: widget.userId,
+                    ),
+                  ),
+                ): null;
+              },
+              icon: const Icon(
+                Icons.add_circle,
+                color: Colors.white,
+              ),
+              label: widget.showBalance ?Text(
+                pointBalance.totalPoint.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ): const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text(
+                  '***',
+                  style: TextStyle(
                     color: Colors.white,
-                    size: 26,
-                  ),
-                  label: Visibility(
-                    visible: widget.showBalance,
-                    child: Text(
-                      pointBalance.totalPoint.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Positioned(
-                  right: 10,
-                  bottom: 5,
-                  child: Container(
-                    width: 13,
-                    height: 13,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.green,
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 13,
-                    ),
-                  ),
-                ),
-              ],
+              ),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ), // Set your desired background color
+              ),
             ),
           );
         } else if (state is UserPointLoadFailure) {
+
           return ErrorWidget(state.error);
         }else {
           return const SizedBox.shrink();

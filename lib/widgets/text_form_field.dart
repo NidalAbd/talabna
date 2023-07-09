@@ -3,6 +3,7 @@ import 'package:talbna/app_theme.dart';
 
 class TextFromField extends StatelessWidget {
   final TextEditingController controller;
+  final int maxLength;
   final bool obscureText;
   final Function validator;
   final Widget prefixIcon;
@@ -17,7 +18,7 @@ class TextFromField extends StatelessWidget {
       required this.prefixIcon,
       required this.hintText,
        this.suffixIcon,
-      required TextInputType keyboardType, required this.padding})
+      required TextInputType keyboardType, required this.padding, required this.maxLength})
       : super(key: key);
 
   @override
@@ -26,6 +27,7 @@ class TextFromField extends StatelessWidget {
       padding: padding,
       child: SizedBox(
         child: TextFormField(
+          maxLength: maxLength,
           controller: controller,
           obscureText: obscureText,
           keyboardType: TextInputType.text,
@@ -38,7 +40,7 @@ class TextFromField extends StatelessWidget {
             hintText: hintText,
             filled: true,
             enabledBorder: OutlineInputBorder(
-              borderSide:  const BorderSide(
+              borderSide:   const BorderSide(
                 color: AppTheme.primaryColor,
               ),
               borderRadius: BorderRadius.circular(10),

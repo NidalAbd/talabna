@@ -145,6 +145,9 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                                 userId: widget.userID,
                               ),
                             );
+                            setState(() {
+
+                            });
                           },
                         ),
                         ),

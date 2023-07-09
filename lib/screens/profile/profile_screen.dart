@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_event.dart';
 import 'package:talbna/blocs/other_users/user_profile_state.dart';
@@ -75,52 +76,56 @@ class _ProfileScreenState extends State<ProfileScreen>
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Wrap(
-                              children: [
-                                ListTile(
-                                  onLongPress: () =>
-                                      _setClipboardData(user.id.toString()),
-                                  leading: const Icon(Icons.perm_identity),
-                                  title: Text(
-                                    user.id.toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                            return Container(
+                              color: AppTheme.primaryColor,
+                              child: Wrap(
+                                children: [
+                                  ListTile(
+                                    onLongPress: () =>
+                                        _setClipboardData(user.id.toString()),
+                                    leading: const Icon(Icons.perm_identity,color: Colors.white,),
+                                    title: Text(
+                                      user.id.toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                      ),
                                     ),
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                ListTile(
-                                    leading: const Icon(Icons.report),
-                                    title: const Text('Report'),
                                     onTap: () {
                                       Navigator.pop(context);
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return ReportTile(
-                                              type: 'user',
-                                              userId: widget.fromUser,
-                                            );
-                                          });
-                                    }),
-                                ListTile(
-                                  leading: const Icon(Icons.attach_money),
-                                  title: const Text('Add Points'),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => AddPointScreen(
-                                          fromUserID: widget.fromUser,
-                                          toUserId: widget.toUser,
+                                    },
+                                  ),
+                                  ListTile(
+                                      leading: const Icon(Icons.report,color: Colors.white,),
+                                      title: const Text('Report',style: TextStyle(color: Colors.white),),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        showModalBottomSheet(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return ReportTile(
+                                                type: 'user',
+                                                userId: widget.fromUser,
+                                              );
+                                            });
+                                      }),
+                                  ListTile(
+                                    leading: const Icon(Icons.attach_money,color: Colors.white,),
+                                    title: const Text('Add Points',style: TextStyle(color: Colors.white),),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => AddPointScreen(
+                                            fromUserID: widget.fromUser,
+                                            toUserId: widget.toUser,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         );
@@ -167,9 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
           );
         } else if (state is OtherUserProfileLoadFailure) {
-          return ErrorCustomWidget.show(context, state.error);
+          return ErrorCustomWidget.show(context,  message: state.error);
         } else {
-          return ErrorCustomWidget.show(context, 'No user profile data found.');
+          return ErrorCustomWidget.show(context, message: 'No user profile data found.');
         }
       },
     );

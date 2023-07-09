@@ -73,7 +73,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
           });
         }
       },
-      initialPhotosNotifier: _initialPhotos,
+      initialPhotosNotifier: _initialPhotos, maxImages: 4, deleteApi: true,
     );
   }
   @override
@@ -97,7 +97,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:  [
-                PointBalance(userId: widget.userId, showBalance: true,),
+                PointBalance(userId: widget.userId, showBalance: true,canClick: true,),
               ],
             ),
           ),
@@ -123,7 +123,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                 setState(() {
                 });
               } else if (state is ServicePostOperationFailure) {
-                ErrorCustomWidget.show(context, state.errorMessage);
+                ErrorCustomWidget.show(context,  message: state.errorMessage);
                 setState(() {
                   _isLoading = false;
                 });

@@ -204,7 +204,6 @@ class _SearchScreenState extends State<SearchScreen> {
           return UserCard(
             follower: user,
             userActionBloc: _userActionBloc,
-            isFollower: user.isFollow!,
             userId: widget.userID,
           );
         }

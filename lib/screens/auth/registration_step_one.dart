@@ -64,6 +64,7 @@ class _RegistrationStepOneState extends State<RegistrationStepOne> {
               TextFromField(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                 controller: _emailController,
+                maxLength: 50,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter your email address';
@@ -82,6 +83,7 @@ class _RegistrationStepOneState extends State<RegistrationStepOne> {
               ),
               TextFromField(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                maxLength: 50,
                 controller: _usernameController,
                 validator: (value) {
                   if (value.isEmpty) {
@@ -100,6 +102,7 @@ class _RegistrationStepOneState extends State<RegistrationStepOne> {
               ),
               TextFromField(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                maxLength: 50,
                 controller: _passwordController,
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -128,6 +131,7 @@ class _RegistrationStepOneState extends State<RegistrationStepOne> {
               TextFromField(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                 controller: _confirmPasswordController,
+                maxLength: 50,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please confirm your password';

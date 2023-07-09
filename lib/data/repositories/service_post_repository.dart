@@ -202,7 +202,9 @@ class ServicePostRepository {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ServicePost.fromJson(jsonDecode(response.body));
-      } else {
+      }else if (response.statusCode == 400) {
+        throw Exception(response.body.toString());
+      }else {
         throw Exception(
           'Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
         );
@@ -275,12 +277,17 @@ class ServicePostRepository {
     if (imageFiles.isNotEmpty) {
       request.files.addAll(imageFiles);
     }
+    print(imageFiles);
     try {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ServicePost.fromJson(jsonDecode(responseBody));
-      } else {
+      }else if (response.statusCode == 400 ) {
+        throw Exception(
+          'error : $responseBody',
+        );
+      }  else {
         throw Exception(
             'Error creating service post: ${response.reasonPhrase}. Response body: $responseBody');
       }
@@ -327,7 +334,11 @@ class ServicePostRepository {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ServicePost.fromJson(jsonDecode(response.body));
-      } else {
+      }else if (response.statusCode == 400 ) {
+        throw Exception(
+          'error : ${response.body}',
+        );
+      }  else {
         throw Exception(
           'Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
         );

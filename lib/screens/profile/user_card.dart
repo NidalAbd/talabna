@@ -7,85 +7,94 @@ import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
 import 'package:talbna/utils/constants.dart';
-import 'package:geocoding/geocoding.dart';
 
 class UserCard extends StatefulWidget {
   final User follower;
-  final bool isFollower;
   final int userId;
   final UserActionBloc userActionBloc;
-  const UserCard({Key? key, required this.follower, required this.userActionBloc, required this.isFollower, required this.userId,})
-      : super(key: key);
+   const UserCard({
+    Key? key,
+    required this.follower,
+    required this.userActionBloc,
+    required this.userId,
+  }) : super(key: key);
 
   @override
   State<UserCard> createState() => _UserCardState();
 }
 
 class _UserCardState extends State<UserCard> {
-  String? city;
-
+  late bool? isFollowThisUser = widget.follower.isFollow;
   @override
   void initState() {
     super.initState();
-    _getCityName();
   }
 
-  Future<void> _getCityName() async {
-    if (widget.follower.locationLatitudes != null &&
-        widget.follower.locationLongitudes != null) {
-      double lat =
-          double.tryParse(widget.follower.locationLatitudes.toString()) ?? 0.0;
-      double lng =
-          double.tryParse(widget.follower.locationLongitudes.toString()) ?? 0.0;
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-        if (placemarks.isNotEmpty) {
-          final Placemark placemark = placemarks.first;
-          setState(() {
-            city = placemark.locality ?? placemark.administrativeArea;
-            print(city);
-          });
-        } else {}
-      } catch (e) {}
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     String avatarUrl =
-        'https://example.com/default-avatar.png'; // Provide a default avatar URL
+        '${Constants.apiBaseUrl}/storage/photos/avatar1.png'; // Provide a default avatar URL
     if (widget.follower.photos!.isNotEmpty) {
-      avatarUrl = widget.follower.photos![0].src;
+      avatarUrl = '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}';
+    }else{
+      avatarUrl =
+      '${Constants.apiBaseUrl}/storage/photos/avatar1.png'; // Provide a default avatar URL
     }
     return Card(
       color: Theme.of(context).brightness == Brightness.dark
           ? AppTheme.lightForegroundColor
           : AppTheme.darkForegroundColor,
       child: ListTile(
-        title: Text(widget.follower.userName!),
-        subtitle: Text(city ?? widget.follower.city!,),
-        leading: UserAvatar(
-          imageUrl:
-          '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}',
-          radius: 16,  toUser: widget.follower.id, canViewProfile: true, fromUser: widget.userId,
-        ),
-        trailing: BlocConsumer<UserActionBloc, UserActionState>(
-        bloc: widget.userActionBloc,
-          listener: (context, state) {},
-          builder: (context , state){
-        bool isFollower = widget.isFollower;
-        if(state is UserFollowUnFollowToggled && state.userId == widget.follower.id){
-          isFollower = state.isFollower;
-        }
-        return TextButton(
-            onPressed: () {
-              widget.userActionBloc.add(ToggleUserMakeFollowEvent(user: widget.follower.id));
+          title: Text(widget.follower.userName!),
+          subtitle: Text(
+             widget.follower.city!,
+          ),
+          leading: UserAvatar(
+            imageUrl: avatarUrl,
+            radius: 24,
+            toUser: widget.follower.id,
+            canViewProfile: true,
+            fromUser: widget.userId,
+          ),
+          trailing: BlocConsumer<UserActionBloc, UserActionState>(
+            bloc: widget.userActionBloc,
+            listener: (context, state) {
+              if (state is UserFollowUnFollowFromListToggled &&
+                  state.userId == widget.follower.id) {
+                isFollowThisUser = state.isFollower; // Update the isFollowing variable
+                final message = state.isFollower
+                    ? 'You are now following ${widget.follower.userName}'
+                    : 'You have unfollowed ${widget.follower.userName}';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              }
             },
-            child:   Text(isFollower? 'unfollow' :'follow' , style: const TextStyle(fontSize: 16),) );
-      },
-      )
-      ),
+            builder: (context, state) {
+              if (state is UserFollowUnFollowFromListToggled &&
+                  state.userId == widget.follower.id) {
+                isFollowThisUser = state.isFollower;
+              }
+              return TextButton(
+                  onPressed: () {
+                    widget.userActionBloc.add(
+                        ToggleUserMakeFollowFromListEvent(user: widget.follower.id));
+                  },
+                  child: Text(
+                    isFollowThisUser! ? 'unfollow' : 'follow',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.darkForegroundColor
+                          : AppTheme.lightForegroundColor,
+                    ),
+                  ));
+            },
+          )),
     );
-
   }
 }

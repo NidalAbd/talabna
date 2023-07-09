@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:talbna/data/repositories/purchase_request_repository.dart';
 import 'package:talbna/data/repositories/report_repository.dart';
 import 'package:talbna/data/repositories/service_post_repository.dart';
 import 'package:talbna/theme_cubit.dart';
+import 'package:talbna/utils/fcm_handler.dart';
 import 'app.dart';
 import 'blocs/authentication/authentication_bloc.dart';
 import 'blocs/category/subcategory_bloc.dart';
@@ -30,18 +32,17 @@ import 'data/repositories/user_profile_repository.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
-  // Bloc.observer = CustomBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
-  // Request permissions
+  await Firebase.initializeApp();
+
+  FCMHandler fcmHandler = FCMHandler();
+  await fcmHandler.initializeFCM();
   await requestPermissions();
-
-  WidgetsFlutterBinding.ensureInitialized();
-
   final authenticationRepository = AuthenticationRepository();
   final servicePostRepository  = ServicePostRepository();
   final userProfileRepository = UserProfileRepository();
   final subcategoryRepository  = CategoriesRepository();
-
+  AppTheme.setSystemBarColors(Brightness.light, AppTheme.primaryColor,AppTheme.primaryColor);
   runApp(
     MultiBlocProvider(
       providers: [

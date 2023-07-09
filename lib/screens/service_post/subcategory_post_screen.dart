@@ -29,7 +29,7 @@ class SubCategoryPostScreen extends StatefulWidget {
 }
 
 class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollSubCategoryPostController = ScrollController();
   int _currentPage = 1;
   bool _hasReachedMax = false;
   late bool isFollowing = false;
@@ -45,8 +45,8 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   @override
   void initState() {
     super.initState();
-    _handleRefresh();
-    _scrollController.addListener(_onScroll);
+    _handleRefreshSubcategories();
+    _scrollSubCategoryPostController.addListener(_onScrollSubcategories);
     context
         .read<UserActionBloc>()
         .add(GetUserFollowSubcategories(subCategoryId: widget.subcategoryId));
@@ -54,18 +54,18 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
         widget.categoryId, widget.subcategoryId, _currentPage));
   }
 
-  void _onScroll() {
+  void _onScrollSubcategories() {
     if (!_hasReachedMax &&
-        _scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+        _scrollSubCategoryPostController.offset >=
+            _scrollSubCategoryPostController.position.maxScrollExtent &&
+        !_scrollSubCategoryPostController.position.outOfRange) {
       _currentPage++;
       widget.servicePostBloc.add(GetServicePostsByCategorySubCategoryEvent(
           widget.categoryId, widget.subcategoryId, _currentPage));
     }
   }
 
-  Future<void> _handleRefresh() async {
+  Future<void> _handleRefreshSubcategories() async {
     _currentPage = 1;
     _hasReachedMax = false;
     _servicePostsSubCategory.clear();
@@ -73,7 +73,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
         widget.categoryId, widget.subcategoryId, _currentPage));
   }
 
-  void _handleServicePostLoadSuccess(
+  void _handleSubcategoriesPostLoadSuccess(
       List<ServicePost> servicePosts, bool hasReachedMax) {
     setState(() {
       _hasReachedMax = hasReachedMax;
@@ -81,9 +81,9 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
     });
   }
 
-  Future<bool> _onWillPop() async {
-    if (_scrollController.offset > 0) {
-      _scrollController.animateTo(
+  Future<bool> _onWillPopSubcategories() async {
+    if (_scrollSubCategoryPostController.offset > 0) {
+      _scrollSubCategoryPostController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInToLinear,
@@ -91,7 +91,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
       // Wait for the duration of the scrolling animation before refreshing
       await Future.delayed(const Duration(milliseconds: 1000));
       // Trigger a refresh after reaching the top
-      _handleRefresh();
+      _handleRefreshSubcategories();
       return false;
     } else {
       return true;
@@ -101,6 +101,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   @override
   void dispose() {
     _servicePostsSubCategory.clear();
+    _scrollSubCategoryPostController.dispose();
     super.dispose();
   }
 
@@ -108,6 +109,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title:  Text(subcategoryTitle),
         actions: [
           BlocConsumer<UserActionBloc, UserActionState>(
@@ -115,8 +117,8 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
               if (state is UserMakeFollowSubcategoriesSuccess) {
                 isFollowing = state.followSuccess; // Update the isFollowing variable
                 final message = state.followSuccess
-                    ? 'You are now following this subcategory'
-                    : 'You have unfollowed this subcategory';
+                    ? 'You are now following  $subcategoryTitle'
+                    : 'You have unfollowed $subcategoryTitle';
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(message),
@@ -129,25 +131,44 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
               if (state is GetFollowSubcategoriesSuccess) {
                 isFollowing = state.followSuccess;
               }
-              return ElevatedButton(
-                onPressed: () {
-                  // Dispatch the toggle follow event
-                  context.read<UserActionBloc>().add(
-                      UserMakeFollowSubcategories(
-                          subCategoryId: widget.subcategoryId));
-                },
-                child: Text(isFollowing ? 'unfollow' :'follow' , style: const TextStyle(fontSize: 16 ,color: Colors.white),) );
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 15, 10),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<UserActionBloc>().add(
+                      UserMakeFollowSubcategories(subCategoryId: widget.subcategoryId),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white, backgroundColor: isFollowing ? Colors.grey : Colors.blue, // Customize the text color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  label: Text(
+                    isFollowing ? 'Unfollow' : 'Follow',
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  icon: Icon(
+                    isFollowing ? Icons.verified_user_outlined : Icons.add_circle, // Replace with your desired icons
+                    size: 20, // Set the size of the icon
+                    color: Colors.white, // Customize the icon color
+                  ),
+                )
+              );
             },
           )
         ],
       ),
       body: WillPopScope(
-        onWillPop: _onWillPop,
+        onWillPop: _onWillPopSubcategories,
         child: BlocListener<ServicePostBloc, ServicePostState>(
           bloc: widget.servicePostBloc,
           listener: (context, state) {
             if (state is ServicePostLoadSuccess) {
-              _handleServicePostLoadSuccess(
+              _handleSubcategoriesPostLoadSuccess(
                   state.servicePosts, state.hasReachedMax);
             }
           },
@@ -164,9 +185,9 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                 subcategoryTitle = _servicePostsSubCategory.first.subCategory!;
                 // show list of service posts
                 return RefreshIndicator(
-                    onRefresh: _handleRefresh,
+                    onRefresh: _handleRefreshSubcategories,
                     child: ListView.builder(
-                      controller: _scrollController,
+                      controller: _scrollSubCategoryPostController,
                       itemCount: _hasReachedMax
                           ? _servicePostsSubCategory.length
                           : _servicePostsSubCategory.length + 1,

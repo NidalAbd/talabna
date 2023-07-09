@@ -16,6 +16,7 @@ import 'package:talbna/screens/widgets/location_picker.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/screens/widgets/user_avatar_profile.dart';
 import 'package:talbna/utils/constants.dart';
+import 'package:talbna/utils/fcm_handler.dart';
 
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
@@ -29,8 +30,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
   late  String _selectedPhoneCountryCode = '00970' ;
-  late  String _selectedWhatsCountryCode = '00970' ;
-
+  late  String deviceToken = '' ;
+  final FCMHandler _fcmHandler = FCMHandler(); // Initialize FCMHandler
   final TextEditingController _whatsAppController = TextEditingController();
   String _selectedCity = '';
   String _gender = '';
@@ -55,6 +56,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     _dateOfBirthNotifier = ValueNotifier<DateTime>(DateTime.now());
     _userProfileBloc = context.read<UserProfileBloc>()..add(UserProfileRequested(id: widget.userId));
     _dateOfBirthController = TextEditingController(text: ''); // Change this line
+    initializeFCM();
   }
   void _updateDateOfBirthController(DateTime value) {
     if (DateFormat('yyyy-MM-dd').format(value) != _dateOfBirthController.text) {
@@ -78,7 +80,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     if (result != null) {
       return File(outputPath)..writeAsBytesSync(result);
     } else {
-      print('Failed to compress image.');
       return null;
     }
   }
@@ -91,7 +92,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       final File? jpegFile = await _convertToJpeg(imageFile);
       return jpegFile;
     } else {
-      print('No image selected.');
       return null;
     }
   }
@@ -105,8 +105,12 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     prefs.setString('gender', user.email);
     prefs.setString('dob', user.email);
   }
+  Future<void> initializeFCM() async {
+    await _fcmHandler.initializeFCM(); // Initialize FCMHandler
+    deviceToken = await _fcmHandler.getDeviceToken(); // Retrieve device token
 
-  void _setValues(User user) {
+  }
+  Future<void> _setValues(User user) async {
     if (user.phones != null && user.phones!.length >= 5) {
       _phoneController.text = user.phones!.substring(5);
     } else {
@@ -118,7 +122,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     } else {
       _whatsAppController.text = user.watsNumber ?? '';
     }
-
     _selectedCity = _selectedCity.isEmpty ? user.city! : _selectedCity;
     _gender = _gender.isEmpty ? user.gender! : _gender;
     _locationLatitudes = user.locationLatitudes ?? 0;
@@ -146,9 +149,9 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
           }else if(state is UserProfileUpdateFailure){
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
-            ErrorCustomWidget.show(context, 'Profile updated failed.');
+            ErrorCustomWidget.show(context,  message: 'Profile updated failed.');
           }else if (state is UserProfileLoadFailure) {
-            ErrorCustomWidget.show(context, 'Profile load failed , refresh the page');            }
+            ErrorCustomWidget.show(context,  message: 'Profile load failed , refresh the page');            }
         },
         builder: (context, state) {
           if (state is UserProfileLoadSuccess) {
@@ -173,7 +176,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       Stack(
                         children: [
                           UserAvatarProfile(
-                            imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}?${DateTime.now().microsecondsSinceEpoch}',
+                            imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
                             radius: 100,
                             toUser: user.id, canViewProfile: false, fromUser: user.id,
                           ),
@@ -211,7 +214,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           ),
                         ],
                       ),
-                SizedBox(height: 30,),
+                const SizedBox(height: 30,),
                 Row(
                   children: [
                     SizedBox(
@@ -439,11 +442,11 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                 print('Error parsing date: $e');
                               }
                             }
-                            String countryPhoneCode = _selectedPhoneCountryCode ?? '';
-                            String phoneNumber = _phoneController.text ?? '';
+                            String countryPhoneCode = _selectedPhoneCountryCode;
+                            String phoneNumber = _phoneController.text;
                             String fullPhoneNumber = countryPhoneCode + phoneNumber;
-                            String countryWhatsCode = _selectedPhoneCountryCode ?? '';
-                            String whatsNumber = _whatsAppController.text ?? '';
+                            String countryWhatsCode = _selectedPhoneCountryCode;
+                            String whatsNumber = _whatsAppController.text;
                             String fullWhatsNumber = countryWhatsCode + whatsNumber;
 
                             // Create a new user object with updated information
@@ -453,6 +456,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               name: user.name,
                               gender: user.gender,
                               city: _selectedCity,
+                              device_token: deviceToken,
                               dateOfBirth: parsedDateOfBirth,
                               locationLatitudes: _locationLatitudes,
                               locationLongitudes: _locationLongitudes,
@@ -472,7 +476,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                             _updateUserProfile(context, updatedUser);
                           }
                         },
-                        child: const Text('Save Changes'),
+                        child: const Text('Save Changes',style: TextStyle(color: Colors.white),),
                       ),
 
                     ],

@@ -171,16 +171,37 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
             Positioned(
               top: 10,
               left: 10,
-              child: CircleAvatar(
-                backgroundColor: const Color(0xFFEEF9E6),
-                radius: 30,
-                child: CircleAvatar(
-                  radius: 28,
-                  backgroundImage: subcategory.photos.isNotEmpty
-                      ? NetworkImage(
-                          '${Constants.apiBaseUrl}/${subcategory.photos[0].src}')
-                      : const AssetImage('assets/loading.gif')
-                          as ImageProvider<Object>?,
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightForegroundColor.withOpacity(0.1)
+                          : AppTheme.darkForegroundColor.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: subcategory.photos.isNotEmpty
+                            ? NetworkImage(
+                          '${Constants.apiBaseUrl}/${subcategory.photos[0].src}',
+                        ) as ImageProvider
+                            : const AssetImage('assets/loading.gif'),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

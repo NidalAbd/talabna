@@ -21,6 +21,15 @@ class UserActionBloc extends Bloc<UserActionEvent, UserActionState> {
         emit(UserActionFailure(error: e.toString()));
       }
     });
+    on<ToggleUserMakeFollowFromListEvent>((event, emit) async {
+      emit(UserActionInProgress());
+      try {
+        bool newFollowerStatus =  await _repository.toggleUserActionFollow(userId: event.user);
+        emit(UserFollowUnFollowFromListToggled(isFollower: newFollowerStatus, userId: event.user));
+      } catch (e) {
+        emit(UserActionFailure(error: e.toString()));
+      }
+    });
     on<UserMakeFollowSubcategories>((event, emit) async {
       emit(UserActionInProgress());
       try {
@@ -30,7 +39,15 @@ class UserActionBloc extends Bloc<UserActionEvent, UserActionState> {
         emit(UserActionFailure(error: e.toString()));
       }
     });
-
+    on<GetUserFollow>((event, emit) async {
+      emit(UserActionInProgress());
+      try {
+        final bool subCategoryMenu = await _repository.getUserFollow(event.user);
+        emit(GetFollowUserSuccess(subCategoryMenu));
+      } catch (e) {
+        emit(UserActionFailure(error: e.toString()));
+      }
+    });
     on<GetUserFollowSubcategories>((event, emit) async {
       emit(UserActionInProgress());
       try {
@@ -68,8 +85,6 @@ class UserActionBloc extends Bloc<UserActionEvent, UserActionState> {
         emit(UserActionFailure(error: e.toString()));
       }
     });
-
-
 
   }
 

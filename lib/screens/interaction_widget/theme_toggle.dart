@@ -34,8 +34,8 @@ class _ThemeToggleListTileState extends State<ThemeToggleListTile> {
     return Builder(
       builder: (BuildContext innerContext) {
         return ListTile(
-          leading: Icon(isDarkMode ? Icons.brightness_2 : Icons.brightness_7),
-          title: const Text('Toggle Dark Mode'),
+          leading: Icon(isDarkMode ? Icons.brightness_2 : Icons.brightness_7,color: Colors.white,),
+          title: const Text('Toggle Dark Mode',style: TextStyle(color: Colors.white),),
           onTap: () {
             final RenderBox box = innerContext.findRenderObject() as RenderBox;
             final Offset globalPosition = box.localToGlobal(Offset.zero);

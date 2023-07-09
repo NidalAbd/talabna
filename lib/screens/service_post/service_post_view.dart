@@ -52,7 +52,6 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
     }else{
       padding = const EdgeInsets.fromLTRB(0, 30, 0, 0);
     }
-
   }
 
   String formatTimeDifference(DateTime? postDate) {
@@ -269,14 +268,15 @@ title: const Text('عرض التفاصيل'),
                     ),
                   ),
                   const SizedBox(height: 10,),
-                  Padding(
+                  if(widget.servicePost.categoriesId != 7)
+                    Padding(
                     padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                     child: LocationButtonWidget(
                       locationLatitudes: widget.servicePost.locationLatitudes!,
                       locationLongitudes: widget.servicePost.locationLongitudes!,
                       width: 15,),
                   ),
-                  Padding(
+                  if(widget.servicePost.categoriesId != 7)Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Card(
                       elevation: 2,

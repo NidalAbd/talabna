@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:video_compress/video_compress.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/utils/constants.dart';
@@ -11,11 +13,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:talbna/data/models/service_post.dart';
 
 class ImagePickerButton extends StatefulWidget {
-  final  Function(List<Photo>?) onImagesPicked;
+  final Function(List<Photo>?) onImagesPicked;
   final ValueNotifier<List<Photo>?> initialPhotosNotifier;
+  final int maxImages;
+  final bool deleteApi;
 
-  const ImagePickerButton({Key? key, required this.onImagesPicked, required this.initialPhotosNotifier})
-      : super(key: key);
+  const ImagePickerButton({
+    Key? key,
+    required this.onImagesPicked,
+    required this.initialPhotosNotifier,
+    required this.maxImages,
+    required this.deleteApi,
+  }) : super(key: key);
+
   @override
   ImagePickerButtonState createState() => ImagePickerButtonState();
 }
@@ -36,47 +46,92 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
           'src': '${Constants.apiBaseUrl}/storage/${photo.src}',
         }))
             .toList();
-        _localImages = List<String?>.filled(
-            _pickedImages.length, null,
-            growable: true);
+        _localImages = List<String?>.filled(_pickedImages.length, null, growable: true);
         setState(() {});
       }
     });
   }
-
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile> imageFiles =
-    await picker.pickMultiImage(imageQuality: 50);
+    final List<XFile> pickedFiles = await picker.pickMultiImage(
+      maxWidth: 1920,
+      maxHeight: 1920,
+    );
 
-    const int maxImages = 4;
-    if (_pickedImages.length + imageFiles.length > maxImages) {
-      _showMaxImagesDialog(maxImages);
-    } else {
-      _showProgressDialog(imageFiles.length);
-      for (XFile file in imageFiles) {
-        final String imagePath = file.path;
-        final img.Image? compressedImage =
-        await _compressImage(File(imagePath));
-        if (compressedImage != null) {
-          final String jpegPath = await _convertToJPEG(compressedImage);
+    if (pickedFiles.isNotEmpty) {
+      int maxImages = widget.maxImages;
+      if (_pickedImages.length + pickedFiles.length > maxImages) {
+        _showMaxImagesDialog(maxImages);
+      } else {
+        _showProgressDialog(pickedFiles.length);
+        for (XFile file in pickedFiles) {
+          final String filePath = file.path;
+          final img.Image? compressedImage = await _compressImage(File(filePath));
+          if (compressedImage != null) {
+            final String? jpegPath = await _convertToJPEG(compressedImage);
+            setState(() {
+              _pickedImages.add(Photo.fromJson({'src': jpegPath}));
+              _localImages.add(jpegPath);
+            });
+            _submitLocalImages();
+            if (kDebugMode) {
+              print('Image added: $jpegPath');
+            }
+          }
+        }
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+
+  Future<void> _pickVideo() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      int maxImages = widget.maxImages;
+      if (_pickedImages.length + 1 > maxImages) {
+        _showMaxImagesDialog(maxImages);
+      } else {
+        File videoFile = File(pickedFile.path);
+        int maxSizeBytes = 5 * 1024 * 1024; // 5MB
+
+        if (videoFile.lengthSync() <= maxSizeBytes &&
+            videoFile.path.toLowerCase().endsWith('.mp4')) {
+          // Video meets the criteria, add it directly without compression
           setState(() {
-            _pickedImages.add(Photo.fromJson({'src': jpegPath}));
-            _localImages.add(jpegPath);
+            _pickedImages.add(Photo.fromJson({'src': pickedFile.path, 'isVideo': true}));
+            _localImages.add(pickedFile.path);
           });
-          _submitLocalImages(); // call the new method here
+          _submitLocalImages();
           if (kDebugMode) {
-            print('Image added: $jpegPath');
+            print('Video added: ${pickedFile.path}');
+          }
+        } else {
+          _showProgressDialog(1);
+
+          final String videoPath = pickedFile.path;
+          final String? mp4Path = await _convertToMP4(videoPath);
+
+          if (mp4Path != null) {
+            setState(() {
+              _pickedImages.add(Photo.fromJson({'src': mp4Path, 'isVideo': true}));
+              _localImages.add(mp4Path);
+            });
+            _submitLocalImages();
+            if (kDebugMode) {
+              print('Video added: $mp4Path');
+            }
           }
         }
       }
-      Navigator.of(context).pop(); // Close the progress dialog
     }
   }
+
+
   List<Photo> getLocalImages() {
-    return _pickedImages
-        .where((photo) => _localImages.contains(photo.src))
-        .toList();
+    return _pickedImages.where((photo) => _localImages.contains(photo.src)).toList();
   }
 
   Future<void> _showMaxImagesDialog(int maxImages) async {
@@ -84,14 +139,14 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('الحد الاعلى من الصور المسموحة'),
-          content: Text('يمكنك ان تختار  $maxImages صور.'),
+          title: const Text('الحد الأقصى للصور المسموح به'),
+          content: Text('يمكنك اختيار $maxImages صورة/فيديو.'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('OK'),
+              child: const Text('موافق'),
             ),
           ],
         );
@@ -127,17 +182,13 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       const int maxSize = 1024 * 1024; // 1 MB
       final int originalSize = file.lengthSync();
       if (originalSize > maxSize) {
-        final img.Image compressedImage =
-        img.copyResize(originalImage, width: 1920);
+        final img.Image compressedImage = img.copyResize(originalImage, width: 1920);
         final double compressionRatio = maxSize / originalSize;
         final List<int> compressedImageData = img.encodeJpg(
           compressedImage,
           quality: (compressionRatio * 100).toInt(),
         );
-        await _saveImageToFile(
-          compressedImageData,
-          '${file.path}_compressed.jpg',
-        );
+        await _saveImageToFile(compressedImageData, '${file.path}_compressed.jpg');
         return compressedImage;
       } else {
         return originalImage;
@@ -146,40 +197,55 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     return null;
   }
 
-  Future<String> _convertToJPEG(img.Image image) async {
+  Future<String?> _convertToJPEG(img.Image image) async {
     final List<int> jpegData = img.encodeJpg(image);
     final String jpegPath = await _saveImageToFile(
-        jpegData, '${DateTime.now().millisecondsSinceEpoch}.jpg');
-    if (kDebugMode) {
-    }
+      jpegData,
+      '${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
     return jpegPath;
   }
 
-  Future<String> _saveImageToFile(
-      List<int> imageData, String filePath) async {
+  Future<String?> _convertToMP4(String videoPath) async {
+    final Directory tempDir = await getTemporaryDirectory();
+    final String tempPath = tempDir.path;
+    final String mp4Path = '$tempPath/${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+    final info = await VideoCompress.compressVideo(
+      mp4Path, // Pass mp4Path as the first positional argument
+      quality: VideoQuality.DefaultQuality,
+      includeAudio: true,
+    );
+    return info?.path;
+  }
+
+  Future<String> _saveImageToFile(List<int> imageData, String filePath) async {
     final Directory tempDir = await getTemporaryDirectory();
     final String tempPath = tempDir.path;
     final File imageFile = File('$tempPath/$filePath');
     await imageFile.writeAsBytes(imageData);
     return imageFile.path;
   }
+
   void _submitLocalImages() {
-    final List<Photo> localImages = _pickedImages
-        .where((photo) => _localImages.contains(photo.src))
-        .toList();
+    final List<Photo> localImages =
+    _pickedImages.where((photo) => _localImages.contains(photo.src)).toList();
     widget.onImagesPicked(localImages);
   }
 
   void _removeImage(int index) async {
     final Photo photo = _pickedImages[index];
     final int? photoUrl = photo.id;
-    context.read<ServicePostBloc>().add(
-        DeleteServicePostImageEvent(servicePostImageId: photoUrl!));
-          setState(() {
-            _pickedImages.removeAt(index);
-            _localImages.removeAt(index);
-          });
-          widget.onImagesPicked(_pickedImages);
+
+    if (widget.deleteApi) {
+      context.read<ServicePostBloc>().add(DeleteServicePostImageEvent(servicePostImageId: photoUrl!));
+    }
+
+    setState(() {
+      _pickedImages.removeAt(index);
+      _localImages.removeAt(index);
+    });
+    widget.onImagesPicked(_pickedImages);
   }
 
   @override
@@ -197,11 +263,42 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
             ),
             itemBuilder: (ctx, index) {
               if (index == _pickedImages.length) {
-                if (_pickedImages.length < 4) {
-                  return IconButton(
-                    onPressed: _pickImages,
-                    icon: Icon(Icons.camera_alt,
-                        size: MediaQuery.of(context).size.width / 5),
+                int remainingImageCount = widget.maxImages - _pickedImages.length;
+                if (_pickedImages.length < widget.maxImages) {
+                  return Stack(
+                    children: [
+                      Positioned.fill(
+                        child: IconButton(
+                          onPressed: _pickMedia,
+                          icon: Icon(
+                            Icons.add_a_photo,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.accentColor
+                                : AppTheme.primaryColor,
+                            size: MediaQuery.of(context).size.width / 5,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 36,
+                        left: 39,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.primaryColor,
+                          ),
+                          child: Text(
+                            remainingImageCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 } else {
                   return const SizedBox.shrink();
@@ -211,7 +308,9 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                   children: [
                     Image(
                       image: (_localImages.isNotEmpty && _localImages[index] != null)
-                          ? FileImage(File(_localImages[index]!))
+                          ? (_pickedImages[index].isVideo ?? false)
+                          ? Image.asset('assets/images/video_placeholder.png').image
+                          : FileImage(File(_localImages[index]!))
                           : FadeInImage(
                         placeholder: const AssetImage('assets/images/loading.gif'),
                         image: NetworkImage(_pickedImages[index].src!),
@@ -243,5 +342,33 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       ],
     );
   }
-}
 
+  void _pickMedia() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Choose an image'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImages();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.videocam),
+              title: const Text('Choose a video'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickVideo();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

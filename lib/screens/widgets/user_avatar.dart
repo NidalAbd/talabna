@@ -12,7 +12,13 @@ class UserAvatar extends StatefulWidget {
   final String? imageUrl;
   final double? radius;
   final int fromUser;
-  const UserAvatar({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser})
+  const UserAvatar(
+      {Key? key,
+      this.imageUrl,
+      this.radius,
+      required this.toUser,
+      required this.canViewProfile,
+      required this.fromUser})
       : super(key: key);
 
   @override
@@ -31,7 +37,8 @@ class _UserAvatarState extends State<UserAvatar> {
         : '${Constants.apiBaseUrl}/storage/photos/avatar3.png')!;
     _userProfileBloc = BlocProvider.of<UserProfileBloc>(context);
     _userProfileBloc.stream.listen((state) {
-      if (state is UserProfilePhotoUpdateSuccess && state.user.id == widget.fromUser) {
+      if (state is UserProfilePhotoUpdateSuccess &&
+          state.user.id == widget.fromUser) {
         setState(() {
           _imageUrl = (state.user.photos?.first.src ?? widget.imageUrl)!;
         });
@@ -45,18 +52,23 @@ class _UserAvatarState extends State<UserAvatar> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => OtherProfileScreen(fromUser: widget.fromUser, toUser: widget.toUser, isOtherProfile: true,),
+            builder: (context) => OtherProfileScreen(
+              fromUser: widget.fromUser,
+              toUser: widget.toUser,
+              isOtherProfile: widget.canViewProfile,
+            ),
           ),
         );
       },
       child: CircleAvatar(
-        backgroundColor: const Color.fromARGB(238, 249, 230, 248),
-        radius:  widget.radius! + 2,
+        backgroundColor: const Color.fromARGB(255, 255, 243, 207),
+        radius: widget.radius! + 2,
         child: CircleAvatar(
           radius: widget.radius,
           backgroundImage: Image.network(
             _imageUrl,
-            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
               return CircleAvatar(
                 radius: widget.radius,
                 backgroundImage: const AssetImage('assets/avatar.png'),

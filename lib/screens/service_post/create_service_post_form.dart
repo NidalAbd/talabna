@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -10,12 +11,14 @@ import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/service_post.dart';
 
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
+import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/widgets/category_dropdown.dart';
 import 'package:talbna/screens/widgets/image_picker_button.dart';
 import 'package:talbna/screens/widgets/location_picker.dart';
 import 'package:talbna/screens/widgets/subcategory_dropdown.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:http/http.dart' as http;
+import 'package:talbna/screens/widgets/video_picker_button.dart';
 import 'package:talbna/utils/functions.dart';
 import 'package:path/path.dart' as p;
 import 'package:http_parser/http_parser.dart';
@@ -30,6 +33,8 @@ class ServicePostFormScreen extends StatefulWidget {
 
 class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
   final GlobalKey<ImagePickerButtonState> _imagePickerButtonKey = GlobalKey<ImagePickerButtonState>();
+  final GlobalKey<ImagePickerButtonState> _VideoPickerButtonKey = GlobalKey<ImagePickerButtonState>();
+
   final _formKey = GlobalKey<FormState>();
   late String _title = '';
   late String _description= '';
@@ -44,6 +49,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
   late String _selectedHaveBadge = 'عادي';
   late int _selectedBadgeDuration = _selectedHaveBadge == 'عادي' ? 0 : 1;
   late int _calculatedPoints = 0;
+  late bool balanceOut = false;
   final ValueNotifier<List<Photo>?> _initialPhotos = ValueNotifier(null);
   Widget _buildImagePickerButton() {
     return ImagePickerButton(
@@ -55,9 +61,10 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
           });
         }
       },
-      initialPhotosNotifier: _initialPhotos,
+      initialPhotosNotifier: _initialPhotos, maxImages: 4, deleteApi: false,
     );
   }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()){
       checkBadgeAndShowMessage(context, _selectedHaveBadge, _selectedBadgeDuration);
@@ -66,10 +73,14 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         return;
       }
       final imageFiles = <http.MultipartFile>[];
+      final videoFiles = <http.MultipartFile>[];
+      print('pickedImages $_pickedImages');
+      print('mimeType $lookupMimeType(photo.src!)');
       for (final photo in _pickedImages) {
         if (photo.src != null) {
           final bytes = await File(photo.src!).readAsBytes();
           final mimeType = lookupMimeType(photo.src!);
+
           if (mimeType == 'image/jpeg' ||
               mimeType == 'image/jpg' ||
               mimeType == 'image/png' ||
@@ -78,11 +89,19 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               'images[]',
               bytes,
               filename: p.basename(photo.src!),
-              contentType: MediaType.parse(mimeType!), // use the detected MIME type for the image file
+              contentType: MediaType.parse(mimeType!), // Use the detected MIME type for the image file
             );
             imageFiles.add(imageFile);
+          } else if (mimeType == 'video/mp4') {
+            final videoFile = http.MultipartFile.fromBytes(
+              'videos[]',
+              bytes,
+              filename: p.basename(photo.src!),
+              contentType: MediaType.parse(mimeType!), // Use the detected MIME type for the video file
+            );
+            videoFiles.add(videoFile);
           } else {
-              print('Unsupported image format: $mimeType');
+            print('Unsupported file format: $mimeType');
           }
         }
       }
@@ -131,7 +150,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children:  [
-                  PointBalance(userId: widget.userId, showBalance: true,),
+                  PointBalance(userId: widget.userId, showBalance: true,canClick: true,),
                 ],
               ),
             ),
@@ -139,12 +158,24 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         ),
         body: BlocListener<ServicePostBloc, ServicePostState>(
         listener: (context, state) {
-          print(state);
       if (state is ServicePostOperationSuccess) {
         SuccessWidget.show(context, 'Service Post created successfully');
         Navigator.of(context).pop();
       } else if (state is ServicePostOperationFailure) {
-        ErrorWidget('Error creating : ${state.errorMessage}');
+        bool balance =
+        state.errorMessage.contains('Your Balance Point not enough');
+        if (balance) {
+          setState(() {
+            balanceOut = balance;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Error: Your Balance Point not enough'),
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error: ${state.errorMessage}'),
+          ));
+        }
       }
         },
           child: Form(
@@ -155,7 +186,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                 padding: const EdgeInsets.all(16.0),
                 children: [
                   _buildImagePickerButton(),
-
                   LocationPicker(
                     onLocationPicked: (LatLng location) {
                       setState(() {
@@ -326,8 +356,25 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                   ),
                   ElevatedButton(
                     onPressed: _submitForm,
-                    child: const Text('اضافة'),
+                    child: const Text('اضافة',style: TextStyle(color: Colors.white),),
                   ),
+                  if (balanceOut)const Text('ليس لديك رصيد نقاط كافي , يمكنك شراء النقاط من هنا'),
+                  if (balanceOut)
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => PurchaseRequestScreen(
+                              userID: widget.userId,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'اضافة نقاط',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                 ],
               ),
             ),

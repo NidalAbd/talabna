@@ -5,18 +5,17 @@ import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
-
-import 'news_form_widget.dart';
 
 class ServicePostScreen extends StatefulWidget {
   final int category;
   final int userID;
-  late bool showSubcategoryGridView;
+  final bool showSubcategoryGridView;
   final ServicePostBloc servicePostBloc;
 
-   ServicePostScreen({
+   const ServicePostScreen({
     Key? key,
     required this.category,
     required this.userID,
@@ -24,18 +23,18 @@ class ServicePostScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ServicePostScreenState createState() => _ServicePostScreenState();
+  ServicePostScreenState createState() => ServicePostScreenState();
 }
 
-class _ServicePostScreenState extends State<ServicePostScreen>
+class ServicePostScreenState extends State<ServicePostScreen>
     with AutomaticKeepAliveClientMixin<ServicePostScreen> {
   @override
   bool get wantKeepAlive => true;
   late  bool haveSubcategory;
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollCategoryPostController = ScrollController();
   int _currentPage = 1;
   bool _hasReachedMax = false;
-
+  late bool isRealScreen = widget.category == 8;
   late int? userId;
 
   List<ServicePost> _servicePostsCategory = [];
@@ -47,29 +46,28 @@ class _ServicePostScreenState extends State<ServicePostScreen>
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _scrollCategoryPostController.addListener(_onScrollCategoryPost);
     widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
-
   }
 
 
-  void _onScroll() {
+  void _onScrollCategoryPost() {
     if (!_hasReachedMax &&
-        _scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+        _scrollCategoryPostController.offset >=
+            _scrollCategoryPostController.position.maxScrollExtent &&
+        !_scrollCategoryPostController.position.outOfRange) {
       _currentPage++;
       widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
     }
 
   }
-  Future<void> _handleRefresh() async {
+  Future<void> _handleRefreshCategoryPost() async {
     _currentPage = 1;
     _hasReachedMax = false;
     _servicePostsCategory.clear();
     widget.servicePostBloc.add(GetServicePostsByCategoryEvent(widget.category, _currentPage));
   }
-  void _handleServicePostLoadSuccess(
+  void _handleCategoryPostLoadSuccess(
       List<ServicePost> servicePosts, bool hasReachedMax) {
     setState(() {
       _hasReachedMax = hasReachedMax;
@@ -77,9 +75,9 @@ class _ServicePostScreenState extends State<ServicePostScreen>
     });
   }
 
-  Future<bool> _onWillPop() async {
-    if (_scrollController.offset > 0) {
-      _scrollController.animateTo(
+  Future<bool> _onWillPopCategoryPost() async {
+    if (_scrollCategoryPostController.offset > 0) {
+      _scrollCategoryPostController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInToLinear,
@@ -87,7 +85,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
       // Wait for 200 milliseconds before refreshing
       await Future.delayed(const Duration(milliseconds: 200));
       // Trigger a refresh after reaching the top
-      _handleRefresh();
+      _handleRefreshCategoryPost();
       return false;
     } else {
       return true;
@@ -97,22 +95,22 @@ class _ServicePostScreenState extends State<ServicePostScreen>
   @override
   void dispose() {
     _servicePostsCategory.clear();
-    _scrollController.dispose();
+    _scrollCategoryPostController.dispose();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     super.build(context); // Add this line
     return WillPopScope(
-      onWillPop: _onWillPop,
-      child: BlocListener<ServicePostBloc, ServicePostState>(
+      onWillPop: _onWillPopCategoryPost,
+      child:BlocListener<ServicePostBloc, ServicePostState>(
         listenWhen: (previous, current) {
           return current is ServicePostLoadSuccess;
         },
         bloc: widget.servicePostBloc,
         listener: (context, state) {
           if (state is ServicePostLoadSuccess) {
-            _handleServicePostLoadSuccess(
+            _handleCategoryPostLoadSuccess(
                 state.servicePosts, state.hasReachedMax);
           }
         },
@@ -120,14 +118,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: widget.showSubcategoryGridView
-                  ? SubcategoryGridView(
-                categoryId: widget.category,
-                userId: widget.userID,
-                servicePostBloc: widget.servicePostBloc,
-                userProfileBloc: BlocProvider.of<UserProfileBloc>(context),
-              )
-                  : BlocBuilder<ServicePostBloc, ServicePostState>(
+              child: BlocBuilder<ServicePostBloc, ServicePostState>(
                       bloc: widget.servicePostBloc,
                       builder: (context, state) {
                         if (state is ServicePostLoading &&
@@ -137,16 +128,16 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                           );
                         } else if (_servicePostsCategory.isNotEmpty) {
                           return RefreshIndicator(
-                            onRefresh: _handleRefresh,
+                            onRefresh: _handleRefreshCategoryPost,
                             child: Column(
                               children: [
-                               if(widget.category == 7) NewsPostForm(
-                                  onPostSubmitted: (String text, String? mediaType) {
-                                  },
-                                ),
+                               // if(widget.category == 7) NewsPostForm(
+                               //    onPostSubmitted: (String text, String? mediaType) {
+                               //    },
+                               //  ),
                                 Expanded(
                                   child: ListView.builder(
-                                    controller: _scrollController,
+                                    controller: _scrollCategoryPostController,
                                     itemCount: _hasReachedMax
                                         ? _servicePostsCategory.length
                                         : _servicePostsCategory.length + 1,
@@ -163,7 +154,8 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                                         child: ServicePostCard(
                                           key: Key('servicePostCategory_${servicePost.id}'),
                                           onPostDeleted: onPostDeleted,
-                                          servicePost: servicePost, canViewProfile: true,
+                                          servicePost: servicePost,
+                                          canViewProfile: true,
                                           userProfileId: widget.userID,
                                         ),
                                       );
@@ -184,7 +176,7 @@ class _ServicePostScreenState extends State<ServicePostScreen>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 IconButton(
-                                  onPressed: _handleRefresh,
+                                  onPressed: _handleRefreshCategoryPost,
                                   icon: const Icon(Icons.refresh),
                                 ),
                                  Text('some error happen , $errorMessage'),

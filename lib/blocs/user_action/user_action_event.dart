@@ -16,6 +16,13 @@ class ToggleUserMakeFollowEvent extends UserActionEvent {
   @override
   List<Object> get props => [user];
 }
+class ToggleUserMakeFollowFromListEvent extends UserActionEvent {
+  final int user;
+  const ToggleUserMakeFollowFromListEvent({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
 class UpdateUserPassword extends UserActionEvent {
   final int userId;
   final String oldPassword;
@@ -27,7 +34,12 @@ class UpdateUserPassword extends UserActionEvent {
     required this.newPassword,
   });
 }
-
+class ReportRequested extends UserActionEvent {
+  final int user;
+  final String type;
+  final String reason;
+  const ReportRequested({required this.user ,required this.type, required this.reason, });
+}
 class UpdateUserEmail extends UserActionEvent {
   final int userId;
   final String newEmail;
@@ -49,6 +61,13 @@ class GetUserFollowSubcategories extends UserActionEvent {
   const GetUserFollowSubcategories({required this.subCategoryId});
   @override
   List<Object> get props => [subCategoryId];
+}
+class GetUserFollow extends UserActionEvent {
+  final int user;
+
+  const GetUserFollow({required this.user});
+  @override
+  List<Object> get props => [user];
 }
 class UserSearchAction extends UserActionEvent {
   final String search;

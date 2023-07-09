@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 
 import 'check_auth.dart';
 
@@ -37,6 +38,7 @@ class _SplashState extends State<Splash> {
         body: Center(
           child: CircleAvatar(
             radius: 40,
+            backgroundColor: AppTheme.primaryColor,
             backgroundImage: AssetImage("assets/talabnaLogo.png"),
           ),
         ));

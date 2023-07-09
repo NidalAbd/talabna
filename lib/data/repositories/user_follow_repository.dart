@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:talbna/data/models/report.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/utils/constants.dart';
@@ -60,53 +61,59 @@ class UserFollowRepository {
       throw Exception('خطأ في الاتصال بالخادم - المتابعين');
     }
   }
+  Future<List<User>> getUserSeller(
+      {int page = 1}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    try {
+      final response = await http.get(
+          Uri.parse('$_baseUrl/api/user/UserSeller?page=$page'),
+          headers: {'Authorization': 'Bearer $token'});
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<User> userFollowing = (data["data"] as List)
+            .map((e) => User.fromJson(e))
+            .toList();
+        return userFollowing;
+      } else if (response.statusCode == 404) {
+        throw Exception('هذا الملف الشخصي غير موجود');
+      } else {
+        throw Exception('فشل في تحميل المتابعين');
+      }
+    } catch (e) {
+      throw Exception('خطأ في الاتصال بالخادم - المتابعين');
+    }
+  }
+  Future<Reports> makeReport({required int id , required String type , required String reason}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final response = await http.post(Uri.parse('$_baseUrl/api/reports/reported/$type/reportedId/$id/reason/$reason'),
+        headers: {'Authorization': 'Bearer $token'});
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData.containsKey('report') && jsonData['report'] != null) {
+        print(jsonData['report']);
 
-  Future<void> userMakeFollow(
-      {required int userId}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
-    try {
-      final response = await http.get(
-          Uri.parse('$_baseUrl/api/users/$userId/follow'),
-          headers: {'Authorization': 'Bearer $token'});
-      if (response.statusCode == 200) {
-        return ;
-      } else if (response.statusCode == 404) {
-        throw Exception('هذا الملف الشخصي غير موجود');
+        return Reports.fromJson(jsonData['report']);
       } else {
-        throw Exception('فشل في تحميل المتابعين');
+        throw Exception('JSON response does not contain userData');
       }
-    } catch (e) {
-      throw Exception('خطأ في الاتصال بالخادم - المتابعين');
+    } else if (response.statusCode == 404) {
+      throw Exception('هذا الملف الشخصي غير موجود');
+    } else {
+      throw Exception('فشل في تحميل الملف الشخصي');
     }
   }
-  Future<void> userMakeUnFollow(
-      {required int userId}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
-    try {
-      final response = await http.get(
-          Uri.parse('$_baseUrl/api/users/$userId/unfollow'),
-          headers: {'Authorization': 'Bearer $token'});
-      if (response.statusCode == 200) {
-        return ;
-      } else if (response.statusCode == 404) {
-        throw Exception('هذا الملف الشخصي غير موجود');
-      } else {
-        throw Exception('فشل في تحميل المتابعين');
-      }
-    } catch (e) {
-      throw Exception('خطأ في الاتصال بالخادم - المتابعين');
-    }
-  }
+
   Future<bool> toggleFollowSubcategories(int subCategoryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
@@ -121,6 +128,25 @@ class UserFollowRepository {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       final isFollowing = jsonResponse['isFollowSubcategory'] ?? false;
+      return isFollowing;
+    } else {
+      return false;
+    }
+  }
+  Future<bool> getUserFollow(int user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('لا يوجد اتصال بالإنترنت');
+    }
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/users/$user/is-following'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonResponse = json.decode(response.body);
+      final isFollowing = jsonResponse['is_follower'] ?? false;
       return isFollowing;
     } else {
       return false;

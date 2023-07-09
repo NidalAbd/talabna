@@ -94,6 +94,7 @@ class _LogoTitleState extends State<LogoTitle>
               const SizedBox(width: 10,),
               CircleAvatar(
                 radius: widget.logoSize,
+                backgroundColor: AppTheme.primaryColor,
                 backgroundImage: const AssetImage('assets/talabnaLogo.png'),
               ),
             ],

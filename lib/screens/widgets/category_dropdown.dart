@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
 
@@ -41,17 +42,16 @@ class _CategoriesDropdownState extends State<CategoriesDropdown> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<Category>(
-
       value: _selectedCategory,
       decoration: const InputDecoration(
-
         labelText: 'الفئة الرئيسية',
       ),
+      dropdownColor: AppTheme.primaryColor,
       items: _categories
           .map((category) => DropdownMenuItem<Category>(
 
         value: category,
-        child: Text(category.name),
+        child: Text(category.name, style: const TextStyle(color: Colors.white),),
       ))
           .toList(),
       onChanged: (Category? newCategory) {

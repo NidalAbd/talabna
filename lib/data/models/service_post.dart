@@ -118,6 +118,7 @@ class Photo {
   int? photoableId;
   String? src;
   String? type;
+  bool? isVideo;
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -127,6 +128,7 @@ class Photo {
     photoableId = json['photoable_id'] ?? 0;
     src = json['src'] ?? '';
     type = json['type'] ?? '';
+    isVideo = json['isVideo'] == 1; // Convert integer to boolean
     createdAt = json['created_at'] != null ? DateTime.parse(json['created_at']) : null;
     updatedAt = json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null;
   }
@@ -138,9 +140,11 @@ class Photo {
     data['photoable_id'] = photoableId;
     data['src'] = src;
     data['type'] = type;
+    data['isVideo'] = isVideo == true ? 1 : 0; // Convert boolean to integer
     if (createdAt != null) data['created_at'] = createdAt;
     if (updatedAt != null) data['updated_at'] = updatedAt;
     return data;
   }
 }
+
 

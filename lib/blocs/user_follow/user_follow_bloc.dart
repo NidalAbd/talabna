@@ -31,7 +31,16 @@ class UserFollowBloc extends Bloc<UserFollowEvent, UserFollowState> {
       }
     });
 
-
+    on<UserSellerRequested>((event, emit) async {
+      emit(UserFollowLoadInProgress());
+      try {
+        final users = await _repository.getUserSeller( page: event.page);
+        bool hasReachedMax = users.length < 10; // Assuming 10 is the maximum number of items you fetch in one request
+        emit(UserSellerSuccessState(users: users, hasReachedMax: hasReachedMax));
+      } catch (e) {
+        emit(UserFollowLoadFailure(error: e.toString()));
+      }
+    });
   }
 
 }

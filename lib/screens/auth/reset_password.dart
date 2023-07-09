@@ -79,6 +79,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 controller: _emailController,
                 obscureText: false,
+                maxLength: 50,
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Email is required';

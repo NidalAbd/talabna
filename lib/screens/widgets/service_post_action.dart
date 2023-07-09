@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -27,9 +29,31 @@ class ServicePostAction extends StatefulWidget {
 
 class _ServicePostActionState extends State<ServicePostAction>
     with SingleTickerProviderStateMixin {
+  late int? currentUserId;
+  late bool isOwnPost = false;
   @override
   void initState() {
     super.initState();
+    initializeUserId();
+
+  }
+
+  void initializeUserId() {
+    getUserId().then((userId) {
+      setState(() {
+        currentUserId = userId;
+        if (currentUserId == widget.servicePostUserId){
+          isOwnPost = true;
+        }else{
+          isOwnPost = false;
+        }
+      });
+    });
+  }
+
+  Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userId');
   }
 
   void _deletePost(BuildContext context) async {
@@ -79,103 +103,112 @@ class _ServicePostActionState extends State<ServicePostAction>
           builder: (context, state) {
         return IconButton(
           padding: EdgeInsets.zero,
-          icon: const Icon(Icons.more_vert),
+          icon:  Icon(Icons.more_vert,color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,),
           onPressed: () {
             showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
-                return Wrap(
-                  children: [
-                    if (widget.userProfileId == widget.servicePostUserId)
-                      ListTile(
-                        leading: const Icon(Icons.edit),
-                        title: const Text('Edit'),
-                        onTap: () {
-                          Navigator.pop(context); // Dismiss the bottom sheet
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => UpdatePostScreen(
-                                userId: widget.userProfileId!,
-                                servicePostId: widget.servicePostId!,
+                return Container(
+                  color: AppTheme.primaryColor,
+                  child: Wrap(
+                    children: [
+                        Visibility(
+                          visible: isOwnPost,
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.edit , color: Colors.white,),
+                                title: const Text('Edit',style: TextStyle(color: Colors.white,),),
+                                onTap: () {
+                                  Navigator.pop(context); // Dismiss the bottom sheet
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => UpdatePostScreen(
+                                        userId: currentUserId!,
+                                        servicePostId: widget.servicePostId!,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    if (widget.userProfileId == widget.servicePostUserId)
-                      ListTile(
-                        leading: const Icon(Icons.category),
-                        title: const Text('Change Category'),
-                        onTap: () {
-                          Navigator.pop(context); // Dismiss the bottom sheet
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ChangeCategoryScreen(
-                                    userId: widget.userProfileId!,
-                                    servicePostId: widget.servicePostId!)),
-                          );
-                        },
-                      ),
-                    if (widget.userProfileId == widget.servicePostUserId)
-                      ListTile(
-                        leading: const Icon(Icons.star),
-                        title: const Text('Make Badge'),
-                        onTap: () {
-                          Navigator.pop(context); // Dismiss the bottom sheet
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ChangeBadge(
-                                    userId: widget.userProfileId!,
-                                    servicePostId: widget.servicePostId!)),
-                          );
-                        },
-                      ),
-                    if (widget.userProfileId == widget.servicePostUserId)
-                      ListTile(
-                        leading: const Icon(Icons.delete),
-                        title: const Text('Delete'),
-                        onTap: () async {
-                          bool? result = await showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Delete Post'),
-                              content: const Text(
-                                  'Are you sure you want to delete this post?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(false),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  child: const Text('Confirm'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (result == true) {
-                            _deletePost(context);
-                          }
-                          Navigator.pop(context); // Dismiss the bottom sheet
-                        },
-                      ),
-                    ListTile(
-                        leading: const Icon(Icons.report),
-                        title: const Text('Report'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return ReportTile(
-                                  type: 'service_post',
-                                  userId: widget.servicePostId!,
-                                );
-                              });
-                        })
-                  ],
+                              ListTile(
+                                leading: const Icon(Icons.category, color: Colors.white,),
+                                title: const Text('Change Category',style: TextStyle(color: Colors.white,),),
+                                onTap: () {
+                                  Navigator.pop(context); // Dismiss the bottom sheet
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) => ChangeCategoryScreen(
+                                            userId: currentUserId!,
+                                            servicePostId: widget.servicePostId!)),
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.star, color: Colors.white,),
+                                title: const Text('Make Badge',style: TextStyle(color: Colors.white,),),
+                                onTap: () {
+                                  Navigator.pop(context); // Dismiss the bottom sheet
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) => ChangeBadge(
+                                            userId: currentUserId!,
+                                            servicePostId: widget.servicePostId!)),
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.delete, color: Colors.white,),
+                                title: const Text('Delete',style: TextStyle(color: Colors.white,),),
+                                onTap: () async {
+                                  bool? result = await showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Delete Post'),
+                                      content: const Text(
+                                          'Are you sure you want to delete this post?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('Confirm'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    _deletePost(context);
+                                  }
+                                  Navigator.pop(context); // Dismiss the bottom sheet
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+
+                      ,ListTile(
+                          leading: const Icon(Icons.report, color: Colors.white,),
+                          title: const Text('Report' ,style: TextStyle(color: Colors.white,),),
+                          onTap: () {
+                            Navigator.pop(context);
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ReportTile(
+                                    type: 'service_post',
+                                    userId: widget.servicePostId!,
+                                  );
+                                });
+                          })
+                    ],
+                  ),
                 );
               },
             );

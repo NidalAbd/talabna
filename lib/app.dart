@@ -8,10 +8,10 @@ import 'package:talbna/screens/splash.dart';
 import 'package:talbna/screens/widgets/loading_widget.dart';
 import 'package:talbna/theme_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/utils/fcm_handler.dart';
 import 'blocs/authentication/authentication_bloc.dart';
 import 'data/repositories/authentication_repository.dart';
 import 'utils/constants.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class MyApp extends StatefulWidget {
   final AuthenticationRepository authenticationRepository;
@@ -26,6 +26,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final FCMHandler _fcmHandler = FCMHandler(); // Initialize FCMHandler
+  @override
+  void initState() {
+    super.initState();
+    initializeFCM(); // Call initializeFCM method when the app is opened
+  }
+
+  Future<void> initializeFCM() async {
+    await _fcmHandler.initializeFCM(); // Initialize FCMHandler
+    String deviceToken = await _fcmHandler.getDeviceToken(); // Retrieve device token
+  }
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<SharedPreferences>(

@@ -12,8 +12,14 @@ class UserFollowerRequested extends UserFollowEvent {
   final int page;
 
   const UserFollowerRequested({required this.user, this.page = 1});
-}
 
+}
+class UserSellerRequested extends UserFollowEvent {
+  final int page;
+
+  const UserSellerRequested({ this.page = 1});
+
+}
 class UserFollowingRequested extends UserFollowEvent {
   final int user;
   final int page;
