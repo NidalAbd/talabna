@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -64,19 +65,19 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     });
   }
   Widget _buildImagePickerButton() {
+    print('from this new value : ${_initialPhotos.value?.first.src}');
     return ImagePickerButton(
       key: _imagePickerButtonKey,
       onImagesPicked: (List<Photo>? pickedPhotos) {
-        print(pickedPhotos);
-        print(_initialPhotos);
-
         if (pickedPhotos != null) {
           setState(() {
             _pickedImages = pickedPhotos;
           });
         }
       },
-      initialPhotosNotifier: _initialPhotos, maxImages: 4, deleteApi: true,
+      initialPhotosNotifier: _initialPhotos,
+      maxImages: 4,
+      deleteApi: true,
     );
   }
   @override
@@ -113,14 +114,12 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
           child: BlocConsumer<ServicePostBloc, ServicePostState>(
             listener: (context, state) {
               print(state);
-
               if (state is ServicePostOperationSuccess) {
                 SuccessWidget.show(context, 'Post updated successfully');
                 setState(() {
                   _isLoading = false;
                 });
                 Navigator.of(context).pop();
-
               }if (state is ServicePostImageDeletingSuccess) {
                 SuccessWidget.show(context, 'image removed');
                 setState(() {
@@ -134,7 +133,6 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
             },
             builder: (context, state) {
               if (state is ServicePostFormLoadSuccess) {
-                // Update the title and description controllers with the old values
                 _oldTitleController.text = state.servicePost!.title!;
                 _oldDescriptionController.text = state.servicePost!.description!;
                 _oldPriceController.text = state.servicePost!.price.toString();
@@ -144,14 +142,12 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                 _selectedCategory?.name = state.servicePost!.category!;
                 _selectedSubCategory?.name = state.servicePost!.subCategory!;
                 _initialPhotos.value = state.servicePost!.photos;
-
               }
               return Form(
                 key: _formKey,
                 child: ListView(
                   children: [
                     _buildImagePickerButton(),
-
                     LocationPicker(
                       onLocationPicked: (LatLng location) {
                         setState(() {
@@ -182,7 +178,8 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                           controller: _oldDescriptionController,
                           maxLength: 5000,
                           textDirection: TextDirection.rtl,
-                          maxLines: 8, // set maxLines to 10 to allow up to 500 characters
+                          minLines: 1,
+                          maxLines: 10, // set maxLines to 10 to allow up to 500 characters
                           decoration: const InputDecoration(
                             labelText: 'الوصف',
                           ),
@@ -294,7 +291,6 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                 }
                               }
                         context.read<ServicePostBloc>().add(UpdatePhotoServicePostEvent(widget.servicePostId, imageFiles));
-
                         final servicePost = ServicePost(
                                   id: widget.servicePostId,
                                   title: _oldTitleController.text,
@@ -320,7 +316,11 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                             },
                       child: _isLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Update Post'),
+                          :  Text('Update Post' , style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightForegroundColor
+                            : AppTheme.darkForegroundColor,
+                      ),),
                     ),
                   ],
                 ),

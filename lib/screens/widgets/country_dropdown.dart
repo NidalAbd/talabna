@@ -118,7 +118,9 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
               items: _countries.map((country) {
                 return DropdownMenuItem<Country>(
                   value: country,
-                  child: Text(country.name ,style: const TextStyle(color: Colors.white),),
+                  child: Text(country.name ,style:  TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),),
                 );
               }).toList(),
               onChanged: (Country? newCountry) {
@@ -152,7 +154,9 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                 items: _cities.map((city) {
                   return DropdownMenuItem<City>(
                     value: city,
-                    child: Text(city.name),
+                    child: Text(city.name ,style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,),),
                   );
                 }).toList(),
                 onChanged: (City? newCity) {

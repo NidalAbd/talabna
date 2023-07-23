@@ -52,6 +52,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
       ..add(GetServicePostsRealsEvent(_currentPage));
     _scrollCategoryPostController = PageController()
       ..addListener(_onScrollReelPost);
+    WidgetsFlutterBinding.ensureInitialized();
 
     Timer.periodic(const Duration(seconds: 1), (Timer t) {
       final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
@@ -428,7 +429,11 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
 
   Widget _buildVideoDisplay(Photo media) {
     return Center(
-      child: VideoPlayer(_getVideoPlayerController(media)),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width , // Set the width to the screen width
+        height: MediaQuery.of(context).size.height,
+        child: VideoPlayer(_getVideoPlayerController(media)),
+      ),
     );
   }
 

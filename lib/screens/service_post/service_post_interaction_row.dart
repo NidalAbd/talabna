@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
@@ -63,7 +64,13 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.remove_red_eye),
+                      Icon(
+                        Icons.remove_red_eye,
+                        color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightBackgroundColor
+                            : AppTheme.lightForegroundColor,
+                      ),
                       const SizedBox(width: 5),
                       Text(
                         widget.views!,
@@ -93,9 +100,16 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.share),
+                    icon: Icon(
+                      Icons.share,
+                      color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightBackgroundColor
+                          : AppTheme.lightForegroundColor,
+                    ),
                     onPressed: () async {
-                    await Share.share('${Constants.apiBaseUrl}/api/service_posts/${widget.servicePostId!}');
+                      await Share.share(
+                          '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePostId!}');
                     },
                   ),
                 ],

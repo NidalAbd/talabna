@@ -51,7 +51,11 @@ class _CategoriesDropdownState extends State<CategoriesDropdown> {
           .map((category) => DropdownMenuItem<Category>(
 
         value: category,
-        child: Text(category.name, style: const TextStyle(color: Colors.white),),
+        child: Text(category.name, style:  TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
+        ),),
       ))
           .toList(),
       onChanged: (Category? newCategory) {

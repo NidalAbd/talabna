@@ -63,7 +63,9 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
       items: _subCategories
           .map((subCategory) => DropdownMenuItem<SubCategory>(
         value: subCategory,
-        child: Text(subCategory.name , style: const TextStyle(color: Colors.white),),
+        child: Text(subCategory.name , style:  TextStyle(  color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black,),),
       ))
           .toList(),
       dropdownColor: AppTheme.primaryColor,

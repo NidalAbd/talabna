@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -123,9 +124,12 @@ class _ChangeBadgeState extends State<ChangeBadge> {
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value,style:  TextStyle(  color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,),),
                     );
                   }).toList(),
+                  dropdownColor: AppTheme.primaryColor,
                 ),
                 Visibility(
                   visible: _selectedHaveBadge != 'عادي',

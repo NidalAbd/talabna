@@ -43,7 +43,6 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
   @override
   void initState() {
     super.initState();
-
     widget.initialPhotosNotifier.addListener(() {
       if (widget.initialPhotosNotifier.value != null) {
         _pickedImages = widget.initialPhotosNotifier.value!
@@ -52,6 +51,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                   'src': '${photo.src}',
                 }))
             .toList();
+
         _localMedia =
             List<String?>.filled(_pickedImages.length, null, growable: true);
         setState(() {});

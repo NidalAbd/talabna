@@ -24,9 +24,9 @@ class _ImageGridState extends State<ImageGrid> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FullScreenImage(
-          mediaUrls: widget.imageUrls,
-          initialIndex: index,
+        builder: (context) => ReelsHomeScreen(
+          userId: widget.userId,  // Replace with your user id
+          servicePost: widget.servicePost,
         ),
       ),
     );
@@ -150,7 +150,7 @@ class _VideoItemState extends State<VideoItem> {
                   child: VideoPlayer(_controller),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 0),
                   child: VideoProgressIndicator(
                     _controller,
                     allowScrubbing: true,

@@ -100,7 +100,7 @@ class _UserCardState extends State<UserCard> {
               ),
               child: Text(
                 isFollowThisUser! ? 'Unfollow' : 'Follow',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
                 ),

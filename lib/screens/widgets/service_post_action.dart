@@ -166,19 +166,19 @@ class _ServicePostActionState extends State<ServicePostAction>
                                   bool? result = await showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: const Text('Delete Post'),
+                                      title: const Text('Delete Post', style: TextStyle(color: Colors.white,),),
                                       content: const Text(
-                                          'Are you sure you want to delete this post?'),
+                                          'Are you sure you want to delete this post?', style: TextStyle(color: Colors.white,),),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.of(context).pop(false),
-                                          child: const Text('Cancel'),
+                                          child: const Text('Cancel', style: TextStyle(color: Colors.white,),),
                                         ),
                                         TextButton(
                                           onPressed: () =>
                                               Navigator.of(context).pop(true),
-                                          child: const Text('Confirm'),
+                                          child: const Text('Confirm', style: TextStyle(color: Colors.white,),),
                                         ),
                                       ],
                                     ),

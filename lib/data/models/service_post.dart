@@ -132,7 +132,7 @@ class Photo {
     id = json['id'] ?? 0;
     photoableType = json['photoable_type'] ?? '';
     photoableId = json['photoable_id'] ?? 0;
-    src = '${Constants.apiBaseUrl}/storage/${json['src']}' ?? '';
+    src = '${Constants.apiBaseUrl}/storage/${json['src']}';
     type = json['type'] ?? '';
     isVideo = json['isVideo'] == 1; // Convert integer to boolean
     createdAt = json['created_at'] != null ? DateTime.parse(json['created_at']) : null;

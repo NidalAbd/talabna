@@ -149,6 +149,7 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
                         TextFormField(
                           controller: _pointsController,
                           keyboardType: TextInputType.number,
+                          maxLength: 5,
                           decoration: const InputDecoration(
                             labelText: 'النقاط المطلوبة',
                             border: OutlineInputBorder(),
