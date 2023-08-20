@@ -154,7 +154,6 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                   icon: Icon(
                     isFollowing ? Icons.verified_user_outlined : Icons.add_circle, // Replace with your desired icons
                     size: 20, // Set the size of the icon
-                    color: Colors.white, // Customize the icon color
                   ),
                 )
               );

@@ -41,12 +41,14 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-          decoration:  const BoxDecoration(
+          decoration:   BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.primaryColor,
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
                 AppTheme.accentColor,
               ],
             ),
@@ -163,9 +165,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           width: MediaQuery.of(context).size.width / 1.19,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor:
-                                              AppTheme.primaryColor.withOpacity(0.6),
+
                                               padding: const EdgeInsets.symmetric(vertical: 16),
                                               shape: const RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.all(
@@ -234,8 +234,10 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 ],
                               ),
-                              child:  const CircleAvatar(
-                                backgroundColor: AppTheme.primaryColor,
+                              child:   CircleAvatar(
+                                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                    ? AppTheme.lightPrimaryColor
+                                    : AppTheme.darkPrimaryColor,
                                 radius: 40,
                                 child: Icon(Icons.lock, size: 60,color: AppTheme.accentColor,),
                               ),

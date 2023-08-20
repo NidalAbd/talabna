@@ -46,7 +46,9 @@ class _CategoriesDropdownState extends State<CategoriesDropdown> {
       decoration: const InputDecoration(
         labelText: 'الفئة الرئيسية',
       ),
-      dropdownColor: AppTheme.primaryColor,
+      dropdownColor: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightPrimaryColor
+          : AppTheme.darkPrimaryColor,
       items: _categories
           .map((category) => DropdownMenuItem<Category>(
 

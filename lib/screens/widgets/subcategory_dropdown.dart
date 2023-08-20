@@ -68,7 +68,9 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
             : Colors.black,),),
       ))
           .toList(),
-      dropdownColor: AppTheme.primaryColor,
+      dropdownColor: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightPrimaryColor
+          : AppTheme.darkPrimaryColor,
       onChanged: (SubCategory? newSubCategory) {
         if (newSubCategory != null) {
           setState(() {

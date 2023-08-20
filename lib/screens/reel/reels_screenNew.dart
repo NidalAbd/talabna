@@ -116,7 +116,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     return WillPopScope(
       onWillPop: _onWillPopReelPost,
       child: Scaffold(
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+            : AppTheme.darkPrimaryColor.withOpacity(0.8),
         body: BlocListener<ServicePostBloc, ServicePostState>(
           listenWhen: (previous, current) =>
               true, // Listen to all state changes

@@ -83,45 +83,36 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _getCategoryIcon(Category category) {
     switch (category.id) {
       case 1:
-        return const Icon(
+        return  const Icon(
           Icons.work,
-          color: Colors.white,
         );
       case 2:
-        return const Icon(
+        return  const Icon(
           Icons.devices,
-          color: Colors.white,
         );
       case 3:
-        return const Icon(
+        return  const Icon(
           Icons.home,
-          color: Colors.white,
         );
       case 7:
-        return const Icon(
+        return  const Icon(
           Icons.play_circle,
-          color: Colors.white,
         );
-
       case 4:
-        return const Icon(
+        return  const Icon(
           Icons.car_rental,
-          color: Colors.white,
         );
       case 5:
-        return const Icon(
+        return  const Icon(
           Icons.cleaning_services,
-          color: Colors.white,
         );
       case 6:
-        return const Icon(
+        return  const Icon(
           Icons.my_location,
-          color: Colors.white,
         );
       default:
-        return const Icon(
+        return  const Icon(
           Icons.category,
-          color: Colors.white,
         );
     }
   }
@@ -187,7 +178,9 @@ class _HomeScreenState extends State<HomeScreen>
                       style: TextStyle(
                           fontSize: 25,
                           fontFamily: GoogleFonts.bungee().fontFamily,
-                          color: Colors.white),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.lightPrimaryColor
+                              : AppTheme.darkPrimaryColor,),
                     ),
                     Text(
                       'NA',
@@ -214,9 +207,6 @@ class _HomeScreenState extends State<HomeScreen>
                   : Container(),
               bottomNavigationBar: BottomAppBar(
                 height: 70,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.primaryColor
-                    : AppTheme.primaryColor,
                 shape: const CircularNotchedRectangle(),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -232,8 +222,8 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         Text(
                           category.name,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 12),
+                          style:  const TextStyle(
+                            fontSize: 12),
                         )
                       ],
                     ),
@@ -247,11 +237,10 @@ class _HomeScreenState extends State<HomeScreen>
                   await _toggleSubcategoryGridView(canToggle: true);
                 },
                 backgroundColor: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.primaryColor
-                    : AppTheme.primaryColor,
+                    ? AppTheme.darkPrimaryColor
+                    : AppTheme.lightPrimaryColor,
                 child: Icon(
                   showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
-                  color: Colors.white,
                 ),
               ),
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

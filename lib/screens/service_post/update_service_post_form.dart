@@ -316,11 +316,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                             },
                       child: _isLoading
                           ? const CircularProgressIndicator()
-                          :  Text('Update Post' , style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightForegroundColor
-                            : AppTheme.darkForegroundColor,
-                      ),),
+                          :  const Text('Update Post' ,),
                     ),
                   ],
                 ),

@@ -106,8 +106,9 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                     .width / 1.1,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.primaryColor
-                                        .withOpacity(0.6),
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                        ? AppTheme.lightPrimaryColor.withOpacity(0.6)
+                                        : AppTheme.darkPrimaryColor.withOpacity(0.6),
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                     shape: const RoundedRectangleBorder(

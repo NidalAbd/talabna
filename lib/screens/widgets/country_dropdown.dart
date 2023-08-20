@@ -114,7 +114,9 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                 labelText: 'الدولة',
                 border: InputBorder.none,
               ),
-              dropdownColor: AppTheme.primaryColor,
+              dropdownColor: Theme.of(context).brightness == Brightness.dark
+    ? AppTheme.lightPrimaryColor
+        : AppTheme.darkPrimaryColor,
               items: _countries.map((country) {
                 return DropdownMenuItem<Country>(
                   value: country,
@@ -150,7 +152,9 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                   labelText: 'المدينة',
                   border: InputBorder.none,
                 ),
-                dropdownColor: AppTheme.primaryColor,
+                dropdownColor: Theme.of(context).brightness == Brightness.dark
+    ? AppTheme.lightPrimaryColor
+        : AppTheme.darkPrimaryColor,
                 items: _cities.map((city) {
                   return DropdownMenuItem<City>(
                     value: city,

@@ -225,6 +225,7 @@ class UserFollowRepository {
       final List<User> userResult = (data["users"]["data"] as List)
           .map((e) => User.fromJson(e))
           .toList();
+
       final List postsResult = (data["posts"]["data"] as List)
           .map((e) => ServicePost.fromJson(e))
           .toList();

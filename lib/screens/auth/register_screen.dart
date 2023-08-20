@@ -60,12 +60,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     return Scaffold(
       resizeToAvoidBottomInset: false, // Add this line
       body: Container(
-          decoration:  const BoxDecoration(
+          decoration:   BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.primaryColor,
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
                 AppTheme.accentColor,
               ],
             ),
@@ -220,8 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      backgroundColor: AppTheme.primaryColor.withOpacity(0.6),
+
                                       padding: const EdgeInsets.symmetric(vertical: 16),
                                       shape: const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.all(
@@ -269,7 +270,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         ],
                       ),
                       child:  CircleAvatar(
-                        backgroundColor: AppTheme.primaryColor,
+                        backgroundColor:    Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightPrimaryColor
+                            : AppTheme.darkPrimaryColor,
                         radius: 40,
                         child: Icon(Icons.lock, size: 60, color: AppTheme.accentColor,),
                       ),

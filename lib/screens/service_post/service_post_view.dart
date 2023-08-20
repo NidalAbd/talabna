@@ -126,12 +126,12 @@ title: const Text('عرض التفاصيل'),
                     ),
               Column(
                 children: [
-                  Card(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppTheme.lightForegroundColor
-                        : AppTheme.darkForegroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightForegroundColor
+                          : AppTheme.darkForegroundColor,
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: Column(
                       children: [
@@ -169,7 +169,6 @@ title: const Text('عرض التفاصيل'),
                                           widget.servicePost.createdAt),
                                       style: const TextStyle(
                                         fontSize: 11,
-                                        color: Colors.grey,
                                       ),
                                     ),
                                   ],

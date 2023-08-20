@@ -172,7 +172,9 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
           builder: (BuildContext context) {
             return Container(
               height: MediaQuery.of(context).size.height * 2 / 3, // Set the height to 2/3 of the screen height
-              color: AppTheme.primaryColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightPrimaryColor
+                  : AppTheme.darkPrimaryColor,
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
@@ -180,7 +182,6 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                   const Text(
                     'Comments',
                     style: TextStyle(
-                      color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -217,7 +218,6 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                                     Text(
                                       comment.text,
                                       style: const TextStyle(
-                                        color: Colors.white,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -226,7 +226,6 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                                     Text(
                                       comment.user.name!,
                                       style: const TextStyle(
-                                        color: Colors.white,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -269,7 +268,6 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -287,9 +285,11 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                                   onPressed: () {
                                     // Add your logic here to handle the comment submission
                                   },
-                                  icon: const Icon(
+                                  icon:  Icon(
                                     Icons.send,
-                                    color: AppTheme.primaryColor,
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? AppTheme.lightPrimaryColor
+                                        : AppTheme.darkPrimaryColor,
                                   ),
                                 ),
                               ],
@@ -305,9 +305,9 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
           },
         );
       },
-      icon: const Icon(
+      icon:  Icon(
         Icons.comment,
-        size: 30,
+        size: widget.iconSize,
       ),
     );
   }

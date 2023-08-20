@@ -95,7 +95,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
 
                 ElevatedButton(
                   onPressed: _submitForm,
-                  child: const Text('تحويل',style: TextStyle(color: Colors.white),),
+                  child: const Text('تحويل'),
                 ),
               ],
             ),

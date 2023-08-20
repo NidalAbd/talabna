@@ -40,10 +40,9 @@ void main() async {
   await requestPermissions();
   final authenticationRepository = AuthenticationRepository();
   final servicePostRepository  = ServicePostRepository();
-
   final userProfileRepository = UserProfileRepository();
   final subcategoryRepository  = CategoriesRepository();
-  AppTheme.setSystemBarColors(Brightness.light, AppTheme.primaryColor,AppTheme.primaryColor);
+  AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor,AppTheme.lightPrimaryColor);
   runApp(
     MultiBlocProvider(
       providers: [

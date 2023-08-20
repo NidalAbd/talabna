@@ -248,9 +248,9 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                           icon: Icon(
                             Icons.add_a_photo,
                             color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.accentColor
-                                    : AppTheme.primaryColor,
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightPrimaryColor
+                                : AppTheme.darkPrimaryColor,
                             size: MediaQuery.of(context).size.width / 5,
                           ),
                         ),
@@ -260,14 +260,15 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                         left: 37,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
+                          decoration:  BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppTheme.primaryColor,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightPrimaryColor
+                                : AppTheme.darkPrimaryColor,
                           ),
                           child: Text(
                             remainingImageCount.toString(),
                             style: const TextStyle(
-                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 22,
                             ),
@@ -348,7 +349,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                       left: 15,
                       child: IconButton(
                         onPressed: () => _removeImage(index),
-                        icon: const Icon(Icons.delete, color: Colors.white),
+                        icon: const Icon(Icons.delete),
                       ),
                     ),
                   ],

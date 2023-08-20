@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
@@ -11,8 +12,8 @@ import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/data/models/service_post.dart';
-import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/widgets/comment_sheet.dart';
+import 'package:talbna/screens/widgets/contact_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
@@ -37,7 +38,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   bool _hasReachedMax = false;
   final ValueNotifier<Duration> _videoProgress = ValueNotifier(Duration.zero);
   bool _isUserChangingSlider = false;
-  final double iconSize = 35;
+  final double iconSize = 40;
   late final bool _autoPlay = true;
   final Map<int, bool> _videoLoadings = {};
   final Map<int, List<VoidCallback>> _videoListeners = {};
@@ -74,8 +75,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
           _videoControllers[media.id!]!.value.isInitialized) {
         _videoProgress.value = _videoControllers[media.id!]!.value.position;
       }
-    }
-    );
+    });
   }
 
   void _loadNextPage() {
@@ -143,7 +143,8 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
 
   void _handleMediaScroll(ServicePost post, int mediaIndex) {
     final media = post.photos![mediaIndex];
-    if (media.isVideo == true && _videoControllers[media.id!]!.value.isInitialized) {
+    if (media.isVideo == true &&
+        _videoControllers[media.id!]!.value.isInitialized) {
       _videoControllers[media.id!]?.pause();
       _videoControllers[media.id!]?.seekTo(Duration.zero);
     }
@@ -167,9 +168,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     return WillPopScope(
       onWillPop: _onWillPopReelPost,
       child: Scaffold(
-        backgroundColor: AppTheme.primaryColor,
         body: BlocListener<ServicePostBloc, ServicePostState>(
-          listenWhen: (previous, current) => true, // Listen to all state changes
+          listenWhen: (previous, current) =>
+              true, // Listen to all state changes
           bloc: _servicePostBloc,
           listener: (context, state) {
             if (state is ServicePostLoadSuccess) {
@@ -203,7 +204,6 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                 bool isFavorite = post.isFavorited!;
                 return Stack(
                   children: <Widget>[
-                    // Media display
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
@@ -247,35 +247,42 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                       left: 0,
                       child: media.isVideo!
                           ? ValueListenableBuilder(
-                        valueListenable: _videoProgress,
-                        builder: (context, value, child) {
-                          double maxSeconds = _videoControllers[media.id!]!.value.isInitialized
-                              ? _videoControllers[media.id!]!.value.duration.inSeconds.toDouble()
-                              : 0.0;
-                          double currentSeconds = min(
-                              _videoProgress.value.inSeconds.toDouble(),
-                              maxSeconds);
-                          return Slider(
-                            value: currentSeconds,
-                            min: 0.0,
-                            max: maxSeconds,
-                            onChanged: (double newValue) {
-                              setState(() {
-                                _isUserChangingSlider = true;
-                                _videoProgress.value =
-                                    Duration(seconds: newValue.toInt());
-                              });
-                            },
-                            onChangeEnd: (double newValue) {
-                              setState(() {
-                                _isUserChangingSlider = false;
-                                _videoControllers[media.id!]?.seekTo(
-                                    _videoProgress.value);
-                              });
-                            },
-                          );
-                        },
-                      )
+                              valueListenable: _videoProgress,
+                              builder: (context, value, child) {
+                                double maxSeconds =
+                                    _videoControllers[media.id!]!
+                                            .value
+                                            .isInitialized
+                                        ? _videoControllers[media.id!]!
+                                            .value
+                                            .duration
+                                            .inSeconds
+                                            .toDouble()
+                                        : 0.0;
+                                double currentSeconds = min(
+                                    _videoProgress.value.inSeconds.toDouble(),
+                                    maxSeconds);
+                                return Slider(
+                                  value: currentSeconds,
+                                  min: 0.0,
+                                  max: maxSeconds,
+                                  onChanged: (double newValue) {
+                                    setState(() {
+                                      _isUserChangingSlider = true;
+                                      _videoProgress.value =
+                                          Duration(seconds: newValue.toInt());
+                                    });
+                                  },
+                                  onChangeEnd: (double newValue) {
+                                    setState(() {
+                                      _isUserChangingSlider = false;
+                                      _videoControllers[media.id!]
+                                          ?.seekTo(_videoProgress.value);
+                                    });
+                                  },
+                                );
+                              },
+                            )
                           : Container(),
                     ),
                     Positioned(
@@ -287,7 +294,6 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             '   ${mediaIndex + 1} : ${post.photos?.length ?? 0}',
-                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -316,103 +322,98 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                       right: 10,
                       bottom: 60,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                      Column(
-                      children: [
-                      CircleAvatar(
-                      backgroundColor: const Color.fromARGB(238, 249, 230, 248),
-                      radius:   20,
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundImage: Image.network(
-                          '${Constants.apiBaseUrl}/storage/${post.userPhoto!}',
-                          errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                            return const CircleAvatar(
-                              radius: 20,
-                              backgroundImage: AssetImage('assets/avatar.png'),
-                            );
-                          },
-                        ).image,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
+                          Column(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor:
+                                    const Color.fromARGB(238, 249, 230, 248),
+                                radius: 25,
+                                child: CircleAvatar(
+                                  radius: 23,
+                                  backgroundImage: Image.network(
+                                    '${Constants.apiBaseUrl}/storage/${post.userPhoto!}',
+                                    errorBuilder: (BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace) {
+                                      return const CircleAvatar(
+                                        radius: 22,
+                                        backgroundImage:
+                                            AssetImage('assets/avatar.png'),
+                                      );
+                                    },
+                                  ).image,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Column(
                             children: [
                               IconButton(
                                 icon: Icon(
-                                  Icons.favorite,
+                                  Icons.favorite_rounded,
                                   size: iconSize,
                                   color: isFavorite ? Colors.red : Colors.white,
                                 ),
                                 onPressed: () {
                                   _servicePostBloc.add(
                                       ToggleFavoriteServicePostEvent(
-                                          servicePostId:
-                                          post.id!));
+                                          servicePostId: post.id!));
                                 },
                               ),
-                              Text(
-                                post
-                                    .favoritesCount
-                                    .toString(),
-                                style: const TextStyle(color: Colors.white),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Text(
+                                  post.favoritesCount.toString(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               )
                             ],
                           ),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CommentModalBottomSheet(
                                 iconSize: iconSize,
                                 userProfileBloc: _userProfileBloc,
                                 userId: widget.userId,
                               ),
-                              Text(
-                                post
-                                    .favoritesCount
-                                    .toString(),
-                                style: const TextStyle(color: Colors.white),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Text(
+                                  post.favoritesCount.toString(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               )
                             ],
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return ReportTile(
-                                          type: 'service_post',
-                                          userId: post.id!,
-                                        );
-                                      });
-                                },
-                                icon: Icon(
-                                  Icons.flag,
-                                  size: iconSize,
-                                ),
-                              ),
-                              Text(
-                                post
-                                    .reportCount
-                                    .toString(),
-                                style: const TextStyle(color: Colors.white),
-                              )
-                            ],
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          ContactModalBottomSheet(
+                            iconSize: iconSize,
+                            userProfileBloc: _userProfileBloc,
+                            userId: widget.userId,
+                            servicePost: post,
+                          ),
+                          const SizedBox(
+                            height: 10,
                           ),
                           IconButton(
-                            onPressed: () {},
-                            icon: Icon(
+                            icon:  Icon(
                               Icons.share,
-                              size: iconSize - 5,
+                              size: iconSize,
                             ),
+                            onPressed: () async {
+                              await Share.share(
+                                  '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePost?.id!}');
+                            },
                           ),
                         ],
                       ),
@@ -430,7 +431,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   Widget _buildVideoDisplay(Photo media) {
     return Center(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width , // Set the width to the screen width
+        width: MediaQuery.of(context)
+            .size
+            .width, // Set the width to the screen width
         height: MediaQuery.of(context).size.height,
         child: VideoPlayer(_getVideoPlayerController(media)),
       ),
@@ -444,9 +447,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator());
+                width: 30, height: 30, child: CircularProgressIndicator());
           }
           return Image.network(media.src!);
         },
@@ -512,11 +513,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   }
 
   void _showNextMedia(int postId) {
-    int currentMediaIndex =_servicePostMediaIndices[postId]!;
-    int totalMediaCount = _servicePosts
-        .firstWhere((post) => post.id == postId)
-        .photos!
-        .length;
+    int currentMediaIndex = _servicePostMediaIndices[postId]!;
+    int totalMediaCount =
+        _servicePosts.firstWhere((post) => post.id == postId).photos!.length;
     if (currentMediaIndex < totalMediaCount - 1) {
       setState(() {
         _servicePostMediaIndices[postId] = currentMediaIndex + 1;

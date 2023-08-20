@@ -44,8 +44,6 @@ class WelcomeScreen extends StatelessWidget {
                             Expanded(
                               child: ElevatedButton( // Changed to OutlinedButton
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryColor
-                                      .withOpacity(0.6),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 16),
                                   shape: const RoundedRectangleBorder(
@@ -63,7 +61,6 @@ class WelcomeScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                      color: Colors.white
                                   ),
                                 ),
                               ),
@@ -72,8 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryColor
-                                      .withOpacity(0.6),
+
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 16),
                                   shape: const RoundedRectangleBorder(
@@ -91,7 +87,6 @@ class WelcomeScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white
                                   ),
                                 ),
                               ),
@@ -116,7 +111,7 @@ class WelcomeScreen extends StatelessWidget {
                     top: 30,
                     right: 10,
                     child: IconButton(
-                      icon: const Icon(Icons.brightness_6),
+                      icon: const Icon(Icons.brightness_3_sharp),
                       onPressed: () =>
                           BlocProvider.of<ThemeCubit>(context).toggleTheme(),
                     ),),

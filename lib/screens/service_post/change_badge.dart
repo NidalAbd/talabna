@@ -124,12 +124,12 @@ class _ChangeBadgeState extends State<ChangeBadge> {
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value,style:  TextStyle(  color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,),),
+                      child: Text(value,),
                     );
                   }).toList(),
-                  dropdownColor: AppTheme.primaryColor,
+                  dropdownColor: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.lightPrimaryColor
+                      : AppTheme.darkPrimaryColor,
                 ),
                 Visibility(
                   visible: _selectedHaveBadge != 'عادي',
@@ -170,7 +170,6 @@ class _ChangeBadgeState extends State<ChangeBadge> {
                   onPressed: _submitForm,
                   child: const Text(
                     'تمييز',
-                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 if (balanceOut)const Text('ليس لديك رصيد نقاط كافي , يمكنك شراء النقاط من هنا'),
@@ -187,7 +186,6 @@ class _ChangeBadgeState extends State<ChangeBadge> {
                     },
                     child: const Text(
                       'اضافة نقاط',
-                      style: TextStyle(color: Colors.white),
                     ),
                   ),
 

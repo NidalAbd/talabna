@@ -374,9 +374,8 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)), // Set the button's border radius
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5), // Set the padding around the button's content
                       ),
-                      child: state is ServicePostLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white)) : const Text(
+                      child: state is ServicePostLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator()) : const Text(
               'اضافة',
-              style: TextStyle(color: Colors.white, fontSize: 16),
               ),
               ),
                     if (balanceOut) const Text('ليس لديك رصيد نقاط كافي , يمكنك شراء النقاط من هنا'),
@@ -393,7 +392,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                         },
                         child: const Text(
                           'اضافة نقاط',
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                   ],

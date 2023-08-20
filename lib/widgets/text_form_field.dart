@@ -34,14 +34,20 @@ class TextFromField extends StatelessWidget {
           validator: (value) => validator(value),
           decoration: InputDecoration(
             prefixIcon: prefixIcon,
-            prefixIconColor: AppTheme.primaryColor,
-            suffixIconColor: AppTheme.primaryColor,
+            prefixIconColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightPrimaryColor
+                : AppTheme.darkPrimaryColor,
+            suffixIconColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightPrimaryColor
+                : AppTheme.darkPrimaryColor,
             suffixIcon: suffixIcon,
             hintText: hintText,
             filled: true,
             enabledBorder: OutlineInputBorder(
-              borderSide:   const BorderSide(
-                color: AppTheme.primaryColor,
+              borderSide:    BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
               ),
               borderRadius: BorderRadius.circular(10),
             ),

@@ -24,8 +24,6 @@ class LocationButtonWidget extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: AppTheme.primaryColor.withOpacity(0.6),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(

@@ -23,12 +23,9 @@ class WhatsAppIconButtonWidget extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child:GestureDetector(
-        onTap: launchWhatsApp,
-        child:  Image.asset('assets/WhatsApp_logo.png' , width: width, height: width,),
-      ),
+    return GestureDetector(
+      onTap: launchWhatsApp,
+      child:  Image.asset('assets/WhatsApp_logo.png' , width: width, height: width,),
     );
 
   }

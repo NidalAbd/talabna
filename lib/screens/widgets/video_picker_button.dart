@@ -176,9 +176,6 @@ class VideoPickerButtonState extends State<VideoPickerButton> {
                 onPressed: _pickVideos,
                 icon: Icon(
                   Icons.video_call_rounded,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.accentColor
-                      : AppTheme.primaryColor,
                   size: MediaQuery.of(context).size.width / 5,
                 ),
               );
@@ -206,7 +203,6 @@ class VideoPickerButtonState extends State<VideoPickerButton> {
                         onPressed: () => _removeLocalImage(index),
                         icon: const Icon(
                           Icons.cancel,
-                          color: Colors.red,
                         ),
                       ),
                     ),

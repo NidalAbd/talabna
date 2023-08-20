@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/screens/home/search_screen.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
 import 'package:talbna/screens/profile/change_email_screen.dart';
@@ -59,7 +60,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                                 ),
                               );
                             },
-                            child: const Text('OK',style: TextStyle(color: Colors.white),),
+                            child: const Text('OK'),
                           ),
                         ],
                       );
@@ -70,17 +71,17 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
             }
           },
         ),
-        // IconButton(
-        //   icon: const Icon(Icons.search_rounded,size: 30,),
-        //   onPressed: () {
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => SearchScreen( userID: widget.userId,),
-        //       ),
-        //     );
-        //   },
-        // ),
+        IconButton(
+          icon: const Icon(Icons.search_rounded,size: 30,),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchScreen( userID: widget.userId,),
+              ),
+            );
+          },
+        ),
         NotificationsAlert(userID: widget.userId),
         IconButton(
           icon: const Icon(
@@ -94,12 +95,11 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                 context: context,
                 builder: (BuildContext context) {
                   return Container(
-                    color: AppTheme.primaryColor,
                     child: ListView(
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.person,color: Colors.white,),
-                          title: const Text('Profile',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.person),
+                          title: const Text('Profile',),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -113,8 +113,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.favorite,color: Colors.white,),
-                          title: const Text('Favorite',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.favorite),
+                          title: const Text('Favorite'),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -126,8 +126,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.update,color: Colors.white,),
-                          title: const Text('Update Info',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.update),
+                          title: const Text('Update Info'),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -140,8 +140,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.attach_money,color: Colors.white,),
-                          title: const Text('Add Points',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.attach_money),
+                          title: const Text('Add Points'),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -155,8 +155,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.email,color: Colors.white,),
-                          title: const Text('Change Email',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.email),
+                          title: const Text('Change Email'),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -169,8 +169,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.lock,color: Colors.white,),
-                          title: const Text('Change Password',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.lock),
+                          title: const Text('Change Password'),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.of(context).push(
@@ -212,7 +212,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                             ),
                           );
                         },
-                        child: const Text('OK',style: TextStyle(color: Colors.white),),
+                        child: const Text('OK'),
                       ),
                     ],
                   );

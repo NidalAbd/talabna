@@ -109,17 +109,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 length: 2,
                 child:  Column(
                     children: <Widget>[
-                      Container(
-                        color:  AppTheme.primaryColor.withOpacity(0.8),
-                        child: TabBar(
-                          labelColor: Colors.white,
-                          unselectedLabelColor: Colors.white.withOpacity(0.5),
-                          indicatorColor: Colors.white,
-                          tabs:  const <Widget>[
-                            Tab(text: 'Users'),
-                            Tab(text: 'Posts'),
-                          ],
-                        ),
+                      const TabBar(
+                        tabs:  <Widget>[
+                          Tab(text: 'Users'),
+                          Tab(text: 'Posts'),
+                        ],
                       ),
                       Expanded(
                         child: TabBarView(
@@ -145,12 +139,11 @@ class _SearchScreenState extends State<SearchScreen> {
     return TextField(
       controller: _searchQueryController,
       autofocus: true,
-      decoration:  InputDecoration(
+      decoration:  const InputDecoration(
         hintText: 'Search...',
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
         border: InputBorder.none,
       ),
-      style: const TextStyle(fontSize: 18.0 , color: Colors.white),
+      style: const TextStyle(fontSize: 18.0),
       onChanged: (query) => setState(() {
         _isSearching = true;
         _searchQuery = query;

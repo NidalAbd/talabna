@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:video_player/video_player.dart';
@@ -58,7 +59,7 @@ class _ImageGridState extends State<ImageGrid> {
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 4.0,
         crossAxisSpacing: 4.0,
-        childAspectRatio: 1,
+        childAspectRatio: 9 / 14, // Adjusted aspect ratio
       ),
       itemBuilder: (BuildContext context, int index) {
         final url = widget.imageUrls[index];
@@ -66,13 +67,13 @@ class _ImageGridState extends State<ImageGrid> {
           onTap: () {
             widget.canClick ? _navigateToFullScreenImage(context, index) : null;
           },
-          child: AspectRatio(
-            aspectRatio: 1 / 1,
-            child: url.endsWith('.mp4') ? VideoItem(url: url, userId: widget.userId, servicePost: widget.servicePost,) : _buildImageWidget(url),
-          ),
+          child: url.endsWith('.mp4')
+              ? VideoItem(url: url, userId: widget.userId, servicePost: widget.servicePost)
+              : _buildImageWidget(url),
         );
       },
     );
+
   }
 
   Widget _buildImageWidget(String url) {
@@ -142,26 +143,14 @@ class _VideoItemState extends State<VideoItem> {
                 ),
               );
             },
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 0),
-                  child: VideoProgressIndicator(
-                    _controller,
-                    allowScrubbing: true,
-                    colors: const VideoProgressColors(
-                      playedColor: Colors.white,
-                      bufferedColor: Colors.white54,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
+            child: Container(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightForegroundColor
+                  : AppTheme.darkForegroundColor,
+              child: AspectRatio(
+                aspectRatio: _controller.value.size.width /  _controller.value.size.height ,
+                child: VideoPlayer(_controller),
+              ),
             ),
           );
         } else {

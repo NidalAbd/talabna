@@ -53,9 +53,9 @@ class _LocationPickerState extends State<LocationPicker> {
   }
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
+      children: [
       ],
     );
   }

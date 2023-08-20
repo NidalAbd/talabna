@@ -21,7 +21,7 @@ class _BottomAppBarWidgetState extends State<BottomAppBarWidget> {
         Text(
           widget.name,
           style: const TextStyle(
-              color: Colors.white, fontSize: 12),
+             fontSize: 12),
         )
       ],
     );

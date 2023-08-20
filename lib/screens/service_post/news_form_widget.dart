@@ -82,7 +82,6 @@ class _NewsPostFormState extends State<NewsPostForm> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -90,7 +89,6 @@ class _NewsPostFormState extends State<NewsPostForm> {
               child: const Text(
                 'Add Post',
                 style: TextStyle(
-                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),

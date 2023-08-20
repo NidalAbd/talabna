@@ -147,22 +147,25 @@ class _AddPointScreenState extends State<AddPointScreen> {
                         key: _formKey,
                         child: Column(
                           children: [
-                            TextFormField(
-                              controller: _pointsController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'اضافة النقاط المطلوبة',
-                                border: OutlineInputBorder(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: TextFormField(
+                                controller: _pointsController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'اضافة النقاط المطلوبة',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'يجب تحديد عدد النقاط المطلوبة';
+                                  }
+                                  if (int.tryParse(value) == null) {
+                                    return 'يجب إدخال رقم صحيح لعدد النقاط المطلوبة';
+                                  }
+                                  return null;
+                                },
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'يجب تحديد عدد النقاط المطلوبة';
-                                }
-                                if (int.tryParse(value) == null) {
-                                  return 'يجب إدخال رقم صحيح لعدد النقاط المطلوبة';
-                                }
-                                return null;
-                              },
                             ),
                             const SizedBox(height: 16.0),
                             ElevatedButton(
@@ -176,7 +179,7 @@ class _AddPointScreenState extends State<AddPointScreen> {
                                       request: points, fromUser: widget.fromUserID, toUser: widget.toUserId),);
                                 }
                               },
-                              child: const Text('تحويل النقاط لهذا المستخدم' , style: TextStyle(color: Colors.white),),
+                              child: const Text('تحويل النقاط لهذا المستخدم' ),
                             ),
                           ],
                         ),

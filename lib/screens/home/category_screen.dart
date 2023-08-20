@@ -68,21 +68,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
           if (state.categories.isEmpty) {
             return Directionality(
               textDirection: TextDirection.ltr,
-              child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 80),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon:  Icon(
-                        Icons.sentiment_very_dissatisfied,
-                        size: 150.0,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightDisabledColor
-                            : AppTheme.darkDisabledColor,
-                      ),
-                      tooltip: 'Change to list view',
-                    ),
-                  )),
+              child: IconButton(
+                onPressed: () {},
+                icon:  Icon(
+                  Icons.sentiment_very_dissatisfied,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.lightDisabledColor
+                      : AppTheme.darkDisabledColor,
+                ),
+                tooltip: 'Change to list view',
+              ),
             );
           } else {
             return Directionality(
@@ -101,8 +96,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     await _toggleSubcategoryGridView(canToggle: true);
                   },
                   backgroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.primaryColor
-                      : AppTheme.primaryColor,
+                      ? AppTheme.lightPrimaryColor
+                      : AppTheme.darkPrimaryColor,
                   child: Icon(
                     showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
                     color: Colors.white,

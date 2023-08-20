@@ -90,7 +90,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
                 prefixIcon: const Icon(
                   Icons.email_rounded,
-                  color: Colors.black,
                 ),
                 hintText: 'البريد الإلكتروني',
                 keyboardType: TextInputType.emailAddress,

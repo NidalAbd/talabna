@@ -49,12 +49,10 @@ class _PointBalanceState extends State<PointBalance> {
               },
               icon: const Icon(
                 Icons.add_circle,
-                color: Colors.white,
               ),
               label: widget.showBalance ?Text(
                 pointBalance.totalPoint.toString(),
                 style: const TextStyle(
-                  color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -63,7 +61,6 @@ class _PointBalanceState extends State<PointBalance> {
                 child: Text(
                   '***',
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),

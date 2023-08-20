@@ -239,7 +239,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               width: 40,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(0.5),
@@ -256,7 +255,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                 icon: const Icon(
                                   Icons.camera_alt,
                                   size: 25,
-                                  color: Colors.black,
                                 ),
                                 onPressed: () async {
                                   File? imageFile =
@@ -289,9 +287,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                         onWhatsAppNumberChanged: (newWhatsAppValue) => updateWhatsAppNumber(newWhatsAppValue),
                       ),
                       Card(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightForegroundColor
-                            : AppTheme.darkForegroundColor,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: DropdownButtonFormField<String?>(
@@ -372,11 +367,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                               .copyWith(
                                             primary:
                                                 Theme.of(context).primaryColor,
-                                          ),
-                                          textTheme: const TextTheme(
-                                            bodyLarge: TextStyle(
-                                              color: Colors.white,
-                                            ),
                                           ),
                                         ),
                                         child: child ?? const SizedBox(),
@@ -466,7 +456,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           },
                           child: const Text(
                             'Save Changes',
-                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),

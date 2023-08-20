@@ -128,100 +128,207 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     ),
                   ]),
                 ),
-          Card(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.lightForegroundColor
-                : AppTheme.darkForegroundColor,
-            // other card properties
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: Row(
-                    children: [
-                      UserAvatar
-                        (
-                          imageUrl:'${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
-                          radius: 16,
-                          fromUser: widget.userProfileId,
-                          toUser: widget.servicePost.userId!,
-                          canViewProfile: widget.canViewProfile
-                         ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              height: 11,
-                            ),
-                            Text(
-                              widget.servicePost.userName ??
-                                  'Unknown', // Display full username
-                              maxLines: 1, // Allow only one line of text
-                              overflow: TextOverflow
-                                  .ellipsis, // Display ellipsis if text overflows
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              formatTimeDifference(
-                                  widget.servicePost.createdAt),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (widget.servicePost.categoriesId != 7)
+          Padding(
+            padding: EdgeInsets.zero,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightForegroundColor
+                    : AppTheme.darkForegroundColor,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                    child: Row(
+                      children: [
+                        UserAvatar
+                          (
+                            imageUrl:'${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                            radius: 16,
+                            fromUser: widget.userProfileId,
+                            toUser: widget.servicePost.userId!,
+                            canViewProfile: widget.canViewProfile
+                           ),
+                        const SizedBox(width: 10),
                         Expanded(
-                          flex: 2,
-                          child: Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: Row(
-                              children: [
-                                Text(
-                                  '${widget.servicePost.type!} ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 11,
+                              ),
+                              Text(
+                                widget.servicePost.userName ??
+                                    'Unknown', // Display full username
+                                maxLines: 1, // Allow only one line of text
+                                overflow: TextOverflow
+                                    .ellipsis, // Display ellipsis if text overflows
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
-                                Text(
-                                  '${widget.servicePost.title!} ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
+                              ),
+                              Text(
+                                formatTimeDifference(
+                                    widget.servicePost.createdAt),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      ServicePostAction(
-                        key: Key('servicePost_${widget.servicePost.id}'),
-                        servicePostUserId: widget.servicePost.userId,
-                        userProfileId: widget.userProfileId,
-                        servicePostId: widget.servicePost.id,
-                        onPostDeleted: widget.onPostDeleted!,
-                      ),
-                    ],
+                        if (widget.servicePost.categoriesId != 7)
+                          Expanded(
+                            flex: 2,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '${widget.servicePost.type!} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '${widget.servicePost.title!} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ServicePostAction(
+                          key: Key('servicePost_${widget.servicePost.id}'),
+                          servicePostUserId: widget.servicePost.userId,
+                          userProfileId: widget.userProfileId,
+                          servicePostId: widget.servicePost.id,
+                          onPostDeleted: widget.onPostDeleted!,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GestureDetector(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ServicePostCardView(
+                              key: Key('servicePost_${widget.servicePost.id}'),
+                              onPostDeleted: widget.onPostDeleted,
+                              userProfileId: widget.userProfileId,
+                              servicePost: widget.servicePost,
+                              canViewProfile: widget.canViewProfile,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: Text(
+                                widget.servicePost.description!,
+                                textAlign: TextAlign.justify,
+                                maxLines: 4,
+                                textDirection: TextDirection.rtl,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ServicePostCardView(
+                                        key: Key('servicePost_${widget.servicePost.id}'),
+                                        onPostDeleted: widget.onPostDeleted,
+                                        userProfileId: widget.userProfileId,
+                                        servicePost: widget.servicePost,
+                                        canViewProfile: widget.canViewProfile,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child:  Text(
+                                  'مزيد من التفاصيل',
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? AppTheme.accentColor
+                                        : AppTheme.lightForegroundColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          ImageGrid(
+                            imageUrls: widget.servicePost.photos
+                                    ?.map((photo) =>
+                                        '${photo.src}')
+                                    .toList() ??
+                                [],
+                            canClick: false, userId: widget.userProfileId, servicePost: widget.servicePost,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  ListTile(
+                    leading: SizedBox(
+                      width: 50,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.remove_red_eye,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightBackgroundColor
+                                : AppTheme.lightForegroundColor,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            formatNumber(widget.servicePost.viewCount ?? 0),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  Theme.of(context).brightness == Brightness.dark
+                                      ? AppTheme.lightBackgroundColor
+                                      : AppTheme.lightForegroundColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    selected: true,
+                    selectedTileColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightForegroundColor.withOpacity(0.5)
+                            : AppTheme.darkForegroundColor.withOpacity(0.5),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -235,128 +342,29 @@ class _ServicePostCardState extends State<ServicePostCard> {
                         ),
                       );
                     },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const SizedBox(height: 10),
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Text(
-                            widget.servicePost.description!,
-                            textAlign: TextAlign.justify,
-                            maxLines: 4,
+                    title: widget.servicePost.categoriesId != 7
+                        ? Directionality(
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ),
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ServicePostCardView(
-                                    key: Key('servicePost_${widget.servicePost.id}'),
-                                    onPostDeleted: widget.onPostDeleted,
-                                    userProfileId: widget.userProfileId,
-                                    servicePost: widget.servicePost,
-                                    canViewProfile: widget.canViewProfile,
-                                  ),
-                                ),
-                              );
-                            },
-                            child:  Text(
-                              'مزيد من التفاصيل',
+                            child: Text(
+                              '${widget.servicePost.distance.toString()} كم',
                               style: TextStyle(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.accentColor
-                                    : AppTheme.lightForegroundColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppTheme.lightDisabledColor
+                                    : AppTheme.darkDisabledColor,
                               ),
                             ),
-                          ),
-                        ),
-                        ImageGrid(
-                          imageUrls: widget.servicePost.photos
-                                  ?.map((photo) =>
-                                      '${photo.src}')
-                                  .toList() ??
-                              [],
-                          canClick: false, userId: widget.userProfileId, servicePost: widget.servicePost,
-                        ),
-                      ],
+                          )
+                        : null,
+                    trailing: Icon(
+                      Icons.arrow_forward,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.lightDisabledColor
+                          : AppTheme.darkDisabledColor,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                ListTile(
-                  leading: SizedBox(
-                    width: 50,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.remove_red_eye,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? AppTheme.lightBackgroundColor
-                              : AppTheme.lightForegroundColor,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          formatNumber(widget.servicePost.viewCount ?? 0),
-                          style: TextStyle(
-                            fontSize: 16,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.lightBackgroundColor
-                                    : AppTheme.lightForegroundColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  selected: true,
-                  selectedTileColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightForegroundColor.withOpacity(0.5)
-                          : AppTheme.darkForegroundColor.withOpacity(0.5),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ServicePostCardView(
-                          key: Key('servicePost_${widget.servicePost.id}'),
-                          onPostDeleted: widget.onPostDeleted,
-                          userProfileId: widget.userProfileId,
-                          servicePost: widget.servicePost,
-                          canViewProfile: widget.canViewProfile,
-                        ),
-                      ),
-                    );
-                  },
-                  title: widget.servicePost.categoriesId != 7
-                      ? Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Text(
-                            '${widget.servicePost.distance.toString()} كم',
-                            style: TextStyle(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? AppTheme.lightDisabledColor
-                                  : AppTheme.darkDisabledColor,
-                            ),
-                          ),
-                        )
-                      : null,
-                  trailing: Icon(
-                    Icons.arrow_forward,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppTheme.lightDisabledColor
-                        : AppTheme.darkDisabledColor,
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ],

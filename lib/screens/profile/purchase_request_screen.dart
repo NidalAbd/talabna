@@ -146,25 +146,33 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: _pointsController,
-                          keyboardType: TextInputType.number,
-                          maxLength: 5,
-                          decoration: const InputDecoration(
-                            labelText: 'النقاط المطلوبة',
-                            border: OutlineInputBorder(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: TextFormField(
+                            controller: _pointsController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 5,
+                            decoration: const InputDecoration(
+                              labelText: 'النقاط المطلوبة',
+                              hintText: 'أدخل عدد النقاط المطلوبة',
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.blue), // Customize the color here
+                              ),
+                              contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                              suffixIcon: Icon(Icons.star, color: Colors.amber),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'يجب تحديد عدد النقاط المطلوبة';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'يجب إدخال رقم صحيح لعدد النقاط المطلوبة';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يجب تحديد عدد النقاط المطلوبة';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'يجب إدخال رقم صحيح لعدد النقاط المطلوبة';
-                            }
-                            return null;
-                          },
                         ),
-                        const SizedBox(height: 16.0),
                         ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
@@ -186,7 +194,6 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
                           },
                           child: const Text(
                             'طلب شراء نقاط',
-                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
@@ -203,7 +210,7 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
                         : AppTheme.darkForegroundColor,
                     child:  ListTile(
                       contentPadding: const EdgeInsets.all(8),
-                      leading: const Icon(Icons.info, color: Colors.blue),
+                      leading: const Icon(Icons.info),
                       title: Text(
                         'بعد إرسال الطلب بعدد النقاط المطلوبة،قم بنسخ الرقم التعريفي (${widget.userID}) وتواصل مع فريق المبيعات لاتمام عملية الشراء ',
                         style:  const TextStyle(

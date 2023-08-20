@@ -18,7 +18,9 @@ class GoogleFaceLoginWidget extends StatelessWidget {
             Container(
               height: 1,
               width: MediaQuery.of(context).size.width / 8.2,
-              color: AppTheme.primaryColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightPrimaryColor
+                  : AppTheme.darkPrimaryColor,
               margin: const EdgeInsets.only(right: 10),
             ),
             const Text(
@@ -29,7 +31,9 @@ class GoogleFaceLoginWidget extends StatelessWidget {
             ),
             Container(
               height: 1,
-              color: AppTheme.primaryColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppTheme.lightPrimaryColor
+                  : AppTheme.darkPrimaryColor,
               width: MediaQuery.of(context).size.width / 8.2,
               margin: const EdgeInsets.only(left: 10),
             ),

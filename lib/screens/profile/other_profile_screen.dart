@@ -140,7 +140,6 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                                 isFollowing ? 'Unfollow' : 'Follow',
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -157,74 +156,67 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Container(
-                              color: AppTheme.primaryColor,
-                              child: Wrap(
-                                children: [
-                                  ListTile(
-                                    onLongPress: () =>
-                                        _setClipboardData(user.id.toString()),
-                                    leading: const Icon(
-                                      Icons.perm_identity,
-                                      color: Colors.white,
-                                    ),
-                                    title: Text(
-                                      user.id.toString(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
+                            return Wrap(
+                              children: [
+                                ListTile(
+                                  onLongPress: () =>
+                                      _setClipboardData(user.id.toString()),
+                                  leading: const Icon(
+                                    Icons.perm_identity,
                                   ),
-                                  ListTile(
-                                      leading: const Icon(
-                                        Icons.report,
-                                        color: Colors.white,
-                                      ),
-                                      title: const Text(
-                                        'Report',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        showModalBottomSheet(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return Container(
-                                                color: AppTheme.primaryColor,
-                                                child: ReportTile(
-                                                  type: 'user',
-                                                  userId: widget.fromUser,
-                                                ),
-                                              );
-                                            });
-                                      }),
-                                  ListTile(
+                                  title: Text(
+                                    user.id.toString(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                ListTile(
                                     leading: const Icon(
-                                      Icons.attach_money,
-                                      color: Colors.white,
+                                      Icons.report,
                                     ),
                                     title: const Text(
-                                      'Add Points',
-                                      style: TextStyle(color: Colors.white),
+                                      'Report',
                                     ),
                                     onTap: () {
                                       Navigator.pop(context);
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => AddPointScreen(
-                                            fromUserID: widget.fromUser,
-                                            toUserId: widget.toUser,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Container(
+                                              color: Theme.of(context).brightness == Brightness.dark
+                                                  ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+                                                  : AppTheme.darkPrimaryColor.withOpacity(0.8),
+                                              child: ReportTile(
+                                                type: 'user',
+                                                userId: widget.fromUser,
+                                              ),
+                                            );
+                                          });
+                                    }),
+                                ListTile(
+                                  leading: const Icon(
+                                    Icons.attach_money,
                                   ),
-                                ],
-                              ),
+                                  title: const Text(
+                                    'Add Points',
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => AddPointScreen(
+                                          fromUserID: widget.fromUser,
+                                          toUserId: widget.toUser,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             );
                           },
                         );

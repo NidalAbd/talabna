@@ -67,7 +67,6 @@ class _NotificationsAlertState extends State<NotificationsAlert> {
                   child: Text(
                     countNotifications.toString(),
                     style: const TextStyle(
-                      color: Colors.white,
                       fontSize: 8,
                     ),
                     textAlign: TextAlign.center,
@@ -77,7 +76,6 @@ class _NotificationsAlertState extends State<NotificationsAlert> {
             ],
           )
               : const Icon(Icons.notifications),
-
         );
       },
     );

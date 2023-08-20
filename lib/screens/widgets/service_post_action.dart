@@ -103,112 +103,107 @@ class _ServicePostActionState extends State<ServicePostAction>
           builder: (context, state) {
         return IconButton(
           padding: EdgeInsets.zero,
-          icon:  Icon(Icons.more_vert,color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black,),
+          icon:  const Icon(Icons.more_vert),
           onPressed: () {
             showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
-                return Container(
-                  color: AppTheme.primaryColor,
-                  child: Wrap(
-                    children: [
-                        Visibility(
-                          visible: isOwnPost,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: const Icon(Icons.edit , color: Colors.white,),
-                                title: const Text('Edit',style: TextStyle(color: Colors.white,),),
-                                onTap: () {
-                                  Navigator.pop(context); // Dismiss the bottom sheet
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => UpdatePostScreen(
-                                        userId: currentUserId!,
-                                        servicePostId: widget.servicePostId!,
+                return Wrap(
+                  children: [
+                      Visibility(
+                        visible: isOwnPost,
+                        child: Column(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.edit ),
+                              title: const Text('Edit'),
+                              onTap: () {
+                                Navigator.pop(context); // Dismiss the bottom sheet
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdatePostScreen(
+                                      userId: currentUserId!,
+                                      servicePostId: widget.servicePostId!,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.category),
+                              title: const Text('Change Category'),
+                              onTap: () {
+                                Navigator.pop(context); // Dismiss the bottom sheet
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) => ChangeCategoryScreen(
+                                          userId: currentUserId!,
+                                          servicePostId: widget.servicePostId!)),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.star),
+                              title: const Text('Make Badge'),
+                              onTap: () {
+                                Navigator.pop(context); // Dismiss the bottom sheet
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) => ChangeBadge(
+                                          userId: currentUserId!,
+                                          servicePostId: widget.servicePostId!)),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.delete),
+                              title: const Text('Delete'),
+                              onTap: () async {
+                                bool? result = await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete Post'),
+                                    content: const Text(
+                                        'Are you sure you want to delete this post?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('Cancel'),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.category, color: Colors.white,),
-                                title: const Text('Change Category',style: TextStyle(color: Colors.white,),),
-                                onTap: () {
-                                  Navigator.pop(context); // Dismiss the bottom sheet
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) => ChangeCategoryScreen(
-                                            userId: currentUserId!,
-                                            servicePostId: widget.servicePostId!)),
-                                  );
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.star, color: Colors.white,),
-                                title: const Text('Make Badge',style: TextStyle(color: Colors.white,),),
-                                onTap: () {
-                                  Navigator.pop(context); // Dismiss the bottom sheet
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) => ChangeBadge(
-                                            userId: currentUserId!,
-                                            servicePostId: widget.servicePostId!)),
-                                  );
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.delete, color: Colors.white,),
-                                title: const Text('Delete',style: TextStyle(color: Colors.white,),),
-                                onTap: () async {
-                                  bool? result = await showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Delete Post', style: TextStyle(color: Colors.white,),),
-                                      content: const Text(
-                                          'Are you sure you want to delete this post?', style: TextStyle(color: Colors.white,),),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(false),
-                                          child: const Text('Cancel', style: TextStyle(color: Colors.white,),),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(true),
-                                          child: const Text('Confirm', style: TextStyle(color: Colors.white,),),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (result == true) {
-                                    _deletePost(context);
-                                  }
-                                  Navigator.pop(context); // Dismiss the bottom sheet
-                                },
-                              ),
-                            ],
-                          ),
-                        )
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('Confirm'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (result == true) {
+                                  _deletePost(context);
+                                }
+                                Navigator.pop(context); // Dismiss the bottom sheet
+                              },
+                            ),
+                          ],
+                        ),
+                      )
 
-                      ,ListTile(
-                          leading: const Icon(Icons.report, color: Colors.white,),
-                          title: const Text('Report' ,style: TextStyle(color: Colors.white,),),
-                          onTap: () {
-                            Navigator.pop(context);
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return ReportTile(
-                                    type: 'service_post',
-                                    userId: widget.servicePostId!,
-                                  );
-                                });
-                          })
-                    ],
-                  ),
+                    ,ListTile(
+                        leading: const Icon(Icons.report,),
+                        title: const Text('Report'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ReportTile(
+                                  type: 'service_post',
+                                  userId: widget.servicePostId!,
+                                );
+                              });
+                        })
+                  ],
                 );
               },
             );

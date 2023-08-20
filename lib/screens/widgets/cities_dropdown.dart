@@ -60,7 +60,9 @@ class _CitiesDropdownState extends State<CitiesDropdown> {
       decoration: const InputDecoration(
         labelText: 'المدينة',
       ),
-      dropdownColor: AppTheme.primaryColor,
+      dropdownColor: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+          : AppTheme.darkPrimaryColor.withOpacity(0.8),
       items: _cities
           .map((city) => DropdownMenuItem<City>(
         value: city,

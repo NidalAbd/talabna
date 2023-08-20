@@ -51,7 +51,9 @@ class _LogoTitleState extends State<LogoTitle>
         ClipPath(
           clipper: CustomShapeClipper(),
           child: Container(
-            color: AppTheme.primaryColor,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+                : AppTheme.darkPrimaryColor.withOpacity(0.8),
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
           ),
@@ -61,7 +63,9 @@ class _LogoTitleState extends State<LogoTitle>
           top: logoTopMargin, // Adjusted when keyboard is opened/closed
           child: CircleAvatar(
             radius: widget.logoSize,
-            backgroundColor: AppTheme.primaryColor,
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+                : AppTheme.darkPrimaryColor.withOpacity(0.8),
             backgroundImage: const AssetImage('assets/talabnaLogo.png'),
           ),
         ),

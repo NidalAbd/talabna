@@ -125,7 +125,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     return WillPopScope(
       onWillPop: _onWillPopReelPost,
       child: Scaffold(
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.lightPrimaryColor
+            : AppTheme.darkPrimaryColor,
         body: BlocListener<ServicePostBloc, ServicePostState>(
           listenWhen: (previous, current) {
             return current is ServicePostLoadSuccess;
@@ -141,7 +143,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
             clipBehavior: Clip.none,
             children: [
               Container(
-                color: AppTheme.primaryColor,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
                 child: PageView.builder(
                   controller: _pageController,
                   onPageChanged: (index) {

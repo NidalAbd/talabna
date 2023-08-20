@@ -288,8 +288,8 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                           icon: Icon(
                             Icons.add_a_photo,
                             color: Theme.of(context).brightness == Brightness.dark
-                                ? AppTheme.accentColor
-                                : AppTheme.primaryColor,
+                                ? AppTheme.lightPrimaryColor
+                                : AppTheme.darkPrimaryColor,
                             size: MediaQuery.of(context).size.width / 5,
                           ),
                         ),
@@ -299,9 +299,11 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                         left: 37,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
+                          decoration:  BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppTheme.primaryColor,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightPrimaryColor.withOpacity(0.8)
+                                : AppTheme.darkPrimaryColor.withOpacity(0.8),
                           ),
                           child: Text(
                             remainingImageCount.toString(),

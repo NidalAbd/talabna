@@ -38,48 +38,45 @@ class _ReportTileState extends State<ReportTile> {
       },
       child: BlocBuilder< ReportBloc , ReportState >(
        builder: (context, state) {
-         return Container(
-           color: AppTheme.primaryColor,
-           child: Column(
-                     mainAxisSize: MainAxisSize.min,
-                     children: <Widget>[
-                       ListTile(
-                         leading: const Icon(Icons.report, color: Colors.white,),
-                         title: const Text('Spam',style: TextStyle(color: Colors.white,),),
-                         onTap: () {
-                           _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '1'));
-                           Navigator.pop(context); // Dismiss the bottom sheet
-                         },
-                       ),
-                       ListTile(
-                         leading: const Icon(Icons.report, color: Colors.white,),
-                         title: const Text('Inappropriate content',style: TextStyle(color: Colors.white,),),
-                         onTap: () {
-                           _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '2'));
-                           Navigator.pop(context); // Dismiss the bottom sheet
+         return Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: <Widget>[
+                     ListTile(
+                       leading: const Icon(Icons.report),
+                       title: const Text('Spam'),
+                       onTap: () {
+                         _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '1'));
+                         Navigator.pop(context); // Dismiss the bottom sheet
+                       },
+                     ),
+                     ListTile(
+                       leading: const Icon(Icons.report),
+                       title: const Text('Inappropriate content'),
+                       onTap: () {
+                         _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '2'));
+                         Navigator.pop(context); // Dismiss the bottom sheet
 
-                         },
-                       ),
-                       ListTile(
-                         leading: const Icon(Icons.report, color: Colors.white,),
-                         title: const Text('Harassment',style: TextStyle(color: Colors.white,),),
-                         onTap: () {
-                           _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '3'));
-                           Navigator.pop(context); // Dismiss the bottom sheet
+                       },
+                     ),
+                     ListTile(
+                       leading: const Icon(Icons.report),
+                       title: const Text('Harassment'),
+                       onTap: () {
+                         _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '3'));
+                         Navigator.pop(context); // Dismiss the bottom sheet
 
-                         },
-                       ),
-                       ListTile(
-                         leading: const Icon(Icons.report, color: Colors.white,),
-                         title: const Text('False information',style: TextStyle(color: Colors.white,),),
-                         onTap: () {
-                           _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '4'));
-                           Navigator.pop(context); // Dismiss the bottom sheet
-                         },
-                       ),
-                     ],
-                   ),
-         );
+                       },
+                     ),
+                     ListTile(
+                       leading: const Icon(Icons.report),
+                       title: const Text('False information'),
+                       onTap: () {
+                         _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '4'));
+                         Navigator.pop(context); // Dismiss the bottom sheet
+                       },
+                     ),
+                   ],
+                 );
 
 
        }

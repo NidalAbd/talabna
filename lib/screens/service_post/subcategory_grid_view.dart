@@ -53,23 +53,28 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is SubcategoryLoaded) {
           if (state.subcategories.isEmpty) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 80),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon:  Icon(
-                        Icons.sentiment_very_dissatisfied,
-                        size: 150.0,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightDisabledColor
-                            : AppTheme.darkDisabledColor,
-                      ),
-                      tooltip: 'Change to list view',
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.lightDisabledColor
+                        : AppTheme.darkDisabledColor,
+                    size: 100,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Oops! No subcategories found here 🙁.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  )),
+                  ),
+
+                ],
+              ),
             );
           } else {
             return Directionality(
