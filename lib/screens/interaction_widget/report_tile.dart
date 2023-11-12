@@ -33,7 +33,12 @@ class _ReportTileState extends State<ReportTile> {
           const LoadingWidget();
         }
         else if(state is ReportSuccess){
-          return SuccessWidget.show(context, 'reported success');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Reported success'),
+            ),
+          );
+          Navigator.pop(context); // Dismiss the bottom sheet
         }
       },
       child: BlocBuilder< ReportBloc , ReportState >(
@@ -46,7 +51,6 @@ class _ReportTileState extends State<ReportTile> {
                        title: const Text('Spam'),
                        onTap: () {
                          _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '1'));
-                         Navigator.pop(context); // Dismiss the bottom sheet
                        },
                      ),
                      ListTile(
@@ -54,8 +58,6 @@ class _ReportTileState extends State<ReportTile> {
                        title: const Text('Inappropriate content'),
                        onTap: () {
                          _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '2'));
-                         Navigator.pop(context); // Dismiss the bottom sheet
-
                        },
                      ),
                      ListTile(
@@ -63,8 +65,6 @@ class _ReportTileState extends State<ReportTile> {
                        title: const Text('Harassment'),
                        onTap: () {
                          _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '3'));
-                         Navigator.pop(context); // Dismiss the bottom sheet
-
                        },
                      ),
                      ListTile(
@@ -72,7 +72,6 @@ class _ReportTileState extends State<ReportTile> {
                        title: const Text('False information'),
                        onTap: () {
                          _reportBloc.add(ReportRequested(user: widget.userId, type: widget.type, reason: '4'));
-                         Navigator.pop(context); // Dismiss the bottom sheet
                        },
                      ),
                    ],

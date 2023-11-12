@@ -21,10 +21,13 @@ import 'package:talbna/screens/widgets/user_avatar_profile.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:talbna/utils/fcm_handler.dart';
 
+import '../../provider/language.dart';
+
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
+  final User user;
 
-  const UpdateUserProfile({Key? key, required this.userId}) : super(key: key);
+  const UpdateUserProfile({Key? key, required this.userId, required this.user}) : super(key: key);
 
   @override
   State<UpdateUserProfile> createState() => _UpdateUserProfileState();
@@ -40,6 +43,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   final TextEditingController _whatsAppController = TextEditingController();
   City? _selectedCity;
   Country? _selectedCountry;
+  City? newCitySelected;
+  Country? newCountrySelected;
   String _gender = '';
   TextEditingController _dateOfBirthController = TextEditingController();
   double _locationLatitudes = 0.0;
@@ -51,10 +56,10 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   late bool isPhoneChanged = false;
   late bool isWatsChanged = false;
   late bool isLocationChanged = false;
+  final Language _language = Language();
 
   Future<void> _updateUserProfile(BuildContext context, User user) async {
-    print('user Data ${user.toJson()}');
-    context.read<UserProfileBloc>().add(UserProfileUpdated(user: user));
+   context.read<UserProfileBloc>().add(UserProfileUpdated(user: user));
   }
 
   @override
@@ -65,7 +70,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     _userProfileBloc = context.read<UserProfileBloc>()
       ..add(UserProfileRequested(id: widget.userId));
     _dateOfBirthController =
-        TextEditingController(text: ''); // Change this line
+        TextEditingController(text: '');
     initializeFCM();
   }
 
@@ -110,16 +115,18 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
 
   dynamic _onCountrySelected(Country? newCountry) {
     setState(() {
-      _selectedCountry = newCountry;
-      countryCode.text = newCountry!.countryCode; // Update countryCode
+      newCountrySelected = newCountry;
+      countryCode.text = newCountry!.countryCode;
       isCountryChanged = true;
+      print(_selectedCountry!.name);
     });
   }
 
   dynamic _onCitySelected(City? newCity) {
     setState(() {
-      _selectedCity = newCity;
+      newCitySelected = newCity;
       isCountryChanged = true;
+      print(_selectedCity!.name);
     });
   }
 
@@ -128,7 +135,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       countryCode.text = newCountryCode!;
     });
   }
-
 
   Future<void> _saveDataToSharedPreferences(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -147,17 +153,22 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   void _setValues(User user) {
     if (user.phones != null && user.phones!.length >= 5) {
       _phoneController.text = user.phones!.substring(5);
-    }else {
+    } else {
       _phoneController.text = '';
     }
     if (user.watsNumber != null && user.watsNumber!.length >= 5) {
       _whatsAppController.text = user.watsNumber!.substring(5);
-    }else {
+    } else {
       _whatsAppController.text = '';
     }
     _selectedCity = user.city;
     _selectedCountry = user.country;
-    countryCode.text = _selectedCountry!.countryCode;
+    if (_selectedCountry != null) {
+      countryCode.text = _selectedCountry!.countryCode;
+    } else {
+      countryCode.text = '00970';
+    }
+
     _gender = _gender.isEmpty ? user.gender! : _gender;
     _dateOfBirthNotifier.value = user.dateOfBirth ?? DateTime.now();
     _selectedDateNotifier = ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now().subtract(const Duration(days: 365 * 20)));
@@ -167,21 +178,22 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   void updatePhoneNumber(String newPhoneNumber) {
     setState(() {
       _phoneController.text = newPhoneNumber;
+      isPhoneChanged = true;
     });
   }
 
   void updateWhatsAppNumber(String newWhatsAppNumber) {
     setState(() {
       _whatsAppController.text = newWhatsAppNumber;
+      isWatsChanged = true;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تعديل البيانات'),
+        title: Text(_language.tUpdateInfoText()),
       ),
       body: BlocConsumer<UserProfileBloc, UserProfileState>(
         bloc: _userProfileBloc,
@@ -194,18 +206,18 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
           } else if (state is UserProfileUpdateFailure) {
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
-            ErrorCustomWidget.show(context, message: 'Profile updated failed.');
+            ErrorCustomWidget.show(context, message: 'Profile update failed.');
           } else if (state is UserProfileLoadFailure) {
             ErrorCustomWidget.show(context,
-                message: 'Profile load failed , refresh the page');
+                message: 'Profile load failed, please refresh the page');
           }
         },
         builder: (context, state) {
           if (state is UserProfileLoadSuccess) {
             final user = state.user;
             _dateOfBirthController.text = dateFormat
-                .format(user.dateOfBirth ?? DateTime.now()); // Add this line
-            _setValues(state.user); // Call the _setValues function here
+                .format(user.dateOfBirth ?? DateTime.now());
+            _setValues(state.user);
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -218,56 +230,45 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           setState(() {
                             _locationLatitudes = location.latitude;
                             _locationLongitudes = location.longitude;
+                            isLocationChanged = true;
                           });
                         },
                       ),
                       Stack(
                         children: [
                           UserAvatarProfile(
-                            imageUrl:
-                                '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+                            imageUrl: '${user.photos?.first.src}',
                             radius: 100,
                             toUser: user.id,
                             canViewProfile: false,
-                            fromUser: user.id,
+                            fromUser: user.id, user: widget.user,
                           ),
                           Positioned(
-                            bottom: 10,
-                            right: 15,
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 1,
-                                    blurRadius: 3,
-                                    offset: const Offset(
-                                      0,
-                                      2,
-                                    ),
+                            bottom: 0,
+                            right: 25,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.camera_alt,
+                                size: 40,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.8),
+                                    offset: const Offset(0, 0),
+                                    blurRadius: 1,
                                   ),
                                 ],
                               ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.camera_alt,
-                                  size: 25,
-                                ),
-                                onPressed: () async {
-                                  File? imageFile =
-                                      await _pickImageFromGallery();
-                                  if (imageFile != null) {
-                                    BlocProvider.of<UserProfileBloc>(context)
-                                        .add(UpdateUserProfilePhoto(
-                                      user: user,
-                                      photo: imageFile,
-                                    ));
-                                  }
-                                },
-                              ),
+                              onPressed: () async {
+                                File? imageFile =
+                                await _pickImageFromGallery();
+                                if (imageFile != null) {
+                                  BlocProvider.of<UserProfileBloc>(context)
+                                      .add(UpdateUserProfilePhoto(
+                                    user: user,
+                                    photo: imageFile,
+                                  ));
+                                }
+                              },
                             ),
                           ),
                         ],
@@ -290,8 +291,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: DropdownButtonFormField<String?>(
-                            decoration: const InputDecoration(
-                              labelText: 'Gender',
+                            decoration: InputDecoration(
+                              labelText: _language.tGenderText(),
                               border: InputBorder.none,
                             ),
                             value: _gender.isNotEmpty ? _gender : null,
@@ -313,25 +314,25 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       ValueListenableBuilder(
                         valueListenable: _selectedDateNotifier,
                         builder: (
-                          BuildContext context,
-                          DateTime value,
-                          Widget? child,
-                        ) {
+                            BuildContext context,
+                            DateTime value,
+                            Widget? child,
+                            ) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             _updateDateOfBirthController(value);
                           });
                           return Card(
                             color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.lightForegroundColor
-                                    : AppTheme.darkForegroundColor,
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightForegroundColor
+                                : AppTheme.darkForegroundColor,
                             child: Padding(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              const EdgeInsets.symmetric(horizontal: 12.0),
                               child: TextFormField(
                                 controller: _dateOfBirthController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Date of Birth',
+                                decoration: InputDecoration(
+                                  labelText: _language.tDateOfBirthText(),
                                   border: InputBorder.none,
                                   suffixIcon: Icon(Icons.date_range_rounded),
                                   suffixIconConstraints: BoxConstraints(
@@ -344,11 +345,11 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                     FocusNode(),
                                   );
                                   DateTime? oldDate =
-                                      _dateOfBirthController.text.isNotEmpty
-                                          ? DateFormat('yyyy-MM-dd').parse(
-                                              _dateOfBirthController.text,
-                                            )
-                                          : null;
+                                  _dateOfBirthController.text.isNotEmpty
+                                      ? DateFormat('yyyy-MM-dd').parse(
+                                    _dateOfBirthController.text,
+                                  )
+                                      : null;
                                   DateTime? selectedDate = await showDatePicker(
                                     context: context,
                                     initialDate: oldDate ??
@@ -357,21 +358,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                         ),
                                     firstDate: DateTime(1900),
                                     lastDate: DateTime.now(),
-                                    builder: (
-                                      BuildContext context,
-                                      Widget? child,
-                                    ) {
-                                      return Theme(
-                                        data: ThemeData.light().copyWith(
-                                          colorScheme: const ColorScheme.light()
-                                              .copyWith(
-                                            primary:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                        ),
-                                        child: child ?? const SizedBox(),
-                                      );
-                                    },
                                   );
                                   if (selectedDate != null) {
                                     _selectedDateNotifier.value = selectedDate;
@@ -386,7 +372,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                   }
                                   DateTime currentDate = DateTime.now();
                                   DateTime selectedDate =
-                                      DateFormat('yyyy-MM-dd').parse(value);
+                                  DateFormat('yyyy-MM-dd').parse(value);
                                   DateTime minimumDate = currentDate.subtract(
                                     const Duration(days: 365 * 18),
                                   );
@@ -400,42 +386,60 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           );
                         },
                       ),
+                      const SizedBox(height: 5,),
                       FractionallySizedBox(
                         widthFactor: 1.0,
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(
+                                    5),
+                              ),
+                            ),
+                          ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              if (_selectedCountry == null ||
-                                  _selectedCity == null) {
+                              if (_selectedCountry == null || _selectedCity == null) {
                                 ErrorCustomWidget.show(context,
-                                    message: 'select country and city');
+                                    message: 'Select country and city');
                                 return;
                               }
-                              DateTime? parsedDateOfBirth;
+                              DateTime? parseDateOfBirth(String dateOfBirthText) {
+                                // Define the date format that matches the one expected by the Laravel backend
+                                final DateFormat format = DateFormat('yyyy-MM-dd');
 
-                              try {
-                                parsedDateOfBirth = dateFormat
-                                    .parse(_dateOfBirthController.text);
-                              } catch (e) {
-                                if (kDebugMode) {
-                                  print('Error parsing date: $e');
+                                // Attempt to parse the dateOfBirthText, and handle any errors.
+                                try {
+                                  // Check if the string is not empty
+                                  if (dateOfBirthText.isNotEmpty) {
+                                    final DateTime parsedDate = format.parseStrict(dateOfBirthText);
+                                    // Return the parsed date if successful
+                                    return parsedDate;
+                                  }
+                                } on FormatException {
+                                  // Handle the case where the date format is invalid
+                                  print('Date format is invalid. Expected format is yyyy-MM-dd.');
                                 }
+
+                                // Return null if the parsing fails or the string is empty
+                                return null;
                               }
-                              if (kDebugMode) {
-                                print('full phone number ${countryCode.text + _phoneController.text}');
-                                print('full whats number ${countryCode.text + _whatsAppController.text}');
-                                print('country $_selectedCountry');
-                                print('city $_selectedCity');
-                              }
+                              // print(newCountrySelected!.name);
+                              // print(newCitySelected!.name);
+                              // print(_gender);
+
                               User updatedUser = User(
                                 id: user.id,
                                 userName: user.userName,
                                 name: user.name,
-                                gender: user.gender,
-                                country: _selectedCountry,
-                                city: _selectedCity,
-                                device_token: deviceToken,
-                                dateOfBirth: parsedDateOfBirth,
+                                gender: _gender,
+                                country: newCountrySelected,
+                                city: newCitySelected,
+                                deviceToken: deviceToken,
+                                dateOfBirth: parseDateOfBirth(_dateOfBirthController.text),
                                 locationLatitudes: _locationLatitudes,
                                 locationLongitudes: _locationLongitudes,
                                 phones: countryCode.text + _phoneController.text,
@@ -454,8 +458,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               _updateUserProfile(context, updatedUser);
                             }
                           },
-                          child: const Text(
-                            'Save Changes',
+                          child:  Text(
+                              _language.tUpdateInfoText(),
                           ),
                         ),
                       ),

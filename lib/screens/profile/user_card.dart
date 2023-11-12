@@ -8,15 +8,18 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
 import 'package:talbna/utils/constants.dart';
 
+import '../../provider/language.dart';
+
 class UserCard extends StatefulWidget {
   final User follower;
   final int userId;
+  final User user;
   final UserActionBloc userActionBloc;
   const UserCard({
     Key? key,
     required this.follower,
     required this.userActionBloc,
-    required this.userId,
+    required this.userId, required this.user,
   }) : super(key: key);
 
   @override
@@ -25,6 +28,8 @@ class UserCard extends StatefulWidget {
 
 class _UserCardState extends State<UserCard> {
   late bool? isFollowThisUser = widget.follower.isFollow;
+  final Language _language = Language();
+
   @override
   void initState() {
     super.initState();
@@ -33,13 +38,13 @@ class _UserCardState extends State<UserCard> {
   @override
   Widget build(BuildContext context) {
     String avatarUrl =
-        '${Constants.apiBaseUrl}/storage/photos/avatar1.png'; // Provide a default avatar URL
+        'storage/photos/avatar1.png'; // Provide a default avatar URL
     if (widget.follower.photos!.isNotEmpty) {
       avatarUrl =
-          '${Constants.apiBaseUrl}/storage/${widget.follower.photos![0].src}';
+          '${widget.follower.photos![0].src}';
     } else {
       avatarUrl =
-          '${Constants.apiBaseUrl}/storage/photos/avatar1.png'; // Provide a default avatar URL
+          'storage/photos/avatar1.png'; // Provide a default avatar URL
     }
     return Card(
       child: ListTile(
@@ -48,19 +53,13 @@ class _UserCardState extends State<UserCard> {
           radius: 24,
           toUser: widget.follower.id,
           canViewProfile: true,
-          fromUser: widget.userId,
+          fromUser: widget.userId, user: widget.user,
         ),
         title: Text(
           widget.follower.userName!,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-          ),
-        ),
-        subtitle: Text(
-          '${widget.follower.country!.name} من ${widget.follower.city!.name}',
-          style: const TextStyle(
-            fontSize: 14,
           ),
         ),
         trailing: SizedBox(
@@ -102,7 +101,7 @@ class _UserCardState extends State<UserCard> {
                   ),
                 ),
                 child: Text(
-                  isFollowThisUser! ? 'Unfollow' : 'Follow',
+                  isFollowThisUser! ? _language.getUnfollowText() : _language.getFollowText(),
                   style: const TextStyle(
                     fontSize: 14,
                   ),

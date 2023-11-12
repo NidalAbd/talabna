@@ -52,8 +52,8 @@ class _LogoTitleState extends State<LogoTitle>
           clipper: CustomShapeClipper(),
           child: Container(
             color: Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.lightPrimaryColor.withOpacity(0.8)
-                : AppTheme.darkPrimaryColor.withOpacity(0.8),
+                ? AppTheme.lightPrimaryColor.withOpacity(0.99)
+                : AppTheme.darkPrimaryColor.withOpacity(0.99),
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
           ),
@@ -64,8 +64,8 @@ class _LogoTitleState extends State<LogoTitle>
           child: CircleAvatar(
             radius: widget.logoSize,
             backgroundColor: Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.lightPrimaryColor.withOpacity(0.8)
-                : AppTheme.darkPrimaryColor.withOpacity(0.8),
+                ? AppTheme.lightPrimaryColor.withOpacity(0.5)
+                : AppTheme.darkPrimaryColor.withOpacity(0.5),
             backgroundImage: const AssetImage('assets/talabnaLogo.png'),
           ),
         ),

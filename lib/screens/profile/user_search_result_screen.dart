@@ -6,18 +6,29 @@ import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/user_card.dart';
-class UserSearchResult extends StatefulWidget {
-   UserSearchResult({Key? key, required this.currentPage,required this.searchQuery,required this.userHasReachedMax,required this.usersResult, required this.userActionBloc, required this.userID}) : super(key: key);
-   final int userID;
-   late List<User> usersResult = [];
-   final UserActionBloc userActionBloc;
-   late int currentPage;
-   String searchQuery = '';
-   bool userHasReachedMax = false;
 
-   @override
+class UserSearchResult extends StatefulWidget {
+  UserSearchResult(
+      {Key? key,
+      required this.currentPage,
+      required this.searchQuery,
+      required this.userHasReachedMax,
+      required this.usersResult,
+      required this.userActionBloc,
+      required this.userID, required this.user})
+      : super(key: key);
+  final int userID;
+  final User user;
+  late List<User> usersResult = [];
+  final UserActionBloc userActionBloc;
+  late int currentPage;
+  String searchQuery = '';
+  bool userHasReachedMax = false;
+
+  @override
   UserSearchResultState createState() => UserSearchResultState();
 }
+
 class UserSearchResultState extends State<UserSearchResult> {
   final ScrollController _scrollSearchController = ScrollController();
   late UserActionBloc _userActionBloc;
@@ -28,6 +39,7 @@ class UserSearchResultState extends State<UserSearchResult> {
     _scrollSearchController.addListener(_onScroll);
     _userActionBloc = context.read<UserActionBloc>();
   }
+
   @override
   void dispose() {
     _scrollSearchController.dispose();
@@ -43,18 +55,21 @@ class UserSearchResultState extends State<UserSearchResult> {
       _handleLoadMore();
     }
   }
+
   void _handleLoadMore() {
     widget.currentPage++;
-    _userActionBloc
-        .add(UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
+    _userActionBloc.add(
+        UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
   }
+
   Future<void> _handleRefresh() async {
     widget.currentPage = 1;
     widget.userHasReachedMax = false;
     widget.usersResult.clear();
-    _userActionBloc
-        .add(UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
+    _userActionBloc.add(
+        UserSearchAction(search: widget.searchQuery, page: widget.currentPage));
   }
+
   Future<bool> _onWillPop() async {
     if (_scrollSearchController.offset > 0) {
       _scrollSearchController.animateTo(
@@ -81,7 +96,8 @@ class UserSearchResultState extends State<UserSearchResult> {
         listener: (context, state) {
           if (state is UserSearchActionResult) {
             setState(() {
-              widget.usersResult = List.from(widget.usersResult)..addAll(state.users);
+              widget.usersResult = List.from(widget.usersResult)
+                ..addAll(state.users);
               widget.userHasReachedMax = state.usersHasReachedMax;
             });
           }
@@ -89,14 +105,17 @@ class UserSearchResultState extends State<UserSearchResult> {
         child: BlocBuilder<UserActionBloc, UserActionState>(
           bloc: widget.userActionBloc,
           builder: (context, state) {
-            if (state is UserFollowLoadInProgress && widget.usersResult.isEmpty) {
+            if (state is UserFollowLoadInProgress &&
+                widget.usersResult.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             } else if (widget.usersResult.isNotEmpty) {
               return RefreshIndicator(
                 onRefresh: _handleRefresh,
                 child: ListView.builder(
                   controller: _scrollSearchController,
-                  itemCount: widget.userHasReachedMax ? widget.usersResult.length : widget.usersResult.length + 1,
+                  itemCount: widget.userHasReachedMax
+                      ? widget.usersResult.length
+                      : widget.usersResult.length + 1,
                   itemBuilder: (context, index) {
                     if (index >= widget.usersResult.length) {
                       return const Center(child: CircularProgressIndicator());
@@ -106,12 +125,12 @@ class UserSearchResultState extends State<UserSearchResult> {
                       return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child:
-                          UserCard(
+                          curve: Curves.easeIn,
+                          child: UserCard(
                             key: UniqueKey(),
                             follower: follower,
                             userActionBloc: _userActionBloc,
-                            userId: widget.userID,
+                            userId: widget.userID, user: widget.user,
                           ));
                     } else {
                       return const Center(child: Text('Invalid index'));
@@ -119,13 +138,13 @@ class UserSearchResultState extends State<UserSearchResult> {
                   },
                 ),
               );
-        } else if (state is UserActionFailure) {
-          return Center(child: Text(state.error));
-        } else {
-          return const Center(child: Text('No followers found.'));
-        }
-      },
-      ),
+            } else if (state is UserActionFailure) {
+              return Center(child: Text(state.error));
+            } else {
+              return const Center(child: Text('No followers found.'));
+            }
+          },
+        ),
       ),
     );
   }

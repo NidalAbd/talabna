@@ -8,6 +8,7 @@ import 'package:talbna/blocs/other_users/user_profile_state.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/profile/add_point_screen.dart';
 import 'package:talbna/screens/profile/user_followers_screen.dart';
@@ -19,16 +20,19 @@ import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/full_screen_image.dart';
 import 'package:talbna/utils/constants.dart';
 
+import '../../provider/language.dart';
+
 class OtherProfileScreen extends StatefulWidget {
   const OtherProfileScreen(
       {Key? key,
       required this.fromUser,
       required this.toUser,
-      required this.isOtherProfile})
+      required this.isOtherProfile, required this.user})
       : super(key: key);
   final bool isOtherProfile;
   final int fromUser;
   final int toUser;
+  final User user;
 
   @override
   State<OtherProfileScreen> createState() => _OtherProfileScreenState();
@@ -36,6 +40,8 @@ class OtherProfileScreen extends StatefulWidget {
 
 class _OtherProfileScreenState extends State<OtherProfileScreen>
     with SingleTickerProviderStateMixin {
+  final Language _language = Language();
+
   late final TabController _tabController;
   late OtherUserProfileBloc _userProfileBloc;
   late UserActionBloc userActionBloc;
@@ -68,7 +74,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
           return const Center(child: CircularProgressIndicator());
         } else if (state is OtherUserProfileLoadSuccess) {
           final user = state.user;
-          final  List<String> userImageURl = ['${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'];
+          final  List<String> userImageURl = ['${user.photos?.first.src}'];
           return Scaffold(
             appBar: AppBar(
               leadingWidth: 30,
@@ -91,7 +97,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                     child: CircleAvatar(
                       radius: 18,
                       backgroundImage: NetworkImage(
-                          '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'),
+                          '${user.photos?.first.src}'),
                     ),
                   ),
                   const SizedBox(width: 10,),
@@ -178,8 +184,8 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                                     leading: const Icon(
                                       Icons.report,
                                     ),
-                                    title: const Text(
-                                      'Report',
+                                    title:  Text(
+                                      _language.tReportText(),
                                     ),
                                     onTap: () {
                                       Navigator.pop(context);
@@ -201,8 +207,8 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                                   leading: const Icon(
                                     Icons.attach_money,
                                   ),
-                                  title: const Text(
-                                    'Add Points',
+                                  title:  Text(
+                                    _language.tConvertPointsText(),
                                   ),
                                   onTap: () {
                                     Navigator.pop(context);
@@ -228,12 +234,12 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
               bottom: TabBar(
                 controller: _tabController,
                 tabs: [
-                  CustomTab(title: 'Posts', count: user.servicePostsCount ?? 0),
+                  CustomTab(title: _language.tPostsText(), count: user.servicePostsCount ?? 0),
                   CustomTab(
-                      title: 'Followers', count: user.followersCount ?? 0),
+                      title: _language.tFollowersText(), count: user.followersCount ?? 0),
                   CustomTab(
-                      title: 'Following', count: user.followingCount ?? 0),
-                  const Tab(text: 'Info'),
+                      title: _language.tFollowingText(), count: user.followingCount ?? 0),
+                   Tab(text: _language.tOverviewText()),
                 ],
               ),
             ),
@@ -241,16 +247,16 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
               controller: _tabController,
               children: [
                 Center(
-                  child: OtherUserPostScreen(userID: widget.toUser),
+                  child: OtherUserPostScreen(userID: widget.toUser, user: widget.user,),
                 ),
                 Center(
                   child: UserFollowerScreen(
-                    userID: user.id,
+                    userID: user.id, user: user,
                   ),
                 ),
                 Center(
                   child: UserFollowingScreen(
-                    userID: user.id,
+                    userID: user.id, user: user,
                   ),
                 ),
                 Center(

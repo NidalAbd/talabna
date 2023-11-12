@@ -8,8 +8,9 @@ import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/user_card.dart';
 class UserFollowingScreen extends StatefulWidget {
-  const UserFollowingScreen({Key? key, required this.userID}) : super(key: key);
+  const UserFollowingScreen({Key? key, required this.userID, required this.user}) : super(key: key);
   final int userID;
+  final User user;
   @override
   UserFollowingScreenState createState() => UserFollowingScreenState();
 }
@@ -109,7 +110,7 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
                         key: UniqueKey(),
                         follower: follower,
                         userActionBloc: _userActionBloc,
-                        userId: widget.userID,
+                        userId: widget.userID, user: widget.user,
                       ));
                     } else {
                       return const Center(child: Text('Invalid index'));

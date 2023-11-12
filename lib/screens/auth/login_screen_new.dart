@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/blocs/authentication/authentication_state.dart';
+import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
 
@@ -22,15 +22,41 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
   TextEditingController();
   late bool _obscurePassword = true;
   bool _isLoading = false;
+  final Language language = Language();
+
+  @override
+  void initState() {
+    super.initState();
+    language.getLanguage(); // No need to call setState here
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
-        if (state is AuthenticationFailure) {
+        if (state is AuthenticationInProgress) {
+          // Set _isLoading to true when the authentication request is in progress.
+          setState(() {
+            _isLoading = true;
+          });
+        } else if (state is AuthenticationFailure) {
+          // Set _isLoading to false when authentication fails.
           setState(() {
             _isLoading = false;
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+              content: Text('Some Error Happen ${state.error}'),
+            ),
+          );
+        } else if (state is AuthenticationSuccess) {
+          // Set _isLoading to false when authentication succeeds.
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.pushReplacementNamed(context, "home");
+          // Navigate to the home screen or perform any necessary action.
+          // Example: Navigator.pushReplacementNamed(context, 'home');
         }
       },
       builder: (context, state) {
@@ -54,7 +80,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
-                                  labelText: 'Email',
+                                  labelText: language.emailText(),
                                   border: OutlineInputBorder(
                                     borderRadius:
                                     BorderRadius.circular(8.0),
@@ -62,7 +88,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
+                                    return language.enterEmailText();
                                   }
                                   return null;
                                 },
@@ -71,7 +97,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                               TextFormField(
                                 controller: _passwordController,
                                 decoration: InputDecoration(
-                                  labelText: 'Password',
+                                  labelText: language.tPasswordText(),
                                   border: OutlineInputBorder(
                                     borderRadius:
                                     BorderRadius.circular(8.0),
@@ -93,22 +119,17 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                 obscureText: _obscurePassword,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
+                                    return language.enterPasswordText();
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 20.0),
                               SizedBox(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width / 1.1,
+                                width: MediaQuery.of(context).size.width /
+                                    1.1,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
-                                        ? AppTheme.lightPrimaryColor.withOpacity(0.6)
-                                        : AppTheme.darkPrimaryColor.withOpacity(0.6),
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                     shape: const RoundedRectangleBorder(
@@ -130,7 +151,8 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                           .read<
                                           AuthenticationBloc>()
                                           .add(LoginRequest(
-                                        email: _emailController
+                                        email:
+                                        _emailController
                                             .text,
                                         password:
                                         _passwordController
@@ -145,12 +167,8 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                     child:
                                     CircularProgressIndicator(),
                                   )
-                                      : const Text(
-                                    'تسجيل دخول',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
+                                      : Text(
+                                    language.loginText(),
                                   ),
                                 ),
                               ),
@@ -160,9 +178,9 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                                   // Implement the "Create one" functionality here
                                   Navigator.pushNamed(context, 'registerNew');
                                 },
-                                child: const Text(
-                                  'لا تمتلك حساب؟ إنشاء حساب',
-                                  style: TextStyle(
+                                child: Text(
+                                  language.createAccountText(),
+                                  style: const TextStyle(
                                     fontSize: 16,
                                   ),
                                 ),
@@ -186,19 +204,34 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                     top: 30,
                     right: 10,
                     child: IconButton(
-                    icon: const Icon(Icons.brightness_6),
-                    onPressed: () =>
-                        BlocProvider.of<ThemeCubit>(context).toggleTheme(),
-                  ),),
+                      icon: Icon(
+                        Icons.brightness_6_sharp,
+                        color: Theme.of(context).brightness ==
+                            Brightness.dark
+                            ? AppTheme.darkPrimaryColor
+                            : AppTheme.lightPrimaryColor,
+                      ),
+                      onPressed: () =>
+                          BlocProvider.of<ThemeCubit>(context)
+                              .toggleTheme(),
+                    ),
+                  ),
                   Positioned(
                     top: 30,
                     left: 10,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).brightness ==
+                            Brightness.dark
+                            ? AppTheme.darkPrimaryColor
+                            : AppTheme.lightPrimaryColor,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                    ),)
+                    ),
+                  )
                 ],
               ),
             );
@@ -215,4 +248,3 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
     super.dispose();
   }
 }
-

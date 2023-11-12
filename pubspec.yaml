@@ -78,6 +78,7 @@ dependencies:
   video_thumbnail: ^0.5.3
   pull_to_refresh: ^2.0.0
   ffmpeg_kit_flutter: ^5.1.0
+  font_awesome_flutter: ^10.6.0
 
 
 

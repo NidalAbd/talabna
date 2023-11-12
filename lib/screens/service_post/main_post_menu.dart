@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_category.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
@@ -9,6 +10,7 @@ import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
 class MainMenuPostScreen extends StatefulWidget {
   final int category;
   final int userID;
+  final User user;
   final bool showSubcategoryGridView;
   final ServicePostBloc servicePostBloc;
 
@@ -16,7 +18,7 @@ class MainMenuPostScreen extends StatefulWidget {
     Key? key,
     required this.category,
     required this.userID,
-    required this.servicePostBloc, required this.showSubcategoryGridView,
+    required this.servicePostBloc, required this.showSubcategoryGridView, required this.user,
   }) : super(key: key);
 
   @override
@@ -44,17 +46,17 @@ class MainMenuPostScreenState extends State<MainMenuPostScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
           child: widget.showSubcategoryGridView
-              ? SubcategoryGridView(
+              ? SubcategoryListView(
             categoryId: widget.category,
             userId: widget.userID,
             servicePostBloc: widget.servicePostBloc,
-            userProfileBloc: BlocProvider.of<UserProfileBloc>(context),
+            userProfileBloc: BlocProvider.of<UserProfileBloc>(context), user: widget.user,
           )
               : ServicePostScreen(
             category: widget.category,
             userID: widget.userID,
             servicePostBloc: widget.servicePostBloc,
-            showSubcategoryGridView: widget.showSubcategoryGridView,
+            showSubcategoryGridView: widget.showSubcategoryGridView, user: widget.user,
           ),
         ),
       ],

@@ -66,6 +66,8 @@ class AuthenticationBloc
         );
         final userId = result['userId'];
         final token = result['token'];
+        print(userId);
+        print(userId);
         emit(AuthenticationSuccess(userId: userId, token: token));
       } catch (e) {
         emit(AuthenticationFailure(error: e.toString()));

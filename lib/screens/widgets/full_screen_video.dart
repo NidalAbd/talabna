@@ -11,7 +11,7 @@ class FullScreenImageViewer extends StatefulWidget {
   final int initialIndex;
   final bool deleteApi;
 
-  FullScreenImageViewer({super.key,
+  const FullScreenImageViewer({super.key,
     required this.images,
     required this.localImages,
     required this.initialIndex,

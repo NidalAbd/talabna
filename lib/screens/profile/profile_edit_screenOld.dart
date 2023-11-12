@@ -23,8 +23,9 @@ import 'package:talbna/utils/fcm_handler.dart';
 
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
+  final User user;
 
-  const UpdateUserProfile({Key? key, required this.userId}) : super(key: key);
+  const UpdateUserProfile({Key? key, required this.userId, required this.user}) : super(key: key);
 
   @override
   State<UpdateUserProfile> createState() => _UpdateUserProfileState();
@@ -224,11 +225,11 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                         children: [
                           UserAvatarProfile(
                             imageUrl:
-                                '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+                                '${user.photos?.first.src}',
                             radius: 100,
                             toUser: user.id,
                             canViewProfile: false,
-                            fromUser: user.id,
+                            fromUser: user.id, user: widget.user,
                           ),
                           Positioned(
                             bottom: 0,
@@ -443,7 +444,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                 gender: user.gender,
                                 country: _selectedCountry,
                                 city: _selectedCity,
-                                device_token: deviceToken,
+                                deviceToken: deviceToken,
                                 dateOfBirth: parsedDateOfBirth,
                                 locationLatitudes: _locationLatitudes,
                                 locationLongitudes: _locationLongitudes,

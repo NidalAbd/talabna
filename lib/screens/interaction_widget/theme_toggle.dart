@@ -1,9 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/provider/language.dart';
 import 'package:talbna/theme_cubit.dart';
 
 class ThemeToggleListTile extends StatefulWidget {
+  final  Language language;
+
+  const ThemeToggleListTile({super.key, required this.language});
   @override
   _ThemeToggleListTileState createState() => _ThemeToggleListTileState();
 }
@@ -35,7 +39,8 @@ class _ThemeToggleListTileState extends State<ThemeToggleListTile> {
       builder: (BuildContext innerContext) {
         return ListTile(
           leading: Icon(isDarkMode ? Icons.brightness_2 : Icons.brightness_7),
-          title: const Text('Toggle Dark Mode'),
+          title:  Text(widget.language.tDarkModeText()),
+          trailing: Icon(isDarkMode ? Icons.toggle_on : Icons.toggle_off, color: isDarkMode ? Colors.blue : Colors.grey , size: 40,),
           onTap: () {
             final RenderBox box = innerContext.findRenderObject() as RenderBox;
             final Offset globalPosition = box.localToGlobal(Offset.zero);

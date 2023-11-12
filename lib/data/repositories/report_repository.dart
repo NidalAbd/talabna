@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ReportRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
-  Future<Reports> makeReport({required int id , required String type , required String reason}) async {
+  Future<bool> makeReport({required int id , required String type , required String reason}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -17,14 +17,7 @@ class ReportRepository {
     final response = await http.post(Uri.parse('$_baseUrl/api/reports/reported/$type/reportedId/$id/reason/$reason'),
         headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final jsonData = jsonDecode(response.body);
-      if (jsonData.containsKey('report') && jsonData['report'] != null) {
-        print(jsonData['report']);
-
-        return Reports.fromJson(jsonData['report']);
-      } else {
-        throw Exception('JSON response does not contain userData');
-      }
+        return true;
     } else if (response.statusCode == 404) {
       throw Exception('هذا الملف الشخصي غير موجود');
     } else {

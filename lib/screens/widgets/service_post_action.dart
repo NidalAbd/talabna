@@ -169,12 +169,16 @@ class _ServicePostActionState extends State<ServicePostAction>
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.of(context).pop(false),
-                                        child: const Text('Cancel'),
+                                        child:  Text('Cancel' , style: TextStyle( color: Theme.of(context).brightness == Brightness.dark
+                                            ? AppTheme.darkForegroundColor
+                                            : AppTheme.lightForegroundColor,),),
                                       ),
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.of(context).pop(true),
-                                        child: const Text('Confirm'),
+                                        child:  Text('Confirm' , style: TextStyle( color: Theme.of(context).brightness == Brightness.dark
+                                            ? AppTheme.darkForegroundColor
+                                            : AppTheme.lightForegroundColor,),),
                                       ),
                                     ],
                                   ),

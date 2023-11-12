@@ -15,11 +15,21 @@ class FullScreenImage extends StatefulWidget {
 
 class _FullScreenImageState extends State<FullScreenImage> {
   late PageController _pageController;
+  late int _currentIndex;
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex; // Initialize with the initial index
     _pageController = PageController(initialPage: widget.initialIndex);
+    _pageController.addListener(() {
+      // Check if page index has changed
+      if (_pageController.page!.round() != _currentIndex) {
+        setState(() {
+          _currentIndex = _pageController.page!.round();
+        });
+      }
+    });
   }
 
   Widget _buildMediaWidget(String url) {
@@ -70,30 +80,38 @@ class _FullScreenImageState extends State<FullScreenImage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        title: Text("${_currentIndex + 1} / ${widget.mediaUrls.length}", style: TextStyle(color: Colors.white)),
       ),
-      backgroundColor: Colors.black,
-      body: InteractiveViewer(
-        boundaryMargin: const EdgeInsets.all(20),
-        minScale: 0.5,
-        maxScale: 4,
-        child: PageView.builder(
-          itemCount: widget.mediaUrls.length,
-          controller: _pageController,
-          itemBuilder: (context, index) {
-            final url = widget.mediaUrls[index];
-            return Center(
-              child: _buildMediaWidget(url),
-            );
-          },
+      body: PageView.builder(
+        itemCount: widget.mediaUrls.length,
+        controller: PageController(
+          initialPage: widget.initialIndex,
+          viewportFraction: 0.5, // Set viewport fraction less than 1
         ),
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        itemBuilder: (context, index) {
+          final url = widget.mediaUrls[index];
+          return InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(20),
+            minScale: 0.5,
+            maxScale: 4,
+            child: Center(
+              child: _buildMediaWidget(url),
+            ),
+          );
+        },
       ),
     );
   }
+
 }

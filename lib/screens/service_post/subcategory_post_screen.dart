@@ -8,6 +8,7 @@ import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 class SubCategoryPostScreen extends StatefulWidget {
@@ -17,9 +18,10 @@ class SubCategoryPostScreen extends StatefulWidget {
       required this.categoryId,
       required this.subcategoryId,
       required this.servicePostBloc,
-      required this.userProfileBloc})
+      required this.userProfileBloc, required this.user})
       : super(key: key);
   final int userID;
+  final User user;
   final int categoryId;
   final int subcategoryId;
   final ServicePostBloc servicePostBloc;
@@ -204,7 +206,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                             key: UniqueKey(), // Add this line
                             onPostDeleted: onPostDeleted,
                             servicePost: servicePost, canViewProfile: false,
-                            userProfileId: widget.userID,
+                            userProfileId: widget.userID, user: widget.user,
                           ),
                         );
                       },

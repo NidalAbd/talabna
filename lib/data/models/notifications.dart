@@ -4,7 +4,7 @@ class Notifications {
   final int id;
   final int userId;
   final String message;
-  final bool read;
+  late final bool read;
   final String type;
   final DateTime createdAt;
   final DateTime updatedAt;

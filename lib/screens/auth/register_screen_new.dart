@@ -8,6 +8,8 @@ import 'package:talbna/blocs/authentication/authentication_state.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
 
+import '../../provider/language.dart';
+
 class RegisterScreenNew extends StatefulWidget {
   const RegisterScreenNew({
     Key? key,
@@ -30,10 +32,12 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
   bool _obscurePassword = true;
   late AnimationController _animationController;
   bool _isLoading = false;
+  final Language language = Language();
 
   @override
   void initState() {
     super.initState();
+    language.getLanguage(); // No need to call setState here
     _emailController = TextEditingController();
     _nameController = TextEditingController();
     _passwordController = TextEditingController();
@@ -67,6 +71,20 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
           setState(() {
             _isLoading = false;
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Some Error Happen ${state.error}'),
+            ),
+          );
+        } else if (state is AuthenticationSuccess) {
+          // Set _isLoading to false when authentication succeeds.
+          print(state);
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.pushReplacementNamed(context, "home");
+          // Navigate to the home screen or perform any necessary action.
+          // Example: Navigator.pushReplacementNamed(context, 'home');
         }
       },
       builder: (context, state) {
@@ -100,11 +118,18 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
                                           ),
-                                          labelText: 'Username',
+                                          labelText: language.usernameText(),
+                                          focusedBorder:  OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Theme.of(context).brightness == Brightness.dark
+                                                  ? AppTheme.lightPrimaryColor
+                                                  : AppTheme.darkPrimaryColor,
+                                            ),
+                                          ),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Please enter your username';
+                                            return language.pleaseEnterUsernameText();
                                           }
                                           return null;
                                         },
@@ -119,11 +144,16 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
                                           ),
-                                          labelText: 'Email',
+                                          labelText: language.emailText(),
+                                          focusedBorder:  const OutlineInputBorder(
+                                            borderSide: BorderSide(
+
+                                            ),
+                                          ),
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Please enter your email';
+                                            return language.enterEmailText();
                                           }
                                           return null;
                                         },
@@ -133,10 +163,14 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                         controller: _passwordController,
                                         obscureText: _obscurePassword,
                                         decoration: InputDecoration(
-                                          labelText: 'Password',
+                                          labelText: language.tPasswordText(),
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
+                                          ),
+                                          focusedBorder:  OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                            ),
                                           ),
                                           suffixIcon: IconButton(
                                             icon: Icon(
@@ -154,7 +188,7 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Please enter your password';
+                                            return language.enterPasswordText();
                                           }
                                           return null;
                                         },
@@ -168,7 +202,11 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                             borderRadius:
                                                 BorderRadius.circular(8.0),
                                           ),
-                                          labelText: 'Confirm Password',
+                                          labelText: language.confirmPasswordText(),
+                                          focusedBorder:  const OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                            ),
+                                          ),
                                           suffixIcon: IconButton(
                                             icon: Icon(
                                               _obscurePassword
@@ -185,20 +223,18 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Please confirm your password';
+                                            return language.confirmPasswordText();
                                           }
                                           if (_passwordController.text !=
                                               value) {
-                                            return 'Passwords do not match';
+                                            return language.passwordsDoNotMatchText();
                                           }
                                           return null;
                                         },
                                       ),
                                       const SizedBox(height: 10.0),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                1.1,
+                                      FractionallySizedBox(
+                                        widthFactor: 1.0,
                                         child: ElevatedButton(
                                           onPressed: _isLoading
                                               ? null
@@ -226,13 +262,7 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                                   }
                                                 },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                Theme.of(context).brightness ==
-                                                        Brightness.dark
-                                                    ? AppTheme.lightPrimaryColor
-                                                        .withOpacity(0.6)
-                                                    : AppTheme.darkPrimaryColor
-                                                        .withOpacity(0.6),
+
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 16),
                                             shape: const RoundedRectangleBorder(
@@ -248,8 +278,8 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                                   height: 20,
                                                   child:
                                                       CircularProgressIndicator())
-                                              : const Text(
-                                                  'تسجيل',
+                                              :  Text(
+                                                  language.signUpText(),
                                                 ),
                                         ),
                                       ),
@@ -258,8 +288,8 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                           Navigator.pushReplacementNamed(
                                               context, 'loginNew');
                                         },
-                                        child: const Text(
-                                          'هل لديك حساب؟ تسجيل الدخول',
+                                        child:  Text(
+                                          language.alreadyHaveAccountText(),
                                         ),
                                       ),
                                     ],
@@ -282,17 +312,20 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                           top: 30,
                           right: 10,
                           child: IconButton(
-                            icon: const Icon(Icons.brightness_6),
+                            icon:  Icon(Icons.brightness_6_sharp ,color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.darkPrimaryColor
+                                : AppTheme.lightPrimaryColor,),
                             onPressed: () =>
-                                BlocProvider.of<ThemeCubit>(context)
-                                    .toggleTheme(),
+                                BlocProvider.of<ThemeCubit>(context).toggleTheme(),
                           ),
                         ),
                         Positioned(
                           top: 30,
                           left: 10,
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back),
+                            icon:  Icon(Icons.arrow_back,color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.darkPrimaryColor
+                                : AppTheme.lightPrimaryColor,),
                             onPressed: () {
                               Navigator.pop(context);
                             },

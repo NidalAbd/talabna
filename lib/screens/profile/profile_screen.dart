@@ -5,6 +5,7 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_event.dart';
 import 'package:talbna/blocs/other_users/user_profile_state.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/profile/add_point_screen.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
@@ -16,14 +17,17 @@ import 'package:talbna/screens/widgets/custom_tab_profile.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/utils/constants.dart';
 
+import '../../provider/language.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     Key? key,
     required this.fromUser,
-    required this.toUser,
+    required this.toUser, required this.user,
   }) : super(key: key);
   final int fromUser;
   final int toUser;
+  final User user;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -32,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   late OtherUserProfileBloc _userProfileBloc;
+  final Language _language = Language();
 
   @override
   void initState() {
@@ -65,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     CircleAvatar(
                       radius: 14,
                       backgroundImage: NetworkImage(
-                          '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}'),
+                          '${user.photos?.first.src}'),
                     ),
                      IconButton(
                       icon: const Icon(
@@ -94,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 ),
                                 ListTile(
                                     leading: const Icon(Icons.report),
-                                    title: const Text('Report'),
+                                    title:  Text(_language.tReportText()),
                                     onTap: () {
                                       Navigator.pop(context);
                                       showModalBottomSheet(
@@ -108,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     }),
                                 ListTile(
                                   leading: const Icon(Icons.attach_money),
-                                  title: const Text('Add Points'),
+                                  title:  Text(_language.tConvertPointsText()),
                                   onTap: () {
                                     Navigator.pop(context);
                                     Navigator.of(context).push(
@@ -133,12 +138,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               bottom: TabBar(
                 controller: _tabController,
                 tabs: [
-                  CustomTab(title: 'Posts', count: user.servicePostsCount ?? 0),
+                  CustomTab(title: _language.tPostsText(), count: user.servicePostsCount ?? 0),
                   CustomTab(
-                      title: 'Followers', count: user.followersCount ?? 0),
+                      title: _language.tFollowersText(), count: user.followersCount ?? 0),
                   CustomTab(
-                      title: 'Following', count: user.followingCount ?? 0),
-                  const Tab(text: 'Info'),
+                      title: _language.tFollowingText(), count: user.followingCount ?? 0),
+                   Tab(text: _language.tOverviewText()),
                 ],
               ),
             ),
@@ -146,16 +151,16 @@ class _ProfileScreenState extends State<ProfileScreen>
               controller: _tabController,
               children: [
                 Center(
-                  child: UserPostScreen(userID: user.id),
+                  child: UserPostScreen(userID: user.id, user: user,),
                 ),
                 Center(
                   child: UserFollowerScreen(
-                    userID: user.id,
+                    userID: user.id, user: widget.user,
                   ),
                 ),
                 Center(
                   child: UserFollowingScreen(
-                    userID: user.id,
+                    userID: user.id, user: widget.user,
                   ),
                 ),
                 Center(

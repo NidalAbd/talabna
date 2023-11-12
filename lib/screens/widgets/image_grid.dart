@@ -1,96 +1,72 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
-import 'package:talbna/data/models/service_post.dart';
-import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:video_player/video_player.dart';
-import 'full_screen_image.dart';
 
 class ImageGrid extends StatefulWidget {
   final List<String> imageUrls;
-  final bool canClick;
   final Function(String)? onImageTap;
-  final int userId;
-  final ServicePost servicePost;
 
-  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap, required this.canClick, required this.userId,required this.servicePost})
-      : super(key: key);
+  const ImageGrid({
+    Key? key,
+    required this.imageUrls,
+    this.onImageTap,
+  }) : super(key: key);
 
   @override
   State<ImageGrid> createState() => _ImageGridState();
 }
 
 class _ImageGridState extends State<ImageGrid> {
-  void _navigateToFullScreenImage(BuildContext context, int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReelsHomeScreen(
-          userId: widget.userId,  // Replace with your user id
-          servicePost: widget.servicePost,
-        ),
-      ),
-    );
+  late PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.imageUrls.isEmpty) {
-      return Container(); // Return an empty container if there are no images
-    }
-
-    int crossAxisCount = 2;
-
-    if (widget.imageUrls.length == 1) {
-      crossAxisCount = 1;
-    } else if (widget.imageUrls.length == 2) {
-      crossAxisCount = 2;
-    } else if (widget.imageUrls.length == 3) {
-      crossAxisCount = 2;
-    } else if (widget.imageUrls.length == 4) {
-      crossAxisCount = 2;
-    }
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.imageUrls.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 4.0,
-        crossAxisSpacing: 4.0,
-        childAspectRatio: 9 / 14, // Adjusted aspect ratio
+    return SizedBox(
+      height: MediaQuery.of(context).size.width * (4 / 3), // Aspect ratio of 16:9
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: widget.imageUrls.length,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        itemBuilder: (context, index) {
+          final url = widget.imageUrls[index];
+          return GestureDetector(
+            onTap: () => widget.onImageTap?.call(url),
+            child: url.endsWith('.mp4') ? VideoItem(url: url) : _buildImageWidget(url),
+          );
+        },
       ),
-      itemBuilder: (BuildContext context, int index) {
-        final url = widget.imageUrls[index];
-        return GestureDetector(
-          onTap: () {
-            widget.canClick ? _navigateToFullScreenImage(context, index) : null;
-          },
-          child: url.endsWith('.mp4')
-              ? VideoItem(url: url, userId: widget.userId, servicePost: widget.servicePost)
-              : _buildImageWidget(url),
-        );
-      },
     );
-
   }
 
   Widget _buildImageWidget(String url) {
-    return FadeInImage(
-      placeholder: const AssetImage('assets/loading.gif'),
-      image: CachedNetworkImageProvider(url),
-      fit: BoxFit.cover,
+    return Image.network(
+      url,
+      fit: BoxFit.fitHeight, // This will ensure the image is fully visible, but could leave space on the sides
     );
+  }
+
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }
 
 class VideoItem extends StatefulWidget {
   final String url;
-  final int userId;
-  final ServicePost servicePost;
 
-  const VideoItem({super.key, required this.url, required this.userId, required this.servicePost});
+  const VideoItem({Key? key, required this.url}) : super(key: key);
 
   @override
   _VideoItemState createState() => _VideoItemState();
@@ -98,65 +74,51 @@ class VideoItem extends StatefulWidget {
 
 class _VideoItemState extends State<VideoItem> {
   late VideoPlayerController _controller;
-  Future<void>? _initializeVideoPlayerFuture;
-  bool isPlaying = false;
+  bool _isPlaying = false; // To keep track of playing state
 
   @override
   void initState() {
-    _controller = VideoPlayerController.network(widget.url);
-    _initializeVideoPlayerFuture = _controller.initialize();
-    _controller.setLooping(true);
     super.initState();
+    _controller = VideoPlayerController.network(widget.url)
+      ..initialize().then((_) {
+        setState(() {
+          _controller.play(); // Play the video as soon as it's initialized
+          _isPlaying = true;
+        });
+      });
+    _controller.setLooping(true); // Loop the video
+  }
+
+  void _togglePlayPause() {
+    setState(() {
+      if (_controller.value.isPlaying) {
+        _controller.pause();
+        _isPlaying = false;
+      } else {
+        _controller.play();
+        _isPlaying = true;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller.value.isInitialized) {
+      return GestureDetector(
+        onTap: _togglePlayPause, // Toggle play/pause on tap
+        child: AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: VideoPlayer(_controller),
+        ),
+      );
+    } else {
+      return const Center(child: CircularProgressIndicator());
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-  void _toggleVideoPlayback() {
-    setState(() {
-      if (isPlaying) {
-        _controller.pause();
-      } else {
-        _controller.play();
-      }
-      isPlaying = !isPlaying;
-    });
-  }
-  @override
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initializeVideoPlayerFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReelsHomeScreen(
-                    userId: widget.userId,  // Replace with your user id
-                    servicePost: widget.servicePost,
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
-              child: AspectRatio(
-                aspectRatio: _controller.value.size.width /  _controller.value.size.height ,
-                child: VideoPlayer(_controller),
-              ),
-            ),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
-    );
   }
 }

@@ -5,6 +5,9 @@ class ServicePost {
   final int? userId;
   final String? userName;
   final String? userPhoto;
+  String? email;
+  String? phones;
+  String? watsNumber;
   final String? title;
   final String? description;
   final String? category;
@@ -19,6 +22,7 @@ class ServicePost {
   final String? haveBadge;
   final int? badgeDuration;
   final int? favoritesCount;
+  final int? commentsCount;
   final int? reportCount;
   final int? viewCount;
   final bool? isFavorited;
@@ -30,9 +34,12 @@ class ServicePost {
   final DateTime? updatedAt;
   final List<Photo>? photos;
 
-  ServicePost(  {
+  ServicePost(   {
      this.userName,
      this.userPhoto,
+    this.phones,
+    this.watsNumber,
+    this.email,
      this.id,
      this.userId,
      this.title,
@@ -51,6 +58,7 @@ class ServicePost {
      this.badgeDuration,
      this.favoritesCount,
      this.reportCount,
+    this.commentsCount,
      this.viewCount,
     this.isFavorited, // Add this field
     this.state,
@@ -68,6 +76,9 @@ class ServicePost {
       userId: json['user_id'] ?? 0,
       userName: json['user_name'] ?? '',
       userPhoto: json['user_photo'] ?? '',
+      email: json['email'] ?? '',
+      watsNumber: json['WatsNumber'] ?? '',
+      phones: json['phones'] ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? '',
@@ -82,6 +93,7 @@ class ServicePost {
       haveBadge: json['have_badge'] ??  '',
       badgeDuration: int.tryParse(json['badge_duration']?.toString() ?? '') ?? 0,
       favoritesCount: json['favorites_count'] ?? 0,
+      commentsCount: json['comments_count'] ?? 0,
       reportCount: json['report_count'] ?? 0,
       viewCount: json['view_count'] ?? 0,
       isFavorited: json['is_favorited'] ?? false,

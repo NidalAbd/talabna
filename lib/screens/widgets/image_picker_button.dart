@@ -46,10 +46,13 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     widget.initialPhotosNotifier.addListener(() {
       if (widget.initialPhotosNotifier.value != null) {
         _pickedImages = widget.initialPhotosNotifier.value!
-            .map((photo) => Photo.fromJson({
-                  'id': photo.id,
-                  'src': '${photo.src}',
-                }))
+            .map((photo) {
+          final url = '${photo.src}'.replaceAll('https://talbna.cloud/storage/', '');
+          return Photo.fromJson({
+            'id': photo.id,
+            'src': url,
+          });
+        })
             .toList();
 
         _localMedia =
@@ -69,7 +72,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     var completedOperations = 0;
 
     if (_pickedImages.length + imageFiles.length > maxImages) {
-      _showMaxImagesDialog(maxImages);
+      _showMaxImagesSnackBar(maxImages);
     } else {
       for (XFile file in imageFiles) {
         setState(() {
@@ -109,25 +112,20 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
         .toList();
   }
 
-  Future<void> _showMaxImagesDialog(int maxImages) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('الحد الاعلى من الصور المسموحة'),
-          content: Text('يمكنك ان تختار  $maxImages صور.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+  Future<void> _showMaxImagesSnackBar(int maxImages) async {
+    final snackBar = SnackBar(
+      content: Text('لقد تجاوزت الحد الأقصى المسموح لعدد الصور المختارة ($maxImages صورة).'),
+      action: SnackBarAction(
+        label: 'موافق',
+        onPressed: () {
+          // Handle the action when the user presses the "موافق" button
+        },
+      ),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+
 
   Future<img.Image?> _compressImage(File file) async {
     final img.Image? originalImage = img.decodeImage(await file.readAsBytes());
@@ -397,7 +395,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
 
     int maxImages = widget.maxImages;
     if (_pickedImages.length + 1 > maxImages) {
-      _showMaxImagesDialog(maxImages);
+      _showMaxImagesSnackBar(maxImages);
     } else if (pickedFile != null) {
       setState(() {
         _processing = true;

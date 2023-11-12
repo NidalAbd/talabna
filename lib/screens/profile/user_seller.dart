@@ -125,7 +125,7 @@ class UserSellerScreenState extends State<UserSellerScreen> {
                                   CircleAvatar(
                                     radius: 25,
                                     backgroundImage: Image.network(
-                                      '${Constants.apiBaseUrl}/storage/${follower.photos!.first.src}',
+                                      '${follower.photos!.first.src}',
                                       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                         return const CircleAvatar(
                                           radius: 30,
@@ -134,7 +134,7 @@ class UserSellerScreenState extends State<UserSellerScreen> {
                                       },
                                     ).image,
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 15),
                                   Expanded(
                                     child: Text(
                                       follower.userName!,
@@ -148,9 +148,9 @@ class UserSellerScreenState extends State<UserSellerScreen> {
                                   const SizedBox(
                                     width: 30,
                                   ),
-                                  WhatsAppIconButtonWidget(width: 20,whatsAppNumber: follower.watsNumber,),
+                                  WhatsAppIconButtonWidget(width: 40,whatsAppNumber: follower.watsNumber,),
                                   const SizedBox(
-                                    width: 30,
+                                    width: 10,
                                   ),
                                 ],
                               ),

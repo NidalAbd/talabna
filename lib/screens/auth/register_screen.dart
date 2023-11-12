@@ -34,6 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
+
     _animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 2));
     _animationController.forward();
@@ -87,6 +88,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   setState(() {
                     _isLoading = false;
                   });
+                }
+                else if (state is AuthenticationSuccess) {
+                  // Set _isLoading to false when authentication succeeds.
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  // Navigate to the home screen or perform any necessary action.
+                  // Example: Navigator.pushReplacementNamed(context, 'home');
                 }
               },
               builder: (context, state) {

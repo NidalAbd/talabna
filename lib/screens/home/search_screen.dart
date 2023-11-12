@@ -10,8 +10,9 @@ import 'package:talbna/screens/profile/user_card.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key, required this.userID}) : super(key: key);
+  const SearchScreen({Key? key, required this.userID, required this.user}) : super(key: key);
   final int userID;
+  final User user;
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -197,7 +198,7 @@ class _SearchScreenState extends State<SearchScreen> {
           return UserCard(
             follower: user,
             userActionBloc: _userActionBloc,
-            userId: widget.userID,
+            userId: widget.userID, user: widget.user,
           );
         }
       },
@@ -217,7 +218,7 @@ class _SearchScreenState extends State<SearchScreen> {
             onPostDeleted: onPostDeleted,
             servicePost: post,
             canViewProfile: true,
-            userProfileId: widget.userID,
+            userProfileId: widget.userID, user: widget.user,
           );
         }
       },

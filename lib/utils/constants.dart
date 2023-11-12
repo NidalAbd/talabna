@@ -3,7 +3,9 @@ class Constants {
   static const String appName = "Talabna";
 
   // API base URL
-  static const String apiBaseUrl = "http://192.168.2.159:8000";
+  static const String apiBaseUrl = "https://talbna.cloud";
+  // static const String apiBaseUrl = "http://192.168.1.122:8000";
+
   // Social media API keys
   static const String googleApiKey = "YOUR_GOOGLE_API_KEY_HERE";
   static const String facebookApiKey = "YOUR_FACEBOOK_API_KEY_HERE";

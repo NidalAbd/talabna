@@ -12,12 +12,7 @@ class ReportInitial extends ReportState {}
 class ReportInProgress extends ReportState {}
 
 class ReportSuccess extends ReportState {
-  final Reports user;
 
-  const ReportSuccess({required this.user});
-
-  @override
-  List<Object> get props => [user];
 }
 
 class ReportFailure extends ReportState{

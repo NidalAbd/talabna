@@ -7,32 +7,32 @@ class AppTheme {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: statusBarColor, // Set the status bar color here
       statusBarBrightness:
-          brightness, // Set the status bar brightness (light or dark) here
+          brightness,
       systemNavigationBarColor:
-          navigationBarColor, // Set the navigation bar color here
+          navigationBarColor,
       systemNavigationBarDividerColor:
-          null, // Set the navigation bar divider color here
+          null,
       systemNavigationBarIconBrightness:
-          brightness, // Set the navigation bar icon brightness here
+          brightness,
     ));
   }
 
   static const Color lightPrimaryColor = Color(0xFFFFFFFF);
-  static const Color darkPrimaryColor = Color(0xFF181616);
+  static const Color darkPrimaryColor = Color(0xFF000000);
   static Color accentColor = lightPrimaryColor.withRed(255).withGreen(180).withBlue(0); // Set blue to 00
   static const Color lightBackgroundColor = Color(0xFFFFFFFF);
-  static const Color lightForegroundColor = Color(0xFF282828);
+  static const Color lightForegroundColor = Color(0xEF000000);
   static const Color lightTextColor = Color(0xFF000000);
   static const Color darkTextColor = Color(0xFFFFFFFF);
   static const Color lightDisabledColor = Color(0xFFF5F5F5);
-  static const Color darkBackgroundColor = Color(0xFF363636);
+  static const Color darkBackgroundColor = Color(0xFF000000);
   static const Color darkForegroundColor = Colors.white;
   static const Color darkDisabledColor = Color(0xFF6E6E6E);
 
   static final ThemeData lightTheme = ThemeData(
     primaryColor: lightPrimaryColor,
     scaffoldBackgroundColor: lightBackgroundColor,
-    cardColor: Color.lerp(darkBackgroundColor, Colors.white, 0.50),
+    cardColor: Color.lerp(darkForegroundColor, Colors.white, 0.50),
     dialogBackgroundColor: lightPrimaryColor,
     bottomAppBarTheme:  const BottomAppBarTheme(color: lightPrimaryColor),
     dividerColor: Colors.grey,
@@ -62,7 +62,7 @@ class AppTheme {
         fontWeight: FontWeight.w500,
       ),
       bodyMedium: TextStyle(fontSize: 16, color: lightTextColor),
-      labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,color: lightPrimaryColor),
       headlineMedium:  TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       headlineSmall:  TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       titleMedium:  TextStyle(
@@ -79,15 +79,15 @@ class AppTheme {
     ),
     colorScheme: const ColorScheme(
       brightness: Brightness.light,
-      primary: lightPrimaryColor,
+      primary: lightForegroundColor,
       secondary: lightPrimaryColor,
       background: lightBackgroundColor,
-      surface: Colors.white,
-      onPrimary: lightForegroundColor,
+      surface: lightForegroundColor,
+      onPrimary: lightPrimaryColor,
       onSecondary: lightForegroundColor,
       onBackground: lightForegroundColor,
       onSurface: lightForegroundColor,
-      onError: Colors.white,
+      onError: Colors.red,
       error: Colors.redAccent,
     ).copyWith(error: Colors.redAccent).copyWith(secondary: accentColor),
   );
@@ -142,11 +142,11 @@ class AppTheme {
     ),
     colorScheme: const ColorScheme(
       brightness: Brightness.dark,
-      primary: darkPrimaryColor,
+      primary: darkForegroundColor,
       secondary: darkPrimaryColor,
       background: darkBackgroundColor,
       surface: Colors.white,
-      onPrimary: darkForegroundColor,
+      onPrimary: darkPrimaryColor,
       onSecondary: darkForegroundColor,
       onBackground: darkForegroundColor,
       onSurface: darkForegroundColor,

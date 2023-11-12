@@ -49,7 +49,7 @@ class UserContact extends StatelessWidget {
           : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.person)),
-        title: const Text('المستخدم'),
+        title: const Text('UserName'),
         subtitle: Text(username),
         trailing: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.add_box)),
       ),

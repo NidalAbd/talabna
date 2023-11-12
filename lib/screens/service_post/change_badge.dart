@@ -14,6 +14,8 @@ import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:http/http.dart' as http;
 
+import '../../provider/language.dart';
+
 class ChangeBadge extends StatefulWidget {
   const ChangeBadge(
       {Key? key, required this.userId, required this.servicePostId})
@@ -30,6 +32,8 @@ class _ChangeBadgeState extends State<ChangeBadge> {
   late int _selectedBadgeDuration = _selectedHaveBadge == 'عادي' ? 0 : 1;
   late int _calculatedPoints = 0;
   late bool balanceOut = false;
+  final Language _language = Language();
+  //_language.tConvertPointsText()
   Future<void> _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       final servicePost = ServicePost(
@@ -56,7 +60,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تغيير التمييز'),
+        title:  Text(_language.tChangeBadgeText()),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -98,99 +102,95 @@ class _ChangeBadgeState extends State<ChangeBadge> {
         },
         child: Form(
           key: _formKey,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                DropdownButtonFormField<String>(
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              DropdownButtonFormField<String>(
+                decoration:  InputDecoration(
+                  labelText: _language.tFeaturedText(),
+                ),
+                value: _selectedHaveBadge,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedHaveBadge = newValue!;
+                    if (_selectedHaveBadge == 'عادي') {
+                      _selectedBadgeDuration = 0;
+                    } else if (_selectedBadgeDuration == 0) {
+                      _selectedBadgeDuration =
+                          1; // Set the default value for ذهبي or ماسي
+                    }
+                    _updateCalculatedPoints();
+                  });
+                },
+                items: <String>['عادي', 'ذهبي', 'ماسي']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value,),
+                  );
+                }).toList(),
+                dropdownColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkPrimaryColor
+                    : AppTheme.lightPrimaryColor,
+              ),
+              Visibility(
+                visible: _selectedHaveBadge != 'عادي',
+                child: DropdownButtonFormField<int>(
                   decoration: const InputDecoration(
-                    labelText: 'تمييز النشر',
+                    labelText: 'المدة',
                   ),
-                  value: _selectedHaveBadge,
-                  onChanged: (String? newValue) {
+                  value: _selectedBadgeDuration,
+                  onChanged: (int? newValue) {
                     setState(() {
-                      _selectedHaveBadge = newValue!;
-                      if (_selectedHaveBadge == 'عادي') {
-                        _selectedBadgeDuration = 0;
-                      } else if (_selectedBadgeDuration == 0) {
-                        _selectedBadgeDuration =
-                            1; // Set the default value for ذهبي or ماسي
-                      }
+                      _selectedBadgeDuration = newValue!;
                       _updateCalculatedPoints();
                     });
                   },
-                  items: <String>['عادي', 'ذهبي', 'ماسي']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
+                  items: <int>[0, 1, 2, 3, 4, 5, 6, 7].where((int value) {
+                    return _selectedHaveBadge == 'عادي' ? true : value != 0;
+                  }).map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
                       value: value,
-                      child: Text(value,),
+                      child: Text('يوم $value'),
                     );
                   }).toList(),
-                  dropdownColor: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.lightPrimaryColor
-                      : AppTheme.darkPrimaryColor,
                 ),
-                Visibility(
-                  visible: _selectedHaveBadge != 'عادي',
-                  child: DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'المدة',
-                    ),
-                    value: _selectedBadgeDuration,
-                    onChanged: (int? newValue) {
-                      setState(() {
-                        _selectedBadgeDuration = newValue!;
-                        _updateCalculatedPoints();
-                      });
-                    },
-                    items: <int>[0, 1, 2, 3, 4, 5, 6, 7].where((int value) {
-                      return _selectedHaveBadge == 'عادي' ? true : value != 0;
-                    }).map<DropdownMenuItem<int>>((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text('يوم $value'),
-                      );
-                    }).toList(),
+              ),
+              const SizedBox(height: 16.0),
+              Visibility(
+                visible: _selectedHaveBadge != 'عادي',
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'ستخصم $_calculatedPoints من رصيد نقاطك عند تمييز النشر بـ $_selectedHaveBadge لمدة $_selectedBadgeDuration يوم',
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 16.0),
-                Visibility(
-                  visible: _selectedHaveBadge != 'عادي',
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'ستخصم $_calculatedPoints من رصيد نقاطك عند تمييز النشر بـ $_selectedHaveBadge لمدة $_selectedBadgeDuration يوم',
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+              ),
+              ElevatedButton(
+                onPressed: _submitForm,
+                child:  Text(
+                    _language.tChangeBadgeText(),
                 ),
+              ),
+              if (balanceOut)const Text('ليس لديك رصيد نقاط كافي , يمكنك شراء النقاط من هنا'),
+              if (balanceOut)
                 ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PurchaseRequestScreen(
+                          userID: widget.userId,
+                        ),
+                      ),
+                    );
+                  },
                   child: const Text(
-                    'تمييز',
+                    'اضافة نقاط',
                   ),
                 ),
-                if (balanceOut)const Text('ليس لديك رصيد نقاط كافي , يمكنك شراء النقاط من هنا'),
-                if (balanceOut)
-                  ElevatedButton(
-                    onPressed: (){
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => PurchaseRequestScreen(
-                            userID: widget.userId,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'اضافة نقاط',
-                    ),
-                  ),
-
-              ],
-            ),
+            ],
           ),
         ),
       ),

@@ -32,6 +32,7 @@ class AuthenticationRepository {
 
       if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
+          print(responseData);
           return responseData;
         } else {
           throw Exception('Status code error: ${response.statusCode}');
@@ -118,8 +119,7 @@ class AuthenticationRepository {
     await http.post(Uri.parse('$API_BASE_URL/api/logout'), headers: headers);
     await removeAuthToken();
   }
-  Future<
-      bool> checkTokenValidity(String token) async {
+  Future<bool> checkTokenValidity(String token) async {
     final response = await http.get(
       Uri.parse('$API_BASE_URL/api/user/check_token'),
       headers: {
@@ -140,8 +140,14 @@ class AuthenticationRepository {
 
   Future<void> saveAuthToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+    bool success = await prefs.setString('auth_token', token);
+    if (success) {
+      print('Token saved successfully $token');
+    } else {
+      print('Failed to save token');
+    }
   }
+
 
   Future<String?> getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -150,8 +156,14 @@ class AuthenticationRepository {
 
   Future<void> saveUserId(int userId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('userId', userId );
+    bool success = await prefs.setInt('userId', userId);
+    if (success) {
+      print('User ID saved successfully $userId');
+    } else {
+      print('Failed to save User ID');
+    }
   }
+
 
   Future<int?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();

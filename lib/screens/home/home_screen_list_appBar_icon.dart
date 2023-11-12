@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/main.dart';
+import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/home/search_screen.dart';
+import 'package:talbna/screens/home/setting_screen.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
 import 'package:talbna/screens/profile/change_email_screen.dart';
@@ -24,6 +27,15 @@ class VertIconAppBar extends StatefulWidget {
 }
 
 class _VertIconAppBarState extends State<VertIconAppBar> {
+  final Language language = Language();
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      language.getLanguage();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -55,7 +67,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => UpdateUserProfile(
-                                    userId: widget.user.id,
+                                    userId: widget.user.id, user: widget.user,
                                   ),
                                 ),
                               );
@@ -77,7 +89,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SearchScreen( userID: widget.userId,),
+                builder: (context) => SearchScreen( userID: widget.userId, user: widget.user,),
               ),
             );
           },
@@ -95,99 +107,92 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                 context: context,
                 builder: (BuildContext context) {
                   return Container(
+                    height: 325,
                     child: ListView(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.person),
-                          title: const Text('Profile',),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ProfileScreen(
-                                  fromUser: widget.userId,
-                                  toUser: widget.userId,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.favorite),
-                          title: const Text('Favorite'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    FavoritePostScreen(userID: widget.user.id),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.update),
-                          title: const Text('Update Info'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => UpdateUserProfile(
-                                  userId: widget.user.id,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.attach_money),
-                          title: const Text('Add Points'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    PurchaseRequestScreen(
-                                      userID: widget.user.id,
+                        children: [
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.person),
+                              title:  Text(language.tProfileText()),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ProfileScreen(
+                                      fromUser: widget.userId,
+                                      toUser: widget.userId, user: widget.user,
                                     ),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.email),
-                          title: const Text('Change Email'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ChangeEmailScreen(
-                                  userId: widget.user.id,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.lock),
-                          title: const Text('Change Password'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ChangePasswordScreen(
-                                      userId: widget.user.id,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.favorite),
+                              title:  Text(language.tFavoriteText()),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        FavoritePostScreen(userID: widget.user.id, user: widget.user,),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.update),
+                              title:  Text(language.tUpdateInfoText()),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdateUserProfile(
+                                      userId: widget.user.id, user: widget.user,
                                     ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        ThemeToggleListTile(),
-                        const LogoutListTile(),
-                      ],
-                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.attach_money),
+                              title:  Text(language.tPurchasePointsText()),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PurchaseRequestScreen(
+                                          userID: widget.user.id,
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.settings),
+                              title:  Text(language.tSettingsText()),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        SettingScreen(userId: widget.userId, user: widget.user,
+                                        )
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                   );
                 },
               );
@@ -197,9 +202,9 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Incomplete Information'),
+                    title:  Text(language.incompleteInformationText()),
                     content:
-                    const Text('Please complete your information.'),
+                     Text(language.completeInformationText()),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -207,12 +212,12 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => UpdateUserProfile(
-                                userId: widget.user.id,
+                                userId: widget.user.id, user: widget.user,
                               ),
                             ),
                           );
                         },
-                        child: const Text('OK'),
+                        child:  Text(language.okText()),
                       ),
                     ],
                   );

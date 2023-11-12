@@ -7,6 +7,8 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 
+import '../../provider/language.dart';
+
 class ChangeEmailScreen extends StatefulWidget {
   final int userId;
   const ChangeEmailScreen({Key? key, required this.userId}) : super(key: key);
@@ -16,6 +18,8 @@ class ChangeEmailScreen extends StatefulWidget {
 }
 
 class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
+  final Language _language = Language();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -38,7 +42,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Email'),
+        title:  Text(_language.tChangeEmailText()),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,8 +77,8 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                 children: [
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Change Email',
+                    decoration:  InputDecoration(
+                      labelText: _language.tChangeEmailText(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -82,7 +86,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Current Password',
+                      labelText: _language.tPasswordText(),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
@@ -98,24 +102,37 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      BlocProvider.of<UserProfileBloc>(context).add(
-                        UpdateUserEmail(
-                          newEmail: _emailController.text,
-                          password: _passwordController.text,
-                          user:  user,
+                  FractionallySizedBox(
+                    widthFactor: 1.0,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                5), // Adjust the radius as per your requirement
+                          ),
                         ),
-                      );
-                    },
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Update Email'),
+                      ),
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        BlocProvider.of<UserProfileBloc>(context).add(
+                          UpdateUserEmail(
+                            newEmail: _emailController.text,
+                            password: _passwordController.text,
+                            user:  user,
+                          ),
+                        );
+                      },
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          :  Text(_language.tUpdateText()),
+                    ),
                   ),
                 ],
               );

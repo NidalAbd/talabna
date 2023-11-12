@@ -14,7 +14,7 @@ class PhoneWidget extends StatelessWidget {
           : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: const Icon(Icons.phone),
-        title: const Text('الجوال'),
+        title: const Text('Phone'),
         subtitle: Text(phone ?? 'لا يوجد بيانات'),
         onTap: () async {
           if (phone != null) {

@@ -6,21 +6,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:talbna/app_theme.dart';
+import 'package:talbna/blocs/comments/comment_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/comment_sheet.dart';
 import 'package:talbna/screens/widgets/contact_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
 class ReelsHomeScreen extends StatefulWidget {
-  const ReelsHomeScreen({Key? key, required this.userId, this.servicePost})
+  const ReelsHomeScreen({Key? key, required this.userId, this.servicePost, required this.user})
       : super(key: key);
   final int userId;
+  final User user;
   final ServicePost? servicePost;
 
   @override
@@ -30,6 +33,8 @@ class ReelsHomeScreen extends StatefulWidget {
 class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   late UserProfileBloc _userProfileBloc;
   late ServicePostBloc _servicePostBloc;
+  late CommentBloc _commentBloc;
+
   int _currentPage = 1;
   List<ServicePost> _servicePosts = [];
   final Map<int, VideoPlayerController> _videoControllers = {};
@@ -43,19 +48,21 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   final Map<int, bool> _videoLoadings = {};
   final Map<int, List<VoidCallback>> _videoListeners = {};
   int _currentPostIndex = 0;
+  late bool isFavorite;
 
   @override
   void initState() {
     super.initState();
     _userProfileBloc = context.read<UserProfileBloc>()
       ..add(UserProfileRequested(id: widget.userId));
+    _commentBloc = context.read<CommentBloc>();
     _servicePostBloc = context.read<ServicePostBloc>()
       ..add(GetServicePostsRealsEvent(_currentPage));
     _scrollCategoryPostController = PageController()
       ..addListener(_onScrollReelPost);
     WidgetsFlutterBinding.ensureInitialized();
 
-    Timer.periodic(const Duration(seconds: 1), (Timer t) {
+    Timer.periodic( const Duration(seconds: 0), (Timer t) {
       final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
       if (currentPage >= _servicePosts.length) {
         // Avoid indexing out of bounds
@@ -88,7 +95,6 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   void _onScrollReelPost() {
     final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
     _handlePageChange(currentPage);
-
     if (!_hasReachedMax &&
         _scrollCategoryPostController.offset >=
             _scrollCategoryPostController.position.maxScrollExtent &&
@@ -179,6 +185,21 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
             } else if (state is ServicePostLoadFailure) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('An error occurred: ${state.errorMessage}')));
+            } else if (state is ServicePostFavoriteToggled) {
+              isFavorite = state.isFavorite;
+              if (isFavorite) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Added to favourite')));
+                setState(() {
+
+                });
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('removed to favourite')));
+                setState(() {
+
+                });
+              }
             }
           },
           child: NotificationListener<ScrollNotification>(
@@ -293,7 +314,15 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            '   ${mediaIndex + 1} : ${post.photos?.length ?? 0}',
+                            '   ${mediaIndex + 1} : ${post.photos?.length ?? 0}', style: const TextStyle(
+                            shadows: [
+                              Shadow(
+                                color: Colors.white, // Shadow color
+                                offset: Offset(1, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
                           ),
                         ),
                       ),
@@ -306,9 +335,16 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon:  const Icon(
                                 Icons.arrow_back,
                                 size: 30,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.white, // Shadow color
+                                    offset: Offset(1, 1),
+                                    blurRadius: 2,
+                                  ),
+                                ],
                               ),
                               onPressed: () {
                                 Navigator.of(context).pop();
@@ -350,70 +386,123 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                           const SizedBox(
                             height: 10,
                           ),
-                          Column(
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.favorite_rounded,
-                                  size: iconSize,
-                                  color: isFavorite ? Colors.red : Colors.white,
+                          Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: Column(
+                              children: [
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.favorite_rounded,
+                                        size: iconSize,
+                                        color: isFavorite
+                                            ? Colors.red
+                                            : Colors.white,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black.withOpacity(
+                                                0.5), // Shadow color
+                                            offset: const Offset(0,
+                                                0), // Shadow offset (vertical, horizontal)
+                                            blurRadius:
+                                                2, // Blur radius of the shadow
+                                          ),
+                                        ],
+                                      ),
+                                      onPressed: () {
+                                        _servicePostBloc.add(
+                                            ToggleFavoriteServicePostEvent(
+                                                servicePostId: post.id!));
+                                      },
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        post.favoritesCount.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withOpacity(
+                                                  1), // Shadow color
+                                              offset: const Offset(0,
+                                                  0), // Shadow offset (vertical, horizontal)
+                                              blurRadius:
+                                                  4, // Blur radius of the shadow
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                onPressed: () {
-                                  _servicePostBloc.add(
-                                      ToggleFavoriteServicePostEvent(
-                                          servicePostId: post.id!));
-                                },
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Text(
-                                  post.favoritesCount.toString(),
-                                  style: const TextStyle(color: Colors.white),
+                                const SizedBox(
+                                  height: 10,
                                 ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CommentModalBottomSheet(
-                                iconSize: iconSize,
-                                userProfileBloc: _userProfileBloc,
-                                userId: widget.userId,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Text(
-                                  post.favoritesCount.toString(),
-                                  style: const TextStyle(color: Colors.white),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    CommentModalBottomSheet(
+                                      iconSize: iconSize,
+                                      userProfileBloc: _userProfileBloc,
+                                      commentBloc: _commentBloc,
+                                      servicePost: post, user: widget.user,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        post.commentsCount.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withOpacity(
+                                                  1), // Shadow color
+                                              offset: const Offset(1,
+                                                  0), // Shadow offset (vertical, horizontal)
+                                              blurRadius:
+                                                  2, // Blur radius of the shadow
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          ContactModalBottomSheet(
-                            iconSize: iconSize,
-                            userProfileBloc: _userProfileBloc,
-                            userId: widget.userId,
-                            servicePost: post,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          IconButton(
-                            icon:  Icon(
-                              Icons.share,
-                              size: iconSize,
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ContactModalBottomSheet(
+                                  iconSize: iconSize,
+                                  userProfileBloc: _userProfileBloc,
+                                  userId: widget.userId,
+                                  servicePost: post,
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.share,
+                                    size: iconSize,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black
+                                            .withOpacity(1), // Shadow color
+                                        offset: const Offset(0, 0),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  onPressed: () async {
+                                    await Share.share(
+                                        '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePost?.id!}');
+                                  },
+                                ),
+                              ],
                             ),
-                            onPressed: () async {
-                              await Share.share(
-                                  '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePost?.id!}');
-                            },
                           ),
                         ],
                       ),
@@ -442,18 +531,29 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
 
   Widget _buildImageDisplay(Photo media) {
     return Center(
-      child: FutureBuilder(
-        future: precacheImage(NetworkImage(media.src!), context),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const SizedBox(
-                width: 30, height: 30, child: CircularProgressIndicator());
-          }
-          return Image.network(media.src!);
-        },
+      child: Hero(
+        tag: 'photo_${widget.servicePost?.id}_${_servicePostMediaIndices[widget.servicePost?.id] ?? 0}', // Use the same tag as in ServicePostCardView
+        child: FutureBuilder(
+          future: precacheImage(NetworkImage(media.src!), context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.lightPrimaryColor
+                      : AppTheme.darkPrimaryColor,
+                ),
+              );
+            }
+            return Image.network(media.src!);
+          },
+        ),
       ),
     );
   }
+
 
   void _toggleVideoPlayback(Photo media) {
     if (_videoControllers[media.id!]!.value.isPlaying) {
@@ -464,24 +564,25 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   }
 
   void _handlePageChange(int pageIndex) {
-    final previousIndex = _currentPostIndex;
     _currentPostIndex = pageIndex;
+    if (pageIndex >= 0 && pageIndex < _servicePosts.length) {
+      final previousIndex = _currentPostIndex;
+      final previousPost = _servicePosts[previousIndex];
+      final previousMediaIndex = _servicePostMediaIndices[previousPost.photos?.length] ?? 0;
+      final previousMedia = previousPost.photos![previousMediaIndex];
+      if (previousMedia.isVideo == true &&
+          _videoControllers[previousMedia.id!]!.value.isInitialized) {
+        _videoControllers[previousMedia.id!]?.pause();
+        _videoControllers[previousMedia.id!]?.seekTo(Duration.zero);
+      }
 
-    final previousPost = _servicePosts[previousIndex];
-    final previousMediaIndex = _servicePostMediaIndices[previousPost.id!] ?? 0;
-    final previousMedia = previousPost.photos![previousMediaIndex];
-    if (previousMedia.isVideo == true &&
-        _videoControllers[previousMedia.id!]!.value.isInitialized) {
-      _videoControllers[previousMedia.id!]?.pause();
-      _videoControllers[previousMedia.id!]?.seekTo(Duration.zero);
-    }
-
-    final currentPost = _servicePosts[_currentPostIndex];
-    final currentMediaIndex = _servicePostMediaIndices[currentPost.id!] ?? 0;
-    final currentMedia = currentPost.photos![currentMediaIndex];
-    if (currentMedia.isVideo == true &&
-        _videoControllers[currentMedia.id!]!.value.isInitialized) {
-      _videoControllers[currentMedia.id!]?.play();
+      final currentPost = _servicePosts[_currentPostIndex];
+      final currentMediaIndex = _servicePostMediaIndices[currentPost.photos?.length] ?? 0;
+      final currentMedia = currentPost.photos![currentMediaIndex];
+      if (currentMedia.isVideo == true &&
+          _videoControllers[currentMedia.id!]!.value.isInitialized) {
+        _videoControllers[currentMedia.id!]?.play();
+      }
     }
   }
 
@@ -572,7 +673,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
             _videoLoadings[photo.id!] = true; // Indicate the video has loaded
           });
           if (_autoPlay) {
-            controller?.play();
+            controller?.pause();
           }
           controller?.setLooping(true);
           controller?.seekTo(Duration.zero);

@@ -39,43 +39,48 @@ class _NotificationsAlertState extends State<NotificationsAlert> {
             haveUnreadNotification = false;
           }
         }
-        return IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => NotificationsScreen(userID: widget.userID),
-              ),
-            );
-          },
-          icon: haveUnreadNotification
-              ? Stack(
-            children: [
-              const Icon(Icons.notifications),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(1),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(6),
+        return Builder(
+          builder: (context) {
+            return IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => NotificationsScreen(userID: widget.userID),
                   ),
-                  constraints: const BoxConstraints(
-                    minWidth: 12,
-                    minHeight: 12,
-                  ),
-                  child: Text(
-                    countNotifications.toString(),
-                    style: const TextStyle(
-                      fontSize: 8,
+                );
+              },
+              icon: haveUnreadNotification
+                  ? Stack(
+                children: [
+                  const Icon(Icons.notifications),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        countNotifications.toString(),
+                        style: const TextStyle(
+                          fontSize: 8,
+                          color: Colors.white
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-            ],
-          )
-              : const Icon(Icons.notifications),
+                ],
+              )
+                  : const Icon(Icons.notifications),
+            );
+          }
         );
       },
     );

@@ -8,6 +8,7 @@ import 'package:talbna/screens/auth/register_screen_new.dart';
 import 'package:talbna/screens/auth/reset_password.dart';
 import 'package:talbna/screens/check_auth.dart';
 import 'package:talbna/screens/home/home_screen.dart';
+import 'package:talbna/screens/home/select_language.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/service_post/create_service_post_form.dart';
 import 'package:talbna/widgets/service_post_view_widget.dart';
@@ -16,6 +17,7 @@ class Routes {
   static const String noRoute = '/';
   static const String login = 'login';
   static const String loginNew = 'loginNew';
+  static const String selectLang = 'SelectLanguage';
 
   static const String resetPassword = 'reset_password';
 
@@ -35,6 +37,8 @@ class Routes {
     switch (settings.name) {
       case noRoute:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case selectLang:
+        return MaterialPageRoute(builder: (_) =>    const LanguageSelectionScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case loginNew:

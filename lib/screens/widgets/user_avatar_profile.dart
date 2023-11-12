@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/other_profile_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/utils/constants.dart';
@@ -12,7 +13,8 @@ class UserAvatarProfile extends StatefulWidget {
   final String? imageUrl;
   final double? radius;
   final int fromUser;
-  const UserAvatarProfile({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser})
+  final User user;
+  const UserAvatarProfile({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser, required this.user})
       : super(key: key);
 
   @override
@@ -45,7 +47,7 @@ class _UserAvatarProfileState extends State<UserAvatarProfile> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => OtherProfileScreen(fromUser: widget.fromUser, toUser: widget.toUser, isOtherProfile: true,),
+            builder: (context) => OtherProfileScreen(fromUser: widget.fromUser, toUser: widget.toUser, isOtherProfile: true, user: widget.user,),
           ),
         );
       },

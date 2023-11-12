@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/other_profile_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/utils/constants.dart';
@@ -12,13 +13,14 @@ class UserAvatar extends StatefulWidget {
   final String? imageUrl;
   final double? radius;
   final int fromUser;
+  final User user;
   const UserAvatar(
       {Key? key,
       this.imageUrl,
       this.radius,
       required this.toUser,
       required this.canViewProfile,
-      required this.fromUser})
+      required this.fromUser, required this.user})
       : super(key: key);
 
   @override
@@ -55,27 +57,23 @@ class _UserAvatarState extends State<UserAvatar> {
             builder: (context) => OtherProfileScreen(
               fromUser: widget.fromUser,
               toUser: widget.toUser,
-              isOtherProfile: widget.canViewProfile,
+              isOtherProfile: widget.canViewProfile, user: widget.user,
             ),
           ),
         );
       },
       child: CircleAvatar(
-        backgroundColor: const Color.fromARGB(255, 255, 243, 207),
-        radius: widget.radius! + 2,
-        child: CircleAvatar(
-          radius: widget.radius,
-          backgroundImage: Image.network(
-            _imageUrl,
-            errorBuilder: (BuildContext context, Object exception,
-                StackTrace? stackTrace) {
-              return CircleAvatar(
-                radius: widget.radius,
-                backgroundImage: const AssetImage('assets/avatar.png'),
-              );
-            },
-          ).image,
-        ),
+        radius: widget.radius,
+        backgroundImage: Image.network(
+          _imageUrl,
+          errorBuilder: (BuildContext context, Object exception,
+              StackTrace? stackTrace) {
+            return CircleAvatar(
+              radius: widget.radius,
+              backgroundImage: const AssetImage('assets/avatar.png'),
+            );
+          },
+        ).image,
       ),
     );
   }

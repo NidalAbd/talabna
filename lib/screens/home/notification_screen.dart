@@ -8,6 +8,8 @@ import 'package:talbna/blocs/notification/notifications_state.dart';
 
 import 'package:talbna/data/models/notifications.dart';
 
+import '../../provider/language.dart';
+
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key, required this.userID}) : super(key: key);
@@ -23,6 +25,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
   int _currentPage = 1;
   bool _hasReachedMax = false;
   List<Notifications> _notification = [];
+  final Language _language = Language();
 
   @override
   void initState() {
@@ -77,7 +80,22 @@ class NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title:  Text(_language.getNotificationText()),
+        actions: [
+          IconButton(onPressed: (){
+            BlocProvider.of<TalbnaNotificationBloc>(context)
+                .add(
+              MarkALlNotificationAsRead(
+                userId: widget.userID,
+              ),
+            );
+            setState(() {
+            });
+          }, icon: const Padding(
+            padding: EdgeInsets.only(right: 25),
+            child: Icon(Icons.mark_email_read_rounded),
+          )),
+        ],
       ),
       body: WillPopScope(
         onWillPop: _onWillPop,
@@ -86,6 +104,13 @@ class NotificationsScreenState extends State<NotificationsScreen> {
           listener: (context, state) {
             if (state is NotificationLoaded) {
               _handleNotificationsLoadSuccess(state.notifications, state.hasReachedMax);
+            }
+            else if (state is AllNotificationMarkedRead) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('All Notification Marked Read'),
+                ),
+              );
             }
           },
           child: BlocBuilder<TalbnaNotificationBloc, TalbnaNotificationState>(
@@ -144,9 +169,6 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                                 userId: widget.userID,
                               ),
                             );
-                            setState(() {
-
-                            });
                           },
                         ),
                         ),
@@ -156,12 +178,10 @@ class NotificationsScreenState extends State<NotificationsScreen> {
 
                 );
               } else if (state is NotificationError) {
-// show error message
                 return Center(
                   child: Text(state.message),
                 );
               } else {
-// show empty state
                 return const Center(
                   child: Text('No Notifications found.'),
                 );

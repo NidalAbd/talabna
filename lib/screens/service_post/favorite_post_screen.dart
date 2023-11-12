@@ -4,11 +4,15 @@ import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
+import '../../provider/language.dart';
+
 class FavoritePostScreen extends StatefulWidget {
-  const FavoritePostScreen({Key? key, required this.userID}) : super(key: key);
+  const FavoritePostScreen({Key? key, required this.userID, required this.user}) : super(key: key);
   final int userID;
+  final User user;
 
   @override
   FavoritePostScreenState createState() => FavoritePostScreenState();
@@ -19,6 +23,8 @@ class FavoritePostScreenState extends State<FavoritePostScreen> {
   late ServicePostBloc _servicePostBloc;
   int _currentPage = 1;
   bool _hasReachedMax = false;
+  final Language _language = Language();
+
   List<ServicePost> _servicePostsFavourite = [];
   late Function onPostDeleted = (int postId) {
     setState(() {
@@ -82,7 +88,7 @@ class FavoritePostScreenState extends State<FavoritePostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('المفضلة'),
+        title:  Text(_language.tFavoriteText()),
       ),
       body: WillPopScope(
         onWillPop: _onWillPopFavourite,
@@ -123,7 +129,7 @@ class FavoritePostScreenState extends State<FavoritePostScreen> {
                             key: UniqueKey(), // Add this line
                             onPostDeleted: onPostDeleted,
                             userProfileId: widget.userID,
-                            servicePost: servicePost, canViewProfile: false,
+                            servicePost: servicePost, canViewProfile: false, user: widget.user,
                         ),
                       );
                     },

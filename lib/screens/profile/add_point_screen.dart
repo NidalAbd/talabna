@@ -6,6 +6,8 @@ import 'package:talbna/blocs/purchase_request/purchase_request_event.dart';
 import 'package:talbna/blocs/purchase_request/purchase_request_state.dart';
 import 'package:talbna/data/models/purchase_request.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
+
+import '../../provider/language.dart';
 class AddPointScreen extends StatefulWidget {
   final int fromUserID;
   final int toUserId;
@@ -19,6 +21,8 @@ class AddPointScreen extends StatefulWidget {
 
 class _AddPointScreenState extends State<AddPointScreen> {
   final _formKey = GlobalKey<FormState>();
+  final Language _language = Language();
+  //_language.tConvertPointsText()
   final _pointsController = TextEditingController();
   late PurchaseRequestBloc _purchaseRequestBloc;
   late int? currentUserId = 0;
@@ -93,7 +97,7 @@ class _AddPointScreenState extends State<AddPointScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تحويل نقاط'),
+        title:  Text(_language.tConvertPointsText()),
         actions:  [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -152,13 +156,13 @@ class _AddPointScreenState extends State<AddPointScreen> {
                               child: TextFormField(
                                 controller: _pointsController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'اضافة النقاط المطلوبة',
+                                decoration:  InputDecoration(
+                                  labelText: _language.getAddRequiredPointsText(),
                                   border: OutlineInputBorder(),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'يجب تحديد عدد النقاط المطلوبة';
+                                    return _language.getRequiredPointsText();
                                   }
                                   if (int.tryParse(value) == null) {
                                     return 'يجب إدخال رقم صحيح لعدد النقاط المطلوبة';
@@ -168,18 +172,31 @@ class _AddPointScreenState extends State<AddPointScreen> {
                               ),
                             ),
                             const SizedBox(height: 16.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  final points =
-                                  int.parse(_pointsController.text);
-                                  context
-                                      .read<PurchaseRequestBloc>()
-                                      .add(AddPointsForUser(
-                                      request: points, fromUser: widget.fromUserID, toUser: widget.toUserId),);
-                                }
-                              },
-                              child: const Text('تحويل النقاط لهذا المستخدم' ),
+                            FractionallySizedBox(
+                              widthFactor: 1.0,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(
+                                          5), // Adjust the radius as per your requirement
+                                    ),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    final points =
+                                    int.parse(_pointsController.text);
+                                    context
+                                        .read<PurchaseRequestBloc>()
+                                        .add(AddPointsForUser(
+                                        request: points, fromUser: widget.fromUserID, toUser: widget.toUserId),);
+                                  }
+                                },
+                                child:  Text( _language.tConvertPointsText()),
+                              ),
                             ),
                           ],
                         ),

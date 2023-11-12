@@ -4,6 +4,8 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 
+import '../../provider/language.dart';
+
 class ChangePasswordScreen extends StatefulWidget {
   final int userId;
   const ChangePasswordScreen({Key? key, required this.userId})
@@ -14,6 +16,8 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final Language _language = Language();
+
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmNewPasswordController = TextEditingController();
@@ -25,7 +29,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title:  Text(_language.getChangePasswordText()),
       ),
       body: BlocConsumer<UserProfileBloc, UserProfileState>(
           listener: (context, state) {
@@ -83,7 +87,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   controller: _newPasswordController,
                   obscureText: _obscureNewPassword,
                   decoration: InputDecoration(
-                    labelText: 'New Password',
+                    labelText: _language.tNewPasswordText(),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureNewPassword
                           ? Icons.visibility_off
@@ -101,7 +105,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   controller: _confirmNewPasswordController,
                   obscureText: _obscureNewPassword,
                   decoration: InputDecoration(
-                    labelText: 'Retype New Password',
+                    labelText: 'Retype ${_language.tNewPasswordText()}',
                     suffixIcon: IconButton(
                       icon: Icon(_obscureNewPassword
                           ? Icons.visibility_off
@@ -115,46 +119,59 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                    if (_newPasswordController.text !=
-                        _confirmNewPasswordController.text) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Passwords do not match'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
+                FractionallySizedBox(
+                  widthFactor: 1.0,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(
+                              5), // Adjust the radius as per your requirement
                         ),
-                      );
-                    } else {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      BlocProvider.of<UserProfileBloc>(context).add(
-                        UpdateUserPassword(
-                          user: user,
-                          oldPassword: _oldPasswordController.text,
-                          newPassword: _newPasswordController.text,
-                        ),
-                      );
-                    }
-                  },
-                  child: _isLoading
-                      ? const SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: CircularProgressIndicator(),
-                  )
-                      : const Text('Update Password'),
+                      ),
+                    ),
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                      if (_newPasswordController.text !=
+                          _confirmNewPasswordController.text) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Passwords do not match'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        BlocProvider.of<UserProfileBloc>(context).add(
+                          UpdateUserPassword(
+                            user: user,
+                            oldPassword: _oldPasswordController.text,
+                            newPassword: _newPasswordController.text,
+                          ),
+                        );
+                      }
+                    },
+                    child: _isLoading
+                        ? const SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(),
+                    )
+                        :  Text(_language.tUpdateText()),
+                  ),
                 ),
               ],
             ),

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
+import 'package:talbna/provider/language.dart';
+import 'package:talbna/screens/auth/welcome_screen.dart';
 
 class LogoutListTile extends StatefulWidget {
-  const LogoutListTile({Key? key}) : super(key: key);
+  const LogoutListTile({Key? key, required this.language}) : super(key: key);
+  final  Language language;
 
   @override
   State<LogoutListTile> createState() => _LogoutListTileState();
@@ -15,24 +18,23 @@ class _LogoutListTileState extends State<LogoutListTile> {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.logout_outlined),
-      title: const Text('Logout'),
+      title:  Text(widget.language.tLogoutText()),
       onTap: () async {
-        Navigator.pop(context);
         final authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Logout'),
-              content: const Text('Are you sure you want to log out?'),
+              title:  Text(widget.language.tLogoutText()),
+              content:  Text(widget.language.logoutConfirmationText()),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('CANCEL'),
+                  child:  Text(widget.language.cancelText()),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('LOGOUT'),
+                  child:  Text(widget.language.tLogoutText()),
                 ),
               ],
             );
@@ -40,6 +42,11 @@ class _LogoutListTileState extends State<LogoutListTile> {
         );
 
         if (confirmed == true) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const WelcomeScreen(),
+            ),
+          );
           authenticationBloc.add(LoggedOut());
         }
       },

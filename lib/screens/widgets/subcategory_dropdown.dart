@@ -3,6 +3,8 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
 
+import '../../provider/language.dart';
+
 class SubCategoriesDropdown extends StatefulWidget {
   final Category? selectedCategory;
   final Function(SubCategory) onSubCategorySelected;
@@ -22,6 +24,7 @@ class SubCategoriesDropdown extends StatefulWidget {
 class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
   List<SubCategory> _subCategories = [];
   SubCategory? _selectedSubCategory;
+  final Language _language = Language();
 
   @override
   void initState() {
@@ -57,8 +60,8 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<SubCategory>(
       value: _selectedSubCategory,
-      decoration: const InputDecoration(
-        labelText: 'الفئة الفرعية',
+      decoration:  InputDecoration(
+        labelText: _language.tSubcategoryText(),
       ),
       items: _subCategories
           .map((subCategory) => DropdownMenuItem<SubCategory>(
@@ -69,8 +72,8 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
       ))
           .toList(),
       dropdownColor: Theme.of(context).brightness == Brightness.dark
-          ? AppTheme.lightPrimaryColor
-          : AppTheme.darkPrimaryColor,
+          ? AppTheme.darkPrimaryColor
+          : AppTheme.lightPrimaryColor,
       onChanged: (SubCategory? newSubCategory) {
         if (newSubCategory != null) {
           setState(() {

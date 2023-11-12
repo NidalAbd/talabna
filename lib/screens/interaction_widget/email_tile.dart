@@ -27,7 +27,7 @@ class EmailTile extends StatelessWidget {
           : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: const Icon(Icons.email),
-        title: const Text('البريد الالكتروني'),
+        title: const Text('Email'),
         subtitle: Text(email),
         onTap: _launchEmailApp,
       ),

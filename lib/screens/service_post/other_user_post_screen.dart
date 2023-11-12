@@ -4,11 +4,13 @@ import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 class OtherUserPostScreen extends StatefulWidget {
-   const OtherUserPostScreen({Key? key, required this.userID}) : super(key: key);
+   const OtherUserPostScreen({Key? key, required this.userID, required this.user}) : super(key: key);
   final int userID;
+  final User user;
 
   @override
   OtherUserPostScreenState createState() => OtherUserPostScreenState();
@@ -125,7 +127,7 @@ class OtherUserPostScreenState extends State<OtherUserPostScreen> {
                           onPostDeleted: onPostDeleted,
                           userProfileId: widget.userID,
                           servicePost: servicePost,
-                          canViewProfile: false,
+                          canViewProfile: false, user: widget.user,
                       ),
                     );
                   },

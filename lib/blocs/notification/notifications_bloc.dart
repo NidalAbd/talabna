@@ -26,6 +26,18 @@ class TalbnaNotificationBloc
       try {
         await notificationRepository.markNotificationAsRead(
             notificationId: event.notificationId, userId: event.userId);
+
+        emit(OneNotificationRead(notifications: event.notificationId));
+      } catch (e) {
+        emit(NotificationError(message: e.toString()));
+      }
+    });
+    on<MarkALlNotificationAsRead>((event, emit) async {
+      emit(NotificationLoading());
+      try {
+        await notificationRepository.markAllNotificationAsRead(
+             userId: event.userId);
+        emit(AllNotificationMarkedRead());
       } catch (e) {
         emit(NotificationError(message: e.toString()));
       }

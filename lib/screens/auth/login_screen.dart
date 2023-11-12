@@ -94,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen>
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-
                                     TextFromField(
                                       maxLength: 150,
                                       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),

@@ -11,15 +11,26 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
       : _repository = repository,
         super(ReportInitial()) {
     on<ReportRequested>((event, emit) async {
+      print('ReportRequested');
       emit(ReportInProgress());
       try {
-        final users = await _repository.makeReport(id : event.user , type: event.type, reason: event.reason);
-        emit(ReportSuccess(user: users));
+        final success = await _repository.makeReport(
+          id: event.user,
+          type: event.type,
+          reason: event.reason,
+        );
+        if (success) {
+          print('ReportSuccess');
+          emit(ReportSuccess());
+        } else {
+          print('ReportFailure');
+          emit(ReportFailure(error: 'Report operation failed'));
+        }
       } catch (e) {
+        print('ReportFailure with error: $e');
         emit(ReportFailure(error: e.toString()));
       }
     });
-
   }
 
 }

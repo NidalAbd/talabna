@@ -11,6 +11,16 @@ abstract class TalbnaNotificationState extends Equatable{
 class NotificationInitial extends TalbnaNotificationState {}
 
 class NotificationLoading extends TalbnaNotificationState {}
+class OneNotificationRead extends TalbnaNotificationState {
+  final int notifications;
+
+  const OneNotificationRead({required this.notifications});
+
+  @override
+  List<Object> get props => [notifications ];
+}
+
+class AllNotificationMarkedRead extends TalbnaNotificationState {}
 
 class NotificationLoaded extends TalbnaNotificationState {
   final List<Notifications> notifications;

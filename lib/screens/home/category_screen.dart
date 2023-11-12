@@ -7,12 +7,14 @@ import 'package:talbna/blocs/category/subcategory_event.dart';
 import 'package:talbna/blocs/category/subcategory_state.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/data/models/category_menu.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/main_post_menu.dart';
 
 class CategoryScreen extends StatefulWidget {
-  const CategoryScreen({super.key,required this.servicePostBloc, required this.userId});
+  const CategoryScreen({super.key,required this.servicePostBloc, required this.userId, required this.user});
   final ServicePostBloc servicePostBloc;
   final int userId;
+  final User user;
 
   @override
   State<CategoryScreen> createState() => _CategoryScreenState();
@@ -87,7 +89,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   children: [
                     _buildCategoryRow(state.categories),
                     Expanded(
-                      child: selectedCategory == null ? Container() : MainMenuPostScreen(category: selectedCategory!.id, userID: widget.userId, servicePostBloc: widget.servicePostBloc, showSubcategoryGridView: showSubcategoryGridView,),
+                      child: selectedCategory == null ? Container() : MainMenuPostScreen(category: selectedCategory!.id, userID: widget.userId, servicePostBloc: widget.servicePostBloc, showSubcategoryGridView: showSubcategoryGridView, user: widget.user,),
                     ),
                   ],
                 ),

@@ -146,30 +146,37 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
   }
 
 
-  Stream<ServicePostState> _mapGetServicePostsRealsEventToState(
-       int page) async* {
+  Stream<ServicePostState> _mapGetServicePostsRealsEventToState(int page) async* {
     yield const ServicePostLoading(event: 'GetServicePostsByCategoryEvent');
-    if (state is ServicePostLoadSuccess && (state as ServicePostLoadSuccess).hasReachedMax) {
-      return;
-    }
+
     try {
-      if (state is! ServicePostLoadSuccess) {
-        final servicePosts = await servicePostRepository.getServicePostsForReals(page: page);
-        yield ServicePostLoadSuccess(servicePosts: servicePosts, hasReachedMax: servicePosts.length < 3, event: 'GetServicePostsForReals');
+      final currentState = state;
+      if (currentState is ServicePostLoadSuccess && currentState.hasReachedMax) {
+        // If we have reached the maximum, no need to fetch more posts.
         return;
       }
-      final currentState = state as ServicePostLoadSuccess;
-      final servicePosts = await servicePostRepository.getServicePostsForReals(page:page );
-      yield servicePosts.isEmpty
-          ? currentState.copyWith(hasReachedMax: true)
-          : currentState.copyWith(
-        servicePosts: currentState.servicePosts + servicePosts,
-        hasReachedMax: false,
-      );
+
+      // Fetch the service posts.
+      final servicePosts = await servicePostRepository.getServicePostsForReals(page: page);
+      final isLastPage = servicePosts.length < 3; // Assuming 3 is the number of posts per page set in the backend.
+
+      if (currentState is! ServicePostLoadSuccess) {
+        // If it's the first time loading posts.
+        yield ServicePostLoadSuccess(servicePosts: servicePosts, hasReachedMax: servicePosts.length < 10, event: 'GetServicePostsForReals');
+      } else {
+        // If we are appending new posts to the already loaded ones.
+        yield servicePosts.isEmpty
+            ? currentState.copyWith(hasReachedMax: true)
+            : currentState.copyWith(
+          servicePosts: currentState.servicePosts + servicePosts,
+          hasReachedMax: false,
+        );
+      }
     } catch (e) {
-      yield ServicePostLoadFailure(errorMessage: e.toString(), event: 'GetServicePostsForReals', );
+      yield ServicePostLoadFailure(errorMessage: e.toString(), event: 'GetServicePostsForReals');
     }
   }
+
   Stream<ServicePostState> _mapGetServicePostsByCategoryEventToState(
       int category, int page) async* {
     yield const ServicePostLoading(event: 'GetServicePostsByCategoryEvent');

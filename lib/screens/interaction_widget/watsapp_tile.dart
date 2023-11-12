@@ -31,8 +31,8 @@ class WhatsAppWidget extends StatelessWidget {
           : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: Image.asset('assets/WhatsApp_logo.png', width: 24, height: 24),
-        title: const Text('الواتساب'),
-        subtitle: Text( '+ ${formatWhatsAppNumber(whatsAppNumber ?? 'لا يوجد بيانات')}'),
+        title: const Text('WhatsApp'),
+        subtitle: Text( '+ ${formatWhatsAppNumber(whatsAppNumber ?? 'no data')}'),
         onTap: launchWhatsApp,
       ),
     );

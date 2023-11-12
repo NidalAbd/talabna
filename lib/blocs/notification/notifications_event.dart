@@ -20,6 +20,10 @@ class MarkNotificationAsRead extends TalbnaNotificationEvent {
 
   const MarkNotificationAsRead({required this.userId, required this.notificationId});
 }
+class MarkALlNotificationAsRead extends TalbnaNotificationEvent {
+  final int userId;
+  const MarkALlNotificationAsRead({required this.userId});
+}
 class CountNotificationEvent extends TalbnaNotificationEvent {
   final int userId;
 

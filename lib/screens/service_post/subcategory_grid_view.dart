@@ -7,42 +7,38 @@ import 'package:talbna/blocs/category/subcategory_state.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
+import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/subcategory_post_screen.dart';
 import 'package:talbna/utils/constants.dart';
 
-class SubcategoryGridView extends StatefulWidget {
+class SubcategoryListView extends StatefulWidget {
   final int categoryId;
   final int userId;
-
+  final User user;
   final ServicePostBloc servicePostBloc;
   final UserProfileBloc userProfileBloc;
 
-  const SubcategoryGridView(
-      {Key? key,
-      required this.categoryId,
-      required this.userId,
-      required this.servicePostBloc,
-      required this.userProfileBloc})
-      : super(key: key);
+  const SubcategoryListView({
+    Key? key,
+    required this.categoryId,
+    required this.userId,
+    required this.servicePostBloc,
+    required this.userProfileBloc,
+    required this.user,
+  }) : super(key: key);
 
   @override
-  _SubcategoryGridViewState createState() => _SubcategoryGridViewState();
+  _SubcategoryListViewState createState() => _SubcategoryListViewState();
 }
 
-class _SubcategoryGridViewState extends State<SubcategoryGridView> {
+class _SubcategoryListViewState extends State<SubcategoryListView> {
   late SubcategoryBloc _subcategoryBloc;
-   int user = 251155151;
 
   @override
   void initState() {
     super.initState();
     _subcategoryBloc = BlocProvider.of<SubcategoryBloc>(context);
     _subcategoryBloc.add(FetchSubcategories(categoryId: widget.categoryId));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -72,25 +68,16 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                 ],
               ),
             );
           } else {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 4 / 2,
-
-                ),
-                itemCount: state.subcategories.length,
-                itemBuilder: (context, index) {
-                  final subcategory = state.subcategories[index];
-                  return _buildSubcategoryCard(subcategory);
-                },
-              ),
+            return ListView.builder(
+              itemCount: state.subcategories.length,
+              itemBuilder: (context, index) {
+                final subcategory = state.subcategories[index];
+                return _buildSubcategoryListItem(subcategory);
+              },
             );
           }
         } else if (state is SubcategoryError) {
@@ -101,6 +88,69 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
       },
     );
   }
+
+  Widget _buildSubcategoryListItem(SubCategoryMenu subcategory) {
+    return Card(
+      color: Theme.of(context).brightness == Brightness.dark
+        ? AppTheme.lightPrimaryColor.withOpacity(0.05)
+        : AppTheme.darkForegroundColor.withOpacity(0.95),
+      child: ListTile(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SubCategoryPostScreen(
+                userID: widget.userId,
+                categoryId: subcategory.categoriesId,
+                subcategoryId: subcategory.id,
+                servicePostBloc: widget.servicePostBloc,
+                userProfileBloc: widget.userProfileBloc,
+                user: widget.user,
+              ),
+            ),
+          );
+        },
+        leading: CircleAvatar(
+          backgroundImage: subcategory.photos.isNotEmpty
+        ? NetworkImage(
+        '${Constants.apiBaseUrl}/${subcategory.photos[0].src}',
+        ) as ImageProvider
+              : const AssetImage('assets/loading.gif'),
+          backgroundColor: Colors.transparent,
+        ),
+        title: Text(
+          subcategory.name,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        ),
+        subtitle: Text(
+          'Total : ${formatNumber(subcategory.servicePostsCount)}',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+        trailing: IconButton(onPressed: (){
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SubCategoryPostScreen(
+                userID: widget.userId,
+                categoryId: subcategory.categoriesId,
+                subcategoryId: subcategory.id,
+                servicePostBloc: widget.servicePostBloc,
+                userProfileBloc: widget.userProfileBloc,
+                user: widget.user,
+              ),
+            ),
+          );
+        }, icon: Icon(Icons.arrow_forward_ios)),
+      ),
+    );
+  }
+
   String formatNumber(int number) {
     if (number >= 1000000000) {
       final double formattedNumber = number / 1000000;
@@ -117,98 +167,5 @@ class _SubcategoryGridViewState extends State<SubcategoryGridView> {
     } else {
       return number.toString();
     }
-  }
-  Widget _buildSubcategoryCard(SubCategoryMenu subcategory) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => SubCategoryPostScreen(
-                    userID: widget.userId,
-                    categoryId: subcategory.categoriesId,
-                    subcategoryId: subcategory.id,
-                    servicePostBloc: widget.servicePostBloc,
-                    userProfileBloc: widget.userProfileBloc,
-                  )),
-        );
-      },
-      child: SizedBox(
-        width: 200, // Set the desired width for the card
-        height: MediaQuery.of(context).size.width /
-            6, // Set the desired height for the card
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
-          children: [
-            Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
-              child: SizedBox(
-                width: double.infinity,
-                height: 200, // Set a fixed height for the container
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 15, 15, 0),
-                      child: Text(
-                        subcategory.name,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        overflow: TextOverflow
-                            .ellipsis, // Truncate text with ellipsis
-                        maxLines: 1, // Limit the text to 1 line
-                      ),
-                    ),
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text('العدد الكلي : ${formatNumber(subcategory.servicePostsCount)}  '),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 10,
-              left: 10,
-              child: Container(
-                width: 64,
-                height: 70,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightForegroundColor.withOpacity(0.1)
-                          : AppTheme.darkForegroundColor.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: Container(
-                    width: 60,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: subcategory.photos.isNotEmpty
-                            ? NetworkImage(
-                          '${Constants.apiBaseUrl}/${subcategory.photos[0].src}',
-                        ) as ImageProvider
-                            : const AssetImage('assets/loading.gif'),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/routes.dart';
-import 'package:talbna/screens/auth/login_screen.dart';
 import 'package:talbna/screens/check_auth.dart';
 import 'package:talbna/screens/splash.dart';
 import 'package:talbna/screens/widgets/loading_widget.dart';

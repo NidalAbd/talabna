@@ -3,6 +3,8 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/repositories/countries_repository.dart';
 import 'package:talbna/data/models/countries.dart';
 
+import '../../provider/language.dart';
+
 class CountryCityDropdown extends StatefulWidget {
   final Country? initialCountry;
   final City? initialCity;
@@ -32,6 +34,7 @@ class CountryCityDropdown extends StatefulWidget {
 }
 
 class _CountryCityDropdownState extends State<CountryCityDropdown> {
+  final Language _language = Language();
   List<Country> _countries = [];
   List<City> _cities = [];
   Country? _selectedCountry;
@@ -103,20 +106,18 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Card(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? AppTheme.lightForegroundColor
-              : AppTheme.darkForegroundColor,
+
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: DropdownButtonFormField<Country>(
               value: _selectedCountry,
-              decoration: const InputDecoration(
-                labelText: 'الدولة',
+              decoration:  InputDecoration(
+                labelText: _language.tCountryText(),
                 border: InputBorder.none,
               ),
               dropdownColor: Theme.of(context).brightness == Brightness.dark
-    ? AppTheme.lightPrimaryColor
-        : AppTheme.darkPrimaryColor,
+    ? AppTheme.darkPrimaryColor
+        : AppTheme.lightPrimaryColor,
               items: _countries.map((country) {
                 return DropdownMenuItem<Country>(
                   value: country,
@@ -141,20 +142,18 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
         ),
         if (_selectedCountry != null)
           Card(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.lightForegroundColor
-                : AppTheme.darkForegroundColor,
+
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: DropdownButtonFormField<City>(
                 value: _selectedCity,
-                decoration: const InputDecoration(
-                  labelText: 'المدينة',
+                decoration:  InputDecoration(
+                  labelText: _language.tCityText(),
                   border: InputBorder.none,
                 ),
                 dropdownColor: Theme.of(context).brightness == Brightness.dark
-    ? AppTheme.lightPrimaryColor
-        : AppTheme.darkPrimaryColor,
+    ? AppTheme.darkPrimaryColor
+        : AppTheme.lightPrimaryColor,
                 items: _cities.map((city) {
                   return DropdownMenuItem<City>(
                     value: city,
@@ -177,9 +176,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
         Row(
           children: [
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: SizedBox(
                 height: 46,
                 width: 80,
@@ -187,8 +184,8 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                   child: TextFormField(
                     readOnly: true,
                     controller: _selectedCountryCode,
-                    decoration: const InputDecoration(
-                      labelText: 'code',
+                    decoration:  InputDecoration(
+                      labelText: _language.getCodeText(),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
                     ),
@@ -198,9 +195,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
             ),
             Expanded(
               child: Card(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.lightForegroundColor
-                    : AppTheme.darkForegroundColor,
+
                 child: TextFormField(
                   controller: phoneController,
                   keyboardType: TextInputType.number,
@@ -224,8 +219,8 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                     }
                     return null;
                   },
-                  decoration:  const InputDecoration(
-                    labelText: 'رقم الهاتف',
+                  decoration:   InputDecoration(
+                    labelText: _language.tPhoneNumberText(),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
                     counterText: '', // Remove the counter text
@@ -239,9 +234,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
         Row(
           children: [
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: SizedBox(
                 height: 46,
                 width: 80,
@@ -249,8 +242,8 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                   child: TextFormField(
                     readOnly: true,
                     controller: _selectedCountryCode,
-                    decoration: const InputDecoration(
-                      labelText: 'code',
+                    decoration:  InputDecoration(
+                      labelText: _language.getCodeText(),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
                     ),
@@ -260,9 +253,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
             ),
             Expanded(
               child: Card(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.lightForegroundColor
-                    : AppTheme.darkForegroundColor,
+
                 child: TextFormField(
                   controller: whatsappController,
                   keyboardType: TextInputType.number,
@@ -285,8 +276,8 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                     }
                     return null;
                   },
-                  decoration: const InputDecoration(
-                    labelText: 'رقم الواتساب',
+                  decoration:  InputDecoration(
+                    labelText: _language.tWhatsappNumberText(),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
                     counterText: '', // Remove the counter text

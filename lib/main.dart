@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
+import 'package:talbna/blocs/comments/comment_bloc.dart';
 import 'package:talbna/blocs/notification/notifications_bloc.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/report/report_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_contact/user_contact_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
+import 'package:talbna/data/repositories/comment_repository.dart';
 import 'package:talbna/data/repositories/purchase_request_repository.dart';
 import 'package:talbna/data/repositories/report_repository.dart';
 import 'package:talbna/data/repositories/service_post_repository.dart';
@@ -31,77 +34,90 @@ import 'data/repositories/user_follow_repository.dart';
 import 'data/repositories/user_profile_repository.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+String language = 'العربية';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   FCMHandler fcmHandler = FCMHandler();
   await fcmHandler.initializeFCM();
   await requestPermissions();
   final authenticationRepository = AuthenticationRepository();
   final servicePostRepository  = ServicePostRepository();
+  final commentsRepository  = CommentRepository();
+
   final userProfileRepository = UserProfileRepository();
   final subcategoryRepository  = CategoriesRepository();
   AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor,AppTheme.lightPrimaryColor);
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider<NetworkBloc>(
-          create: (context) => NetworkBloc()..add(NetworkObserve()),
-        ),
-        BlocProvider<AuthenticationBloc>(
-          create: (context) => AuthenticationBloc(
-            authenticationRepository: authenticationRepository,
-          ),
-        ),
-        BlocProvider<UserProfileBloc>(
-          create: (context) => UserProfileBloc(
-            repository: userProfileRepository,
-          ),
-        ),
-        BlocProvider<PurchaseRequestBloc>(
-          create: (context) => PurchaseRequestBloc(repository: PurchaseRequestRepository()),
-        ),
-        BlocProvider<OtherUserProfileBloc>(
-          create: (context) => OtherUserProfileBloc(
-            repository: userProfileRepository,
-          ),
-        ),
-        BlocProvider<UserFollowBloc>(
-          create: (context) => UserFollowBloc(
-            repository: UserFollowRepository(),
-          ),
-        ),
-        BlocProvider<UserActionBloc>(
-          create: (context) => UserActionBloc(
-            repository: UserFollowRepository(),
-          ),
-        ),
-        BlocProvider<TalbnaNotificationBloc>(
-          create: (context) => TalbnaNotificationBloc(notificationRepository: NotificationRepository()),
-        ),
-        BlocProvider<ServicePostBloc>(
-          create: (context) => ServicePostBloc(servicePostRepository: servicePostRepository),
-        ),
+  SharedPreferences.getInstance().then((instance) {
+      if (instance.containsKey('language')) {
+        language = instance.getString('language')!;
+      } else {
+        language = 'English'; // You can set any language as the default
+      }
 
-        BlocProvider<UserContactBloc>(
-          create: (context) => UserContactBloc(repository: UserContactRepository()),
+      runApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<NetworkBloc>(
+            create: (context) => NetworkBloc()..add(NetworkObserve()),
+          ),
+          BlocProvider<AuthenticationBloc>(
+            create: (context) => AuthenticationBloc(
+              authenticationRepository: authenticationRepository,
+            ),
+          ),
+          BlocProvider<UserProfileBloc>(
+            create: (context) => UserProfileBloc(
+              repository: userProfileRepository,
+            ),
+          ),
+          BlocProvider<PurchaseRequestBloc>(
+            create: (context) => PurchaseRequestBloc(repository: PurchaseRequestRepository()),
+          ),
+          BlocProvider<OtherUserProfileBloc>(
+            create: (context) => OtherUserProfileBloc(
+              repository: userProfileRepository,
+            ),
+          ),
+          BlocProvider<UserFollowBloc>(
+            create: (context) => UserFollowBloc(
+              repository: UserFollowRepository(),
+            ),
+          ),
+          BlocProvider<UserActionBloc>(
+            create: (context) => UserActionBloc(
+              repository: UserFollowRepository(),
+            ),
+          ),
+          BlocProvider<TalbnaNotificationBloc>(
+            create: (context) => TalbnaNotificationBloc(notificationRepository: NotificationRepository()),
+          ),
+          BlocProvider<ServicePostBloc>(
+            create: (context) => ServicePostBloc(servicePostRepository: servicePostRepository),
+          ),
+          BlocProvider<CommentBloc>(
+            create: (context) => CommentBloc(commentRepository: commentsRepository),
+          ),
+          BlocProvider<UserContactBloc>(
+            create: (context) => UserContactBloc(repository: UserContactRepository()),
+          ),
+          BlocProvider<ReportBloc>(
+            create: (context) => ReportBloc(repository: ReportRepository()),
+          ),
+          BlocProvider<SubcategoryBloc>(
+            create: (context) => SubcategoryBloc(categoriesRepository: subcategoryRepository),
+          ),
+          BlocProvider<ThemeCubit>(
+            create: (context) => ThemeCubit(),
+          ),
+        ],
+        child: MyApp(
+          authenticationRepository: authenticationRepository,
         ),
-        BlocProvider<ReportBloc>(
-          create: (context) => ReportBloc(repository: ReportRepository()),
-        ),
-        BlocProvider<SubcategoryBloc>(
-          create: (context) => SubcategoryBloc(categoriesRepository: subcategoryRepository),
-        ),
-        BlocProvider<ThemeCubit>(
-          create: (context) => ThemeCubit(),
-        ),
-      ],
-      child: MyApp(
-        authenticationRepository: authenticationRepository,
       ),
-    ),
-  );
+    );
+  });
+
 }
 
 Future<void> requestPermissions() async {

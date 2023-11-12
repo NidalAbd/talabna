@@ -11,6 +11,8 @@ import 'package:talbna/screens/widgets/category_dropdown.dart';
 import 'package:talbna/screens/widgets/subcategory_dropdown.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 
+import '../../provider/language.dart';
+
 class ChangeCategoryScreen extends StatefulWidget {
   const ChangeCategoryScreen({Key? key,required this.userId, required this.servicePostId}) : super(key: key);
   final int userId;
@@ -24,7 +26,8 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   Category? _selectedCategory;
   SubCategory? _selectedSubCategory;
-
+  final Language _language = Language();
+  //_language.tConvertPointsText()
   Future<void> _submitForm() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()){
       if (_selectedCategory == null || _selectedSubCategory == null) {
@@ -54,7 +57,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تغيير القسم'),
+        title:  Text(_language.tChangeCategoryText()),
         actions:  [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -78,27 +81,24 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
         },
         child: Form(
           key: _formKey,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
 
-                CategoriesDropdown(
-                  onCategorySelected: _onCategorySelected,
-                ),
-                const SizedBox(height: 8.0),
-                SubCategoriesDropdown(
-                  selectedCategory: _selectedCategory,
-                  onSubCategorySelected: _onSubCategorySelected,
-                ),
+              CategoriesDropdown(
+                onCategorySelected: _onCategorySelected,
+              ),
+              const SizedBox(height: 8.0),
+              SubCategoriesDropdown(
+                selectedCategory: _selectedCategory,
+                onSubCategorySelected: _onSubCategorySelected,
+              ),
 
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('تحويل'),
-                ),
-              ],
-            ),
+              ElevatedButton(
+                onPressed: _submitForm,
+                child:  Text(_language.tChangeCategoryText()),
+              ),
+            ],
           ),
         ),
       ),

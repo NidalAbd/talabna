@@ -1,314 +1,296 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/app_theme.dart';
+import 'package:talbna/blocs/comments/comment_bloc.dart';
+import 'package:talbna/blocs/comments/comment_state.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
-import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/comment.dart';
+import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/user_avatar_profile.dart';
-import 'package:talbna/utils/constants.dart';
+
+import '../../blocs/comments/comment_event.dart';
+import '../../provider/language.dart';
 
 class CommentModalBottomSheet extends StatefulWidget {
   final double iconSize;
-  final int userId;
+  final User user;
   final UserProfileBloc userProfileBloc;
+  final CommentBloc commentBloc;
+  final ServicePost? servicePost;
 
-  const CommentModalBottomSheet({super.key,
+  const CommentModalBottomSheet({
+    super.key,
     required this.iconSize,
-    required this.userId,
     required this.userProfileBloc,
+    required this.commentBloc,
+    required this.servicePost,
+    required this.user,
   });
 
   @override
-  State<CommentModalBottomSheet> createState() => _CommentModalBottomSheetState();
+  State<CommentModalBottomSheet> createState() =>
+      _CommentModalBottomSheetState();
 }
 
 class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
+  final Language _language = Language();
+  final ScrollController _scrollController = ScrollController();
+  bool isDeleting = false;
+  bool isAdding = false;
 
-  List<Comment> comments = [
-    Comment(
-      text: "Wow, this video is incredible!",
-      user: User(
-        id: 5,
-        name: "may",
-        photos: [
-          Photo(
-            src: "photos/avatar5.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user5@example.com',
-      ),
-    ),
-    Comment(
-      text: "I can't stop watching this video!",
-      user: User(
-        id: 6,
-        name: "monzer",
-        photos: [
-          Photo(
-            src: "photos/avatar4.png",
-            id: 55000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user6@example.com',
-      ),
-    ),
-    Comment(
-      text: "Absolutely mind-blowing! I love it.",
-      user: User(
-        id: 7,
-        name: "wael",
-        photos: [
-          Photo(
-            src: "photos/avatar3.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user7@example.com',
-      ),
-    ),
-    Comment(
-      text: "This video deserves all the awards!",
-      user: User(
-        id: 8,
-        name: "nidal",
-        photos: [
-          Photo(
-            src: "photos/avatar2.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user8@example.com',
-      ),
-    ),
-    Comment(
-      text: "Incredible work! I'm speechless.",
-      user: User(
-        id: 9,
-        name: "omar",
-        photos: [
-          Photo(
-            src: "photos/avatar5.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user9@example.com',
-      ),
-    ),
-    Comment(
-      text: "This video just made my day!",
-      user: User(
-        id: 10,
-        name: "ahmed",
-        photos: [
-          Photo(
-            src: "photos/avatar3.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user10@example.com',
-      ),
-    ),
-    Comment(
-      text: "I can't get enough of this video!",
-      user: User(
-        id: 11,
-        name: "mohammed",
-        photos: [
-          Photo(
-            src: "photos/avatar4.png",
-            id: 5000,
-            photoableType: 'App\Models\ServicePost',
-            photoableId: 4500,
-            createdAt: DateTime.parse('2023-06-19 22:45:26'),
-            updatedAt: DateTime.parse('2023-06-19 22:45:26'),
-          ),
-        ],
-        email: 'user11@example.com',
-      ),
-    ),
-  ];
-
+  final TextEditingController _commentController = TextEditingController();
+  int page = 1; // Initialize the page
 
   @override
   void initState() {
     super.initState();
-    widget.userProfileBloc.add(UserProfileRequested(id: widget.userId));
+    _scrollController.addListener(_onScroll);
+    if (widget.servicePost != null) {
+      widget.commentBloc
+          .add(LoadCommentsEvent(postId: widget.servicePost!.id!, page: page));
+    }
+  }
+
+  void _onScroll() {
+    final commentBloc = BlocProvider.of<CommentBloc>(context);
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !commentBloc.isFetching) {
+      final currentState = commentBloc.state;
+      if (currentState is CommentLoadSuccessState && currentState.hasMore) {
+        commentBloc.add(
+          LoadMoreCommentsEvent(
+              postId: widget.servicePost!.id!,
+              page: currentState.comments.length ~/ 10 + 1),
+        );
+      }
+    }
+  }
+
+  void _addComment() async {
+    if (_commentController.text.isNotEmpty) {
+      setState(() {
+        isAdding = true;
+      });
+      final newComment = Comments(
+        content: _commentController.text,
+        userId: widget.user.id,
+        servicePostId: widget.servicePost!.id!,
+        user: widget.user,
+      );
+      widget.commentBloc.add(AddCommentEvent(comment: newComment, page: page)); // Assuming this is an async operation
+      _commentController.clear();
+      setState(() {
+        isAdding = false;
+      });
+    }
+  }
+
+  void _deleteComment(int commentId, Comments comment) async {
+    setState(() {
+      isDeleting = true;
+    });
+     widget.commentBloc.add(DeleteCommentEvent(commentId: commentId, page: page, comment: comment)); // Assuming this is an async operation
+    setState(() {
+      isDeleting = false;
+    });
+  }
+
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose(); // This should be at the end
   }
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true, // Enable scrolling within the modal
-          builder: (BuildContext context) {
-            return Container(
-              height: MediaQuery.of(context).size.height * 2 / 3, // Set the height to 2/3 of the screen height
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightPrimaryColor
-                  : AppTheme.darkPrimaryColor,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Header
-                  const Text(
-                    'Comments',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    // Body - ListView of comments
-                    child: ListView.separated(
-                      itemCount: comments.length, // Replace with the actual list of comments
-                      separatorBuilder: (context, index) => Divider(
-                        color: Colors.white.withOpacity(0.2),
-                        thickness: 1,
-                        height: 16,
-                      ),
-                      itemBuilder: (BuildContext context, int index) {
-                        final comment = comments[index]; // Replace with your comment model
-                        return Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              UserAvatarProfile(
-                                imageUrl: '${Constants.apiBaseUrl}/storage/${comment.user.photos?.first.src}',
-                                radius: 20,
-                                toUser: comment.user.id,
-                                canViewProfile: false,
-                                fromUser: comment.user.id,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      comment.text,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      comment.user.name!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Row(
-                      children: [
-                        BlocConsumer<UserProfileBloc, UserProfileState>(
-                          bloc: widget.userProfileBloc,
-                          listener: (context, state) {
-                            if (state is UserProfileUpdateSuccess) {
-                              BlocProvider.of<UserProfileBloc>(context).add(UserProfileRequested(id: widget.userId));
-                            }
-                          },
-                          builder: (context, state) {
-                            if (state is UserProfileLoadSuccess) {
-                              final user = state.user;
-                              return UserAvatarProfile(
-                                imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
-                                radius: 20,
-                                toUser: user.id,
-                                canViewProfile: false,
-                                fromUser: user.id,
-                              );
-                            } else {
-                              return const Center(child: CircularProgressIndicator());
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    decoration: const InputDecoration(
-                                      hintText: 'Add a comment',
-                                      border: InputBorder.none,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    // Add your logic here to handle the comment submission
-                                  },
-                                  icon:  Icon(
-                                    Icons.send,
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? AppTheme.lightPrimaryColor
-                                        : AppTheme.darkPrimaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-        );
+    return BlocListener<UserProfileBloc, UserProfileState>(
+      bloc: widget.userProfileBloc,
+      listener: (context, state) {
+        // You can use this listener to react to specific state changes
       },
-      icon:  Icon(
-        Icons.comment,
-        size: widget.iconSize,
+      child: IconButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (BuildContext context) {
+              return BlocBuilder<CommentBloc, CommentState>(
+                bloc: widget.commentBloc,
+                builder: (context, state) {
+                  if (state is CommentLoadSuccessState) {
+                    return _buildCommentsSheet(
+                        context, state.comments, widget.commentBloc.isFetching);
+                  }else if (state is CommentInitialState) {
+                    widget.commentBloc.add(LoadCommentsEvent(
+                        postId: widget.servicePost!.id!, page: page));
+                    return const Center(child: Text('Loading . .'));
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              );
+            },
+          );
+        },
+        icon: Icon(
+          Icons.comment,
+          size: widget.iconSize,
+          color: Colors.white,
+          shadows: [
+            Shadow(
+              color: Colors.black.withOpacity(1),
+              offset: const Offset(0, 0),
+              blurRadius: 4,
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildCommentsSheet(
+      BuildContext context, List<Comments> comments, bool isFetchingMore) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 2 / 3,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppTheme.darkPrimaryColor
+          : AppTheme.lightPrimaryColor,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text(
+            _language.getCommentsText(),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: comments.isEmpty
+                ? const Center(
+                    child: Text(
+                        "No comments available."), // Display a message when no comments are available
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: comments.length + (isFetchingMore ? 1 : 0),
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index >= comments.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final comment = comments[index];
+                      return _buildCommentItem(context, comment);
+                    },
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: _buildAddCommentSection(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentItem(BuildContext context, Comments comment) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          UserAvatarProfile(
+            imageUrl: '${comment.user.photos?.first.src}',
+            radius: 20,
+            toUser: comment.user.id,
+            canViewProfile: false,
+            fromUser: comment.user.id,
+            user: widget.user,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  comment.content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  comment.user.name!,
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (comment.userId == widget.user.id) ...[
+                      isDeleting
+                          ? const CircularProgressIndicator()
+                          : IconButton(
+                        onPressed: () => _deleteComment(comment.id!, comment),
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddCommentSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(
+                      hintText: 'Add a comment',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: isAdding ? null : _addComment, // Disable the button while adding
+                  icon: isAdding
+                      ? const CircularProgressIndicator()
+                      : Icon(
+                    Icons.send,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.lightPrimaryColor
+                        : AppTheme.darkPrimaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

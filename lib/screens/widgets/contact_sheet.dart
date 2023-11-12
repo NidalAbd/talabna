@@ -50,8 +50,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
             return Container(
               height: MediaQuery.of(context).size.height * 2 / 8, // Set the height to 2/3 of the screen height
               color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightPrimaryColor
-                  : AppTheme.darkPrimaryColor,
+                  ? AppTheme.darkPrimaryColor
+                  : AppTheme.lightPrimaryColor,
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
@@ -63,7 +63,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: GridView.count(
                       crossAxisCount: 5, // Number of columns you want in the grid
@@ -93,48 +94,48 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                             const Text('Report', style: TextStyle(fontSize: 14 )),
                           ],
                         ),
-                        const Column(
+                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Center(
                               child: EmailIconButton(
-                                email: 'kol.eljra7.90@hotmail.com',
+                                email: widget.servicePost.email!,
                                 width: 50,
                               ),
                             ),
-                            Text('Email', style: TextStyle(fontSize: 14)),
+                            const Text('Email', style: TextStyle(fontSize: 14)),
                           ],
                         ),
-                        const Column(
+                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Center(
                               child: WhatsAppIconButtonWidget(
                                 width: 30,
-                                whatsAppNumber: '00970598826056',
+                                whatsAppNumber: widget.servicePost.watsNumber,
                               ),
                             ),
-                            SizedBox(height: 10,),
-                            Text('Chat', style: TextStyle(fontSize: 14,)),
+                            const SizedBox(height: 10,),
+                            const Text('Chat', style: TextStyle(fontSize: 14,)),
                           ],
                         ),
-                        const Column(
+                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Center(
                               child: PhoneIconButtonWidget(
                                 width: 50,
-                                phone: '00970598826056',
+                                phone: widget.servicePost.phones,
                               ),
                             ),
-                            Text('Call', style: TextStyle(fontSize: 14)),
+                            const Text('Call', style: TextStyle(fontSize: 14)),
                           ],
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             LocationIconButtonWidget(locationLatitudes: widget.servicePost.locationLatitudes!, locationLongitudes: widget.servicePost.locationLongitudes!, width: 50,),
-                            Text('${widget.servicePost.distance.toString()} Km',style: const TextStyle(fontSize: 12) ),
+                            Text(widget.servicePost.distance.toString(),style: const TextStyle(fontSize: 12) ),
                           ],
                         )
                       ],
@@ -149,6 +150,15 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
       icon:  Icon(
         Icons.contacts,
         size: widget.iconSize,
+        color: Colors.white,
+       shadows: [ Shadow(
+         color: Colors.black
+             .withOpacity(1), // Shadow color
+         offset: const Offset(0,
+             0),
+         blurRadius:
+         4,
+       ),],
       ),
     );
   }

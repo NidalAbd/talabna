@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:talbna/data/models/countries.dart';
+import 'package:talbna/data/models/service_post.dart';
 
 class User {
   int id;
@@ -8,7 +9,7 @@ class User {
   String? gender;
   City? city;
   Country? country;
-  String? device_token;
+  String? deviceToken;
   DateTime? dateOfBirth;
   double? locationLatitudes;
   double? locationLongitudes;
@@ -34,7 +35,7 @@ class User {
     this.gender,
     this.city,
     this.country,
-    this.device_token,
+    this.deviceToken,
     this.dateOfBirth,
     this.locationLatitudes,
     this.locationLongitudes,
@@ -58,6 +59,26 @@ class User {
       photos = List<Photo>.from(json['photos'].map((photo) => Photo.fromJson(photo)));
     }
 
+    DateTime? dateOfBirth;
+    if (json['date_of_birth'] != null) {
+      dateOfBirth = DateTime.tryParse(json['date_of_birth']);
+    }
+
+    DateTime? emailVerifiedAt;
+    if (json['email_verified_at'] != null) {
+      emailVerifiedAt = DateTime.tryParse(json['email_verified_at']);
+    }
+
+    DateTime? createdAt;
+    if (json['created_at'] != null) {
+      createdAt = DateTime.tryParse(json['created_at']);
+    }
+
+    DateTime? updatedAt;
+    if (json['updated_at'] != null) {
+      updatedAt = DateTime.tryParse(json['updated_at']);
+    }
+
     return User(
       id: json['id'] ?? 0,
       userName: json['user_name'] ?? '',
@@ -65,17 +86,17 @@ class User {
       gender: json['gender'] ?? '',
       city: json['city'] != null ? City.fromJson(json['city']) : null,
       country: json['country'] != null ? Country.fromJson(json['country']) : null,
-      device_token: json['device_token'] ?? '',
-      dateOfBirth: json['date_of_birth'] != null ? DateTime.parse(json['date_of_birth']) : null,
+      deviceToken: json['device_token'] ?? '',
+      dateOfBirth: dateOfBirth,
       locationLatitudes: double.tryParse(json['location_latitudes']?.toString() ?? '') ?? 0,
       locationLongitudes: double.tryParse(json['location_longitudes']?.toString() ?? '') ?? 0,
       phones: json['phones'] ?? '',
       watsNumber: json['WatsNumber'] ?? '',
       email: json['email'] ?? '',
-      emailVerifiedAt: json['email_verified_at'] != null ? DateTime.parse(json['email_verified_at']) : null,
+      emailVerifiedAt: emailVerifiedAt,
       isActive: json['is_active'] ?? '',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       followingCount: _parseNullableInt(json['following_count']),
       followersCount: _parseNullableInt(json['followers_count']),
       servicePostsCount: _parseNullableInt(json['service_posts_count']),
@@ -86,15 +107,16 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
     final Map<String, dynamic> data = <String, dynamic>{};
+    final DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss'); // Corrected date format
+
     data['id'] = id;
     data['user_name'] = userName ?? '';
     data['name'] = name ?? '';
     data['gender'] = gender ?? '';
     data['city'] = city?.toJson();
     data['country'] = country?.toJson();
-    data['device_token'] = device_token ?? '';
+    data['device_token'] = deviceToken ?? '';
     if (dateOfBirth != null) {
       data['date_of_birth'] = format.format(dateOfBirth!);
     }
@@ -103,15 +125,7 @@ class User {
     data['phones'] = phones ?? '';
     data['WatsNumber'] = watsNumber ?? '';
     data['email'] = email;
-    data['email_verified_at'] = emailVerifiedAt != null ? format.format(emailVerifiedAt!) : null;
-    data['is_active'] = isActive ?? '';
-    data['created_at'] = createdAt != null ? format.format(createdAt!) : null;
-    data['updated_at'] = updatedAt != null ? format.format(updatedAt!) : null;
-    data['following_count'] = followingCount?.toString();
-    data['followers_count'] = followersCount?.toString();
-    data['service_posts_count'] = servicePostsCount?.toString();
-    data['pointsBalance'] = pointsBalance?.toString();
-    data['photos'] = photos?.map((v) => v.toJson()).toList();
+    print('this date of birth to go out ${data['date_of_birth']}');
     return data;
   }
 
@@ -120,46 +134,5 @@ class User {
       return null;
     }
     return int.tryParse(value.toString());
-  }
-}
-
-class Photo {
-  int? id;
-  String photoableType;
-  int? photoableId;
-  String src;
-  DateTime createdAt;
-  DateTime updatedAt;
-
-  Photo({
-    required this.id,
-    required this.photoableType,
-    required this.photoableId,
-    required this.src,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Photo.fromJson(Map<String, dynamic> json) {
-    return Photo(
-      id: json['id'],
-      photoableType: json['photoable_type'],
-      photoableId: json['photoable_id'],
-      src: json['src'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    final DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['photoable_type'] = photoableType;
-    data['photoable_id'] = photoableId;
-    data['src'] = src;
-    data['created_at'] = format.format(createdAt);
-    data['updated_at'] = format.format(updatedAt);
-    return data;
   }
 }
