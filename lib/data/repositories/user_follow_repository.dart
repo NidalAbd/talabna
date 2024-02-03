@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/data/models/report.dart';
 import 'package:talbna/data/models/service_post.dart';
@@ -14,10 +13,7 @@ class UserFollowRepository {
       {required int userId, int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
         Uri.parse('$_baseUrl/api/user/follower/$userId?page=$page'),
         headers: {'Authorization': 'Bearer $token'});
@@ -38,10 +34,7 @@ class UserFollowRepository {
       {required int userId, int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
           Uri.parse('$_baseUrl/api/user/following/$userId?page=$page'),
@@ -65,10 +58,7 @@ class UserFollowRepository {
       {int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
           Uri.parse('$_baseUrl/api/user/UserSeller?page=$page'),
@@ -92,10 +82,7 @@ class UserFollowRepository {
   Future<Reports> makeReport({required int id , required String type , required String reason}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.post(Uri.parse('$_baseUrl/api/reports/reported/$type/reportedId/$id/reason/$reason'),
         headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -117,10 +104,7 @@ class UserFollowRepository {
   Future<bool> toggleFollowSubcategories(int subCategoryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.post(
       Uri.parse('$_baseUrl/api/subcategories/$subCategoryId/toggle-follow'),
       headers: {'Authorization': 'Bearer $token'},
@@ -136,10 +120,7 @@ class UserFollowRepository {
   Future<bool> getUserFollow(int user) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$_baseUrl/api/users/$user/is-following'),
       headers: {'Authorization': 'Bearer $token'},
@@ -155,10 +136,7 @@ class UserFollowRepository {
   Future<bool> getUserFollowSubcategories(int subCategoryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$_baseUrl/api/subcategories/$subCategoryId/is-following'),
       headers: {'Authorization': 'Bearer $token'},
@@ -178,10 +156,7 @@ class UserFollowRepository {
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/users/$userId/follower'),
@@ -203,10 +178,7 @@ class UserFollowRepository {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final Map<String, dynamic> requestBody = {
       'search': searchAction,
     };

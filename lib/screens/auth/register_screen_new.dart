@@ -83,7 +83,6 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
             _isLoading = false;
           });
           Navigator.pushReplacementNamed(context, "home");
-          // Navigate to the home screen or perform any necessary action.
           // Example: Navigator.pushReplacementNamed(context, 'home');
         }
       },

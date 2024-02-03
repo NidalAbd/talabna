@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EmailTile extends StatelessWidget {
   final String email;
-  const EmailTile({Key? key, required this.email}) : super(key: key);
+  const EmailTile({super.key, required this.email});
+
+  String _truncateEmail(String email) {
+    const maxLength = 15;
+    if (email.length > maxLength) {
+      return '${email.substring(0, maxLength)}...';
+    } else {
+      return email;
+    }
+  }
 
   void _launchEmailApp() async {
     final Uri emailLaunchUri = Uri(
@@ -22,13 +30,20 @@ class EmailTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? AppTheme.lightForegroundColor
-          : AppTheme.darkForegroundColor,
       child: ListTile(
         leading: const Icon(Icons.email),
         title: const Text('Email'),
-        subtitle: Text(email),
+        subtitle: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _truncateEmail(email),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
         onTap: _launchEmailApp,
       ),
     );

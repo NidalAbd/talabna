@@ -1,17 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:talbna/data/models/notifications.dart';
 
-abstract class TalbnaNotificationState extends Equatable{
-  const TalbnaNotificationState();
+abstract class talabnaNotificationState extends Equatable{
+  const talabnaNotificationState();
 
   @override
   List<Object> get props => [];
 }
 
-class NotificationInitial extends TalbnaNotificationState {}
+class NotificationInitial extends talabnaNotificationState {}
 
-class NotificationLoading extends TalbnaNotificationState {}
-class OneNotificationRead extends TalbnaNotificationState {
+class NotificationLoading extends talabnaNotificationState {}
+class OneNotificationRead extends talabnaNotificationState {
   final int notifications;
 
   const OneNotificationRead({required this.notifications});
@@ -20,9 +20,9 @@ class OneNotificationRead extends TalbnaNotificationState {
   List<Object> get props => [notifications ];
 }
 
-class AllNotificationMarkedRead extends TalbnaNotificationState {}
+class AllNotificationMarkedRead extends talabnaNotificationState {}
 
-class NotificationLoaded extends TalbnaNotificationState {
+class NotificationLoaded extends talabnaNotificationState {
   final List<Notifications> notifications;
   final bool hasReachedMax;
 
@@ -31,7 +31,7 @@ class NotificationLoaded extends TalbnaNotificationState {
   @override
   List<Object> get props => [notifications, hasReachedMax];
 }
-class CountNotificationState extends TalbnaNotificationState {
+class CountNotificationState extends talabnaNotificationState {
   final int countNotification;
 
   const CountNotificationState({required this.countNotification,});
@@ -40,13 +40,13 @@ class CountNotificationState extends TalbnaNotificationState {
   List<Object> get props => [countNotification];
 }
 
-class NotificationError extends TalbnaNotificationState {
+class NotificationError extends talabnaNotificationState {
   final String message;
   const NotificationError({required this.message});
 
   @override
   List<Object> get props => [message];
 }
-class UserFollowerFollowingHasMaxReached extends TalbnaNotificationState {
+class UserFollowerFollowingHasMaxReached extends talabnaNotificationState {
 
 }

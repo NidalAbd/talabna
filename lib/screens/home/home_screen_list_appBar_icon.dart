@@ -1,43 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
-import 'package:talbna/main.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/home/search_screen.dart';
 import 'package:talbna/screens/home/setting_screen.dart';
-import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
-import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
-import 'package:talbna/screens/profile/change_email_screen.dart';
-import 'package:talbna/screens/profile/change_password_screen.dart';
 import 'package:talbna/screens/profile/profile_edit_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/service_post/create_service_post_form.dart';
 import 'package:talbna/screens/service_post/favorite_post_screen.dart';
-
 import 'notification_alert_widget.dart';
 
-class VertIconAppBar extends StatefulWidget {
-  const VertIconAppBar({super.key, required this.userId, required this.user});
+class VertIconAppBar extends StatelessWidget {
+  const VertIconAppBar({
+    Key? key,
+    required this.userId,
+    required this.user,
+    required this.showSubcategoryGridView,
+    required this.toggleSubcategoryGridView,
+  }) : super(key: key);
+
   final int userId;
   final User user;
-  @override
-  State<VertIconAppBar> createState() => _VertIconAppBarState();
-}
+  final bool showSubcategoryGridView;
+  final Future<void> Function({required bool canToggle}) toggleSubcategoryGridView;
 
-class _VertIconAppBarState extends State<VertIconAppBar> {
-  final Language language = Language();
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      language.getLanguage();
-    });
-  }
   @override
   Widget build(BuildContext context) {
+    final language = Language();
+
     return Row(
       children: [
         IconButton(
@@ -48,7 +39,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ServicePostFormScreen(userId: widget.userId),
+                  builder: (context) => ServicePostFormScreen(userId: userId),
                 ),
               );
             } else {
@@ -67,7 +58,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => UpdateUserProfile(
-                                    userId: widget.user.id, user: widget.user,
+                                    userId: user.id,
+                                    user: user,
                                   ),
                                 ),
                               );
@@ -84,22 +76,19 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
           },
         ),
         IconButton(
-          icon: const Icon(Icons.search_rounded,size: 30,),
+          icon: const Icon(Icons.search_rounded, size: 30),
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SearchScreen( userID: widget.userId, user: widget.user,),
+                builder: (context) => SearchScreen(userID: userId, user: user),
               ),
             );
           },
         ),
-        NotificationsAlert(userID: widget.userId),
+        NotificationsAlert(userID: userId),
         IconButton(
-          icon: const Icon(
-            Icons.more_vert,
-            size: 30,
-          ),
+          icon: const Icon(Icons.more_vert, size: 30),
           onPressed: () async {
             bool loadedUser = await _checkDataCompletion();
             if (loadedUser) {
@@ -109,102 +98,122 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                   return Container(
                     height: 325,
                     child: ListView(
-                        children: [
-                          Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.person),
-                              title:  Text(language.tProfileText()),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(
-                                      fromUser: widget.userId,
-                                      toUser: widget.userId, user: widget.user,
-                                    ),
+                      children: [
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.person),
+                            title: Text(language.tProfileText()),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(
+                                    fromUser: userId,
+                                    toUser: userId,
+                                    user: user,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                          Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.favorite),
-                              title:  Text(language.tFavoriteText()),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        FavoritePostScreen(userID: widget.user.id, user: widget.user,),
+                        ),
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.favorite),
+                            title: Text(language.tFavoriteText()),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => FavoritePostScreen(
+                                    userID: user.id,
+                                    user: user,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                          Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.update),
-                              title:  Text(language.tUpdateInfoText()),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => UpdateUserProfile(
-                                      userId: widget.user.id, user: widget.user,
-                                    ),
+                        ),
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.update),
+                            title: Text(language.tUpdateInfoText()),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => UpdateUserProfile(
+                                    userId: user.id,
+                                    user: user,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                          Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.attach_money),
-                              title:  Text(language.tPurchasePointsText()),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PurchaseRequestScreen(
-                                          userID: widget.user.id,
-                                        ),
+                        ),
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.attach_money),
+                            title: Text(language.tPurchasePointsText()),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => PurchaseRequestScreen(
+                                    userID: user.id,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                          Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.settings),
-                              title:  Text(language.tSettingsText()),
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        SettingScreen(userId: widget.userId, user: widget.user,
-                                        )
+                        ),
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            leading: Icon(showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded),
+                            title: const Text('List - Group'),
+                            trailing: Icon(
+                              showSubcategoryGridView ? Icons.toggle_on : Icons.toggle_off,
+                              size: 40,
+                            ),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await toggleSubcategoryGridView(canToggle: true);
+                            },
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.settings),
+                            title: Text(language.tSettingsText()),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => SettingScreen(
+                                    userId: userId,
+                                    user: user,
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                   );
                 },
               );
             } else {
-              // User data is not available, display a message or take appropriate action
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title:  Text(language.incompleteInformationText()),
-                    content:
-                     Text(language.completeInformationText()),
+                    title: Text(language.incompleteInformationText()),
+                    content: Text(language.completeInformationText()),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -212,12 +221,13 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => UpdateUserProfile(
-                                userId: widget.user.id, user: widget.user,
+                                userId: user.id,
+                                user: user,
                               ),
                             ),
                           );
                         },
-                        child:  Text(language.okText()),
+                        child: Text(language.okText()),
                       ),
                     ],
                   );
@@ -230,9 +240,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
     );
   }
 
-
   Future<bool> _checkDataCompletion() async {
-    print('_checkDataCompletion');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userName = prefs.getString('userName');
     String? phones = prefs.getString('phones');

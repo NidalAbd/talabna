@@ -21,7 +21,7 @@ class NotificationsScreen extends StatefulWidget {
 
 class NotificationsScreenState extends State<NotificationsScreen> {
   late ScrollController _scrollController;
-  late TalbnaNotificationBloc _talbnaNotificationBloc;
+  late talabnaNotificationBloc _talabnaNotificationBloc;
   int _currentPage = 1;
   bool _hasReachedMax = false;
   List<Notifications> _notification = [];
@@ -30,8 +30,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _talbnaNotificationBloc = BlocProvider.of<TalbnaNotificationBloc>(context);
-    _talbnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
+    _talabnaNotificationBloc = BlocProvider.of<talabnaNotificationBloc>(context);
+    _talabnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
   }
@@ -41,7 +41,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
             _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       _currentPage++;
-      _talbnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
+      _talabnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
     }
   }
 
@@ -49,7 +49,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
     _currentPage = 1;
     _hasReachedMax = false;
     _notification.clear();
-    _talbnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
+    _talabnaNotificationBloc.add(FetchNotifications(page: _currentPage , userId: widget.userID,));
   }
 
   void _handleNotificationsLoadSuccess(
@@ -83,7 +83,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
         title:  Text(_language.getNotificationText()),
         actions: [
           IconButton(onPressed: (){
-            BlocProvider.of<TalbnaNotificationBloc>(context)
+            BlocProvider.of<talabnaNotificationBloc>(context)
                 .add(
               MarkALlNotificationAsRead(
                 userId: widget.userID,
@@ -99,8 +99,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
       ),
       body: WillPopScope(
         onWillPop: _onWillPop,
-        child: BlocListener<TalbnaNotificationBloc, TalbnaNotificationState>(
-          bloc: _talbnaNotificationBloc,
+        child: BlocListener<talabnaNotificationBloc, talabnaNotificationState>(
+          bloc: _talabnaNotificationBloc,
           listener: (context, state) {
             if (state is NotificationLoaded) {
               _handleNotificationsLoadSuccess(state.notifications, state.hasReachedMax);
@@ -113,8 +113,8 @@ class NotificationsScreenState extends State<NotificationsScreen> {
               );
             }
           },
-          child: BlocBuilder<TalbnaNotificationBloc, TalbnaNotificationState>(
-            bloc: _talbnaNotificationBloc,
+          child: BlocBuilder<talabnaNotificationBloc, talabnaNotificationState>(
+            bloc: _talabnaNotificationBloc,
             builder: (context, state) {
               if (state is NotificationLoading && _notification.isEmpty) {
                 // show loading indicator
@@ -136,18 +136,12 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                         }
                         final notification = _notification[index];
                         return Card(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? (notification.read
-                              ? AppTheme.lightForegroundColor: AppTheme.lightForegroundColor.withOpacity(0.3))
-                              : (notification.read
-                              ? AppTheme.darkForegroundColor:AppTheme.darkForegroundColor.withOpacity(0.3)),
                         child: AnimatedOpacity(
                         opacity: 1.0,
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeIn,
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: AppTheme.lightForegroundColor,
                             radius: 25,
                             child: Icon(
                               _notification[index].getIconData(),
@@ -162,7 +156,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                               ? null
                               :  const Icon(Icons.fiber_new,),
                           onTap: () {
-                            BlocProvider.of<TalbnaNotificationBloc>(context)
+                            BlocProvider.of<talabnaNotificationBloc>(context)
                                 .add(
                               MarkNotificationAsRead(
                                 notificationId: notification.id,

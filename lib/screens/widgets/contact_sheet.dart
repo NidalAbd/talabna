@@ -87,39 +87,40 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                                 },
                                 icon: Icon(
                                   Icons.flag,
-                                  size: widget.iconSize,
+                                  size: 30,
                                 ),
                               ),
                             ),
-                            const Text('Report', style: TextStyle(fontSize: 14 )),
+                            const Text('Report', style: TextStyle(fontSize: 12 )),
                           ],
                         ),
-                         Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Center(
-                              child: EmailIconButton(
-                                email: widget.servicePost.email!,
-                                width: 50,
-                              ),
+                        Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Center(
+                            child: EmailIconButton(
+                              email: widget.servicePost.email!,
+                              width: 50,
                             ),
-                            const Text('Email', style: TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                         Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Center(
-                              child: WhatsAppIconButtonWidget(
-                                width: 30,
-                                whatsAppNumber: widget.servicePost.watsNumber,
-                              ),
+                          ),
+
+                          const Text('Email', style: TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                        Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Center(
+                            child: WhatsAppIconButtonWidget(
+                              width: 30,
+                              whatsAppNumber: widget.servicePost.watsNumber,
                             ),
-                            const SizedBox(height: 10,),
-                            const Text('Chat', style: TextStyle(fontSize: 14,)),
-                          ],
-                        ),
-                         Column(
+                          ),
+                          const SizedBox(height: 10,),
+                          const Text('Chat', style: TextStyle(fontSize: 14,)),
+                        ],
+                      ),
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Center(
@@ -128,7 +129,7 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                                 phone: widget.servicePost.phones,
                               ),
                             ),
-                            const Text('Call', style: TextStyle(fontSize: 14)),
+                            const Text('Call', style: TextStyle(fontSize: 12)),
                           ],
                         ),
                         Column(

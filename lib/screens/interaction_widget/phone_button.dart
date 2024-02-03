@@ -40,12 +40,12 @@ class PhoneButtonWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
                SizedBox(width: width), // Add a fixed width SizedBox before the icon
-              const Icon(Icons.phone),
+               Icon(Icons.phone),
                SizedBox(width: width), // Add some space between the icon and text
               Text(
                 phone!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

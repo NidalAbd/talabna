@@ -20,7 +20,14 @@ class EmailButton extends StatelessWidget {
       throw 'Could not launch email app.';
     }
   }
-
+  String _truncateEmail(String email) {
+    const maxLength = 24;
+    if (email.length > maxLength) {
+      return '${email.substring(0, maxLength)}...';
+    } else {
+      return email;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -41,12 +48,12 @@ class EmailButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
                SizedBox(width: width), // Add a fixed width SizedBox before the icon
-              const Icon(Icons.email),
+               const Icon(Icons.email ),
                SizedBox(width: width), // Add some space between the icon and text
               Text(
-                email,
+                _truncateEmail(email),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style:  const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

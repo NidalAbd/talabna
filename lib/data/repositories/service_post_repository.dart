@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:http/http.dart' as http;
@@ -10,10 +9,7 @@ class ServicePostRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
 
   Future<List<ServicePost>> getAllServicePosts() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(Uri.parse('$_baseUrl/api/service_posts'));
 
@@ -36,10 +32,7 @@ class ServicePostRepository {
   Future<ServicePost> getServicePostById(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/service_posts/$id'),
@@ -60,10 +53,7 @@ class ServicePostRepository {
       { required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -89,10 +79,7 @@ class ServicePostRepository {
       {required int categories, required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -119,10 +106,7 @@ class ServicePostRepository {
       {required int userId, required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -150,10 +134,7 @@ class ServicePostRepository {
       {required int userId, required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/service_posts/user/$userId?page=$page'),
@@ -177,10 +158,7 @@ class ServicePostRepository {
       required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -206,10 +184,7 @@ class ServicePostRepository {
   Future<ServicePost> updateServicePostBadge(ServicePost servicePost, int servicePostID) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     // Create a Map object
     Map<String, String> formData = {
       'haveBadge': servicePost.haveBadge?? 'null',
@@ -244,10 +219,7 @@ class ServicePostRepository {
   Future<ServicePost> updateServicePostCategory(ServicePost servicePost, int servicePostID) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     // Create a Map object
     Map<String, String> formData = {
       'category': servicePost.category ?? 'null',
@@ -280,10 +252,7 @@ class ServicePostRepository {
   Future<ServicePost> createServicePost(ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final request =
     http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts'));
     request.headers['Authorization'] = 'Bearer $token';
@@ -333,10 +302,7 @@ class ServicePostRepository {
       ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     // Create a Map object
     Map<String, String> formData = {
       'id': servicePost.id.toString(),
@@ -388,10 +354,7 @@ class ServicePostRepository {
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.delete(
         Uri.parse('$_baseUrl/api/service_posts/$servicePostId'),
@@ -416,10 +379,7 @@ class ServicePostRepository {
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/api/service_posts/incrementView/$servicePostId'),
@@ -443,10 +403,7 @@ class ServicePostRepository {
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/api/doFavourite/$servicePostId'),
@@ -467,10 +424,7 @@ class ServicePostRepository {
   Future<bool> getFavourite({required int servicePostId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
@@ -502,10 +456,7 @@ class ServicePostRepository {
       throw Exception('Token not found in shared preferences');
     }
 
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts/updatePhoto/$servicePostImageId'));
@@ -539,10 +490,7 @@ class ServicePostRepository {
     if (token == null) {
       throw Exception('Token not found in shared preferences');
     }
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.delete(
         Uri.parse('$_baseUrl/api/service_posts/deletePhoto/$servicePostImageId'),

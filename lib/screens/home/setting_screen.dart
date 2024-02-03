@@ -190,7 +190,7 @@ class _SettingScreenState extends State<SettingScreen> {
             padding: const EdgeInsets.all(8.0),
             child: ThemeToggleListTile(language: _language,),
           )),
-           Card(
+          Card(
               child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: LogoutListTile(language: _language,),

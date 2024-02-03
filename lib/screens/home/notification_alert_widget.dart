@@ -15,19 +15,19 @@ class NotificationsAlert extends StatefulWidget {
 }
 
 class _NotificationsAlertState extends State<NotificationsAlert> {
-  late TalbnaNotificationBloc _talbnaNotificationBloc;
+  late talabnaNotificationBloc _talabnaNotificationBloc;
 
   @override
   void initState() {
     super.initState();
-    _talbnaNotificationBloc = BlocProvider.of<TalbnaNotificationBloc>(context);
-    _talbnaNotificationBloc.add(CountNotificationEvent(userId: widget.userID));
+    _talabnaNotificationBloc = BlocProvider.of<talabnaNotificationBloc>(context);
+    _talabnaNotificationBloc.add(CountNotificationEvent(userId: widget.userID));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TalbnaNotificationBloc, TalbnaNotificationState>(
-      bloc: _talbnaNotificationBloc,
+    return BlocBuilder<talabnaNotificationBloc, talabnaNotificationState>(
+      bloc: _talabnaNotificationBloc,
       builder: (context, state) {
         late int countNotifications = 0;
         bool haveUnreadNotification = false;

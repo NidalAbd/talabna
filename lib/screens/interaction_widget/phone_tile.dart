@@ -9,9 +9,7 @@ class PhoneWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? AppTheme.lightForegroundColor
-          : AppTheme.darkForegroundColor,
+
       child: ListTile(
         leading: const Icon(Icons.phone),
         title: const Text('Phone'),

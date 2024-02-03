@@ -36,9 +36,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             const Divider(),
 
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: const Text('Gender'),
@@ -48,9 +46,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             const Divider(),
 
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: ListTile(
                 leading: const Icon(Icons.location_city),
                 title: const Text('city'),
@@ -60,9 +56,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             const Divider(),
 
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: ListTile(
                 leading: const Icon(Icons.cake),
                 title: const Text('date of birth'),
@@ -72,9 +66,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             const Divider(),
 
             Card(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.lightForegroundColor
-                  : AppTheme.darkForegroundColor,
+
               child: ListTile(
                 leading: const Icon(Icons.check_circle_outline),
                 title: const Text('state'),

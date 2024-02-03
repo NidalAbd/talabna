@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/data/models/countries.dart';
 import 'package:talbna/utils/constants.dart';
@@ -13,10 +12,7 @@ class CountriesRepository {
   Future<List<Country>> getCountries() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/countries_list'),
       headers: {'Authorization': 'Bearer $token'},
@@ -34,10 +30,7 @@ class CountriesRepository {
   Future<List<City>> getCities(int countryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/countries_list/$countryId/cities/'),
       headers: {'Authorization': 'Bearer $token'},

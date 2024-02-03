@@ -14,10 +14,12 @@ import 'utils/constants.dart';
 
 class MyApp extends StatefulWidget {
   final AuthenticationRepository authenticationRepository;
+  final bool isDarkTheme;
 
   const MyApp({
     Key? key,
     required this.authenticationRepository,
+    required this.isDarkTheme,
   }) : super(key: key);
 
   @override
@@ -25,17 +27,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final FCMHandler _fcmHandler = FCMHandler(); // Initialize FCMHandler
+  final FCMHandler _fcmHandler = FCMHandler();
+
   @override
   void initState() {
     super.initState();
-    initializeFCM(); // Call initializeFCM method when the app is opened
+    initializeFCM();
   }
 
   Future<void> initializeFCM() async {
-    await _fcmHandler.initializeFCM(); // Initialize FCMHandler
-    String deviceToken = await _fcmHandler.getDeviceToken(); // Retrieve device token
+    await _fcmHandler.initializeFCM();
+    String deviceToken = await _fcmHandler.getDeviceToken();
   }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<SharedPreferences>(
@@ -89,4 +93,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-

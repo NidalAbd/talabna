@@ -289,9 +289,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                         onWhatsAppNumberChanged: (newWhatsAppValue) => updateWhatsAppNumber(newWhatsAppValue),
                       ),
                       Card(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightForegroundColor
-                            : AppTheme.darkForegroundColor,
+
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: DropdownButtonFormField<String?>(
@@ -326,10 +324,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                             _updateDateOfBirthController(value);
                           });
                           return Card(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.lightForegroundColor
-                                    : AppTheme.darkForegroundColor,
+
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 12.0),

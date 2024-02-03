@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/utils/constants.dart';
@@ -11,24 +10,21 @@ class AuthenticationRepository {
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
   Future<Map<String, dynamic>> _post(String url, dynamic data, {String? token}) async {
     try {
+
       Map<String, String> headers = {
         'Content-Type': 'application/json',
       };
+
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
       }
-
-      final connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        throw Exception('لا يوجد اتصال بالإنترنت');
-      }
-
       final response = await http.post(
           Uri.parse('$API_BASE_URL/$url'),
           headers: headers,
           body: json.encode(data),
         );
       print(response.statusCode);
+      print(json.decode(response.body));
 
       if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
@@ -44,10 +40,6 @@ class AuthenticationRepository {
 
   Future<Map<String, dynamic>> _get(String url) async {
     final authToken = await getAuthToken();
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
     final headers = {
       'Authorization': 'Bearer $authToken',
     };

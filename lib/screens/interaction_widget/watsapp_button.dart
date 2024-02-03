@@ -48,7 +48,7 @@ class WhatsAppButtonWidget extends StatelessWidget {
               Text(
                 whatsAppNumber!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

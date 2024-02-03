@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/data/models/point_balance.dart';
@@ -16,10 +15,7 @@ class UserProfileRepository {
   Future<User> getUserProfileById(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(Uri.parse('$_baseUrl/api/user/profile/$id'),
         headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -40,10 +36,7 @@ class UserProfileRepository {
       {required int userId, int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
         Uri.parse('$_baseUrl/api/user/follower/$userId?page=$page'),
         headers: {'Authorization': 'Bearer $token'});
@@ -64,10 +57,7 @@ class UserProfileRepository {
       {required int userId, int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.get(
           Uri.parse('$_baseUrl/api/user/following/$userId?page=$page'),
@@ -93,10 +83,7 @@ class UserProfileRepository {
   Future<User> updateUserProfile(User user) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/api/users/${user.id}'),
@@ -129,10 +116,7 @@ class UserProfileRepository {
   Future<void> updateUserEmail(User user, String newEmail , String password) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/api/user/${user.id}/change-email'),
@@ -160,10 +144,7 @@ class UserProfileRepository {
   Future<void> updateUserPassword(User user, String oldPassword, String newPassword) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final response = await http.put(
         Uri.parse('$_baseUrl/api/user/${user.id}/change-password'),
@@ -190,10 +171,7 @@ class UserProfileRepository {
   Future<void> updateUserProfilePhoto(User user, File photo) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     try {
       final stream = http.ByteStream(photo.openRead());
       final length = await photo.length();

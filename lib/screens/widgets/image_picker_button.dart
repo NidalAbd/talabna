@@ -47,7 +47,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       if (widget.initialPhotosNotifier.value != null) {
         _pickedImages = widget.initialPhotosNotifier.value!
             .map((photo) {
-          final url = '${photo.src}'.replaceAll('https://talbna.cloud/storage/', '');
+          final url = '${photo.src}'.replaceAll('https://talabna.cloud/storage/', '');
           return Photo.fromJson({
             'id': photo.id,
             'src': url,

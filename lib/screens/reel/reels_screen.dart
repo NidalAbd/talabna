@@ -18,10 +18,12 @@ import 'package:talbna/screens/widgets/comment_sheet.dart';
 import 'package:talbna/screens/widgets/contact_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+
+import 'like_button.dart';
 
 class ReelsHomeScreen extends StatefulWidget {
-  const ReelsHomeScreen({Key? key, required this.userId, this.servicePost, required this.user})
-      : super(key: key);
+  const ReelsHomeScreen({super.key, required this.userId, this.servicePost, required this.user});
   final int userId;
   final User user;
   final ServicePost? servicePost;
@@ -60,9 +62,8 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
       ..add(GetServicePostsRealsEvent(_currentPage));
     _scrollCategoryPostController = PageController()
       ..addListener(_onScrollReelPost);
-    WidgetsFlutterBinding.ensureInitialized();
 
-    Timer.periodic( const Duration(seconds: 0), (Timer t) {
+    Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
       final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
       if (currentPage >= _servicePosts.length) {
         // Avoid indexing out of bounds
@@ -176,7 +177,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
       child: Scaffold(
         body: BlocListener<ServicePostBloc, ServicePostState>(
           listenWhen: (previous, current) =>
-              true, // Listen to all state changes
+          true, // Listen to all state changes
           bloc: _servicePostBloc,
           listener: (context, state) {
             if (state is ServicePostLoadSuccess) {
@@ -186,20 +187,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('An error occurred: ${state.errorMessage}')));
             } else if (state is ServicePostFavoriteToggled) {
-              isFavorite = state.isFavorite;
-              if (isFavorite) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Added to favourite')));
-                setState(() {
-
-                });
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('removed to favourite')));
-                setState(() {
-
-                });
-              }
+              setState(() {
+                isFavorite = state.isFavorite;
+              });
             }
           },
           child: NotificationListener<ScrollNotification>(
@@ -268,42 +258,42 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                       left: 0,
                       child: media.isVideo!
                           ? ValueListenableBuilder(
-                              valueListenable: _videoProgress,
-                              builder: (context, value, child) {
-                                double maxSeconds =
-                                    _videoControllers[media.id!]!
-                                            .value
-                                            .isInitialized
-                                        ? _videoControllers[media.id!]!
-                                            .value
-                                            .duration
-                                            .inSeconds
-                                            .toDouble()
-                                        : 0.0;
-                                double currentSeconds = min(
-                                    _videoProgress.value.inSeconds.toDouble(),
-                                    maxSeconds);
-                                return Slider(
-                                  value: currentSeconds,
-                                  min: 0.0,
-                                  max: maxSeconds,
-                                  onChanged: (double newValue) {
-                                    setState(() {
-                                      _isUserChangingSlider = true;
-                                      _videoProgress.value =
-                                          Duration(seconds: newValue.toInt());
-                                    });
-                                  },
-                                  onChangeEnd: (double newValue) {
-                                    setState(() {
-                                      _isUserChangingSlider = false;
-                                      _videoControllers[media.id!]
-                                          ?.seekTo(_videoProgress.value);
-                                    });
-                                  },
-                                );
-                              },
-                            )
+                        valueListenable: _videoProgress,
+                        builder: (context, value, child) {
+                          double maxSeconds =
+                          _videoControllers[media.id!]!
+                              .value
+                              .isInitialized
+                              ? _videoControllers[media.id!]!
+                              .value
+                              .duration
+                              .inSeconds
+                              .toDouble()
+                              : 0.0;
+                          double currentSeconds = min(
+                              _videoProgress.value.inSeconds.toDouble(),
+                              maxSeconds);
+                          return Slider(
+                            value: currentSeconds,
+                            min: 0.0,
+                            max: maxSeconds,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                _isUserChangingSlider = true;
+                                _videoProgress.value =
+                                    Duration(seconds: newValue.toInt());
+                              });
+                            },
+                            onChangeEnd: (double newValue) {
+                              setState(() {
+                                _isUserChangingSlider = false;
+                                _videoControllers[media.id!]
+                                    ?.seekTo(_videoProgress.value);
+                              });
+                            },
+                          );
+                        },
+                      )
                           : Container(),
                     ),
                     Positioned(
@@ -363,7 +353,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                             children: [
                               CircleAvatar(
                                 backgroundColor:
-                                    const Color.fromARGB(238, 249, 230, 248),
+                                const Color.fromARGB(238, 249, 230, 248),
                                 radius: 25,
                                 child: CircleAvatar(
                                   radius: 23,
@@ -375,7 +365,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                       return const CircleAvatar(
                                         radius: 22,
                                         backgroundImage:
-                                            AssetImage('assets/avatar.png'),
+                                        AssetImage('assets/avatar.png'),
                                       );
                                     },
                                   ).image,
@@ -387,35 +377,65 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                             height: 10,
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right: 5),
+                            padding: const EdgeInsets.only(right: 0),
                             child: Column(
                               children: [
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.favorite_rounded,
-                                        size: iconSize,
-                                        color: isFavorite
-                                            ? Colors.red
-                                            : Colors.white,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withOpacity(
-                                                0.5), // Shadow color
-                                            offset: const Offset(0,
-                                                0), // Shadow offset (vertical, horizontal)
-                                            blurRadius:
-                                                2, // Blur radius of the shadow
-                                          ),
-                                        ],
-                                      ),
-                                      onPressed: () {
-                                        _servicePostBloc.add(
-                                            ToggleFavoriteServicePostEvent(
-                                                servicePostId: post.id!));
-                                      },
+                                    const SizedBox(
+                                      height: 5,
                                     ),
+                                    LikeButton(
+                                      isFavorite: isFavorite,
+                                      onPressed: (newState) {
+                                        setState(() {
+                                          isFavorite = newState; // Update the state
+                                        });
+                                        _servicePostBloc.add(
+                                          ToggleFavoriteServicePostEvent(servicePostId: post.id!),
+                                        );
+                                      }, favoritesCount:  post.favoritesCount!, onFavoritesCountChanged: (int ) {
+                                             if (post.isFavorited!) {
+                                              post.favoritesCount = (post.favoritesCount ?? 0) + 1;
+                                            } else {
+                                              post.favoritesCount = (post.favoritesCount ?? 1) - 1;
+                                            }
+                                    },
+                                    ),
+
+                                    // IconButton(
+                                    //   icon: Icon(
+                                    //     Icons.favorite_rounded,
+                                    //     size: iconSize,
+                                    //     color: post.isFavorited == true ? Colors.red : Colors.white,
+                                    //     shadows: [
+                                    //       Shadow(
+                                    //         color: Colors.black.withOpacity(0.5), // Shadow color
+                                    //         offset: const Offset(0, 0), // Shadow offset (vertical, horizontal)
+                                    //         blurRadius: 2, // Blur radius of the shadow
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    //   onPressed: () {
+                                    //     setState(() {
+                                    //       // Toggle the favorite status locally
+                                    //       post.isFavorited = !(post.isFavorited ?? false);
+                                    //
+                                    //       // Adjust the favorites count accordingly
+                                    //       if (post.isFavorited!) {
+                                    //         post.favoritesCount = (post.favoritesCount ?? 0) + 1;
+                                    //       } else {
+                                    //         post.favoritesCount = (post.favoritesCount ?? 1) - 1;
+                                    //       }
+                                    //     });
+                                    //
+                                    //     // Trigger the BLoC event to sync with the server
+                                    //     _servicePostBloc.add(
+                                    //       ToggleFavoriteServicePostEvent(servicePostId: post.id!),
+                                    //     );
+                                    //   },
+                                    // ),
                                     Padding(
                                       padding: const EdgeInsets.only(left: 5),
                                       child: Text(
@@ -429,7 +449,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                               offset: const Offset(0,
                                                   0), // Shadow offset (vertical, horizontal)
                                               blurRadius:
-                                                  4, // Blur radius of the shadow
+                                              4, // Blur radius of the shadow
                                             ),
                                           ],
                                         ),
@@ -438,7 +458,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                   ],
                                 ),
                                 const SizedBox(
-                                  height: 10,
+                                  height: 5,
                                 ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -462,7 +482,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                               offset: const Offset(1,
                                                   0), // Shadow offset (vertical, horizontal)
                                               blurRadius:
-                                                  2, // Blur radius of the shadow
+                                              2, // Blur radius of the shadow
                                             ),
                                           ],
                                         ),
@@ -471,7 +491,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                   ],
                                 ),
                                 const SizedBox(
-                                  height: 10,
+                                  height: 5,
                                 ),
                                 ContactModalBottomSheet(
                                   iconSize: iconSize,
@@ -480,7 +500,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                   servicePost: post,
                                 ),
                                 const SizedBox(
-                                  height: 10,
+                                  height: 5,
                                 ),
                                 IconButton(
                                   icon: Icon(
@@ -518,13 +538,25 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   }
 
   Widget _buildVideoDisplay(Photo media) {
-    return Center(
-      child: SizedBox(
-        width: MediaQuery.of(context)
-            .size
-            .width, // Set the width to the screen width
-        height: MediaQuery.of(context).size.height,
-        child: VideoPlayer(_getVideoPlayerController(media)),
+    return VisibilityDetector(
+      key: Key('video_${media.id}'), // Ensure a unique key for each video
+      onVisibilityChanged: (VisibilityInfo info) {
+        // Retrieve the corresponding video controller
+        final controller = _videoControllers[media.id];
+        if (controller != null && controller.value.isInitialized) {
+          if (info.visibleFraction > 0.5) {
+            controller.play();
+          } else {
+            controller.pause();
+          }
+        }
+      },
+      child: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: VideoPlayer(_getVideoPlayerController(media)),
+        ),
       ),
     );
   }
@@ -553,7 +585,6 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
       ),
     );
   }
-
 
   void _toggleVideoPlayback(Photo media) {
     if (_videoControllers[media.id!]!.value.isPlaying) {
@@ -673,10 +704,9 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
             _videoLoadings[photo.id!] = true; // Indicate the video has loaded
           });
           if (_autoPlay) {
-            controller?.pause();
+            controller?.play();
           }
           controller?.setLooping(true);
-          controller?.seekTo(Duration.zero);
         });
 
       errorListener() {
@@ -696,8 +726,15 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
       }
 
       controller.addListener(completionListener);
+      positionListener() {
+        if (!_isUserChangingSlider) {
+          _videoProgress.value = controller!.value.position;
+        }
+      }
+
+      controller.addListener(positionListener);
       // Remember these listeners.
-      _videoListeners[photo.id!] = [errorListener, completionListener];
+      _videoListeners[photo.id!] = [errorListener, completionListener, positionListener];
       _videoControllers[photo.id!] = controller;
     }
     return controller;

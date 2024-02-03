@@ -46,16 +46,16 @@ class TextFromField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderSide:    BorderSide(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.darkPrimaryColor
-                    : AppTheme.lightPrimaryColor,
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
               ),
               borderRadius: BorderRadius.circular(10),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide:  BorderSide(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.darkPrimaryColor
-                    : AppTheme.lightPrimaryColor,
+                    ? AppTheme.lightPrimaryColor
+                    : AppTheme.darkPrimaryColor,
               ),
               borderRadius: BorderRadius.circular(10),
             ),

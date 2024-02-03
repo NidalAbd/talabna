@@ -46,7 +46,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
-              content: Text('Some Error Happen ${state.error}'),
+              content: Text('Some Error Happen ${state.error},' , style: TextStyle(color: Colors.white),),
             ),
           );
         } else if (state is AuthenticationSuccess) {

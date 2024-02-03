@@ -112,9 +112,7 @@ class UserSellerScreenState extends State<UserSellerScreen> {
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeIn,
                           child:Card(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? AppTheme.lightForegroundColor
-                                : AppTheme.darkForegroundColor,
+
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(

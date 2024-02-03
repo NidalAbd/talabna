@@ -21,11 +21,11 @@ class ServicePost {
   final String? country;
   final String? haveBadge;
   final int? badgeDuration;
-  final int? favoritesCount;
+   int? favoritesCount;
   final int? commentsCount;
   final int? reportCount;
   final int? viewCount;
-  final bool? isFavorited;
+   bool? isFavorited;
   final bool? isFollowed;
   final String? state;
   final int? categoriesId;

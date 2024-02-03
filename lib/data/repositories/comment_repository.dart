@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/data/models/comment.dart';
@@ -12,10 +11,7 @@ class CommentRepository {
   Future<List<Comments>> fetchComments({required int postId, int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('No Internet connection');
-    }
+
 
     final response = await http.get(
         Uri.parse('$_baseUrl/api/commentsForPost/$postId?page=$page'),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -52,15 +51,5 @@ bool isValidPhoneNumber(String value) {
   return regExp.hasMatch(value);
 }
 
-class NetworkHelper {
-  static void observeNetwork() {
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
-        NetworkBloc().add(NetworkNotify());
-      } else {
-        NetworkBloc().add(NetworkNotify(isConnected: true));
-      }
-    });
-  }
-}
+
 

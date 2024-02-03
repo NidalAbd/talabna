@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_theme.dart';
 
 class ThemeCubit extends Cubit<ThemeData> {
-  ThemeCubit() : super(AppTheme.lightTheme);
+  ThemeCubit() : super(AppTheme.darkTheme);
 
   static const String _themeKey = 'selected_theme';
 
@@ -15,8 +14,10 @@ class ThemeCubit extends Cubit<ThemeData> {
 
     if (themeModeIndex == 1) {
       emit(AppTheme.darkTheme);
+      AppTheme.setSystemBarColors(Brightness.dark, AppTheme.darkPrimaryColor, AppTheme.darkPrimaryColor);
     } else {
       emit(AppTheme.lightTheme);
+      AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor, AppTheme.lightPrimaryColor);
     }
   }
 
@@ -24,23 +25,21 @@ class ThemeCubit extends Cubit<ThemeData> {
     if (state == AppTheme.lightTheme) {
       await _saveThemePreference(1);
       emit(AppTheme.darkTheme);
-      _setSystemBarsColors(AppTheme.darkTheme);
+      AppTheme.setSystemBarColors(Brightness.dark, AppTheme.darkPrimaryColor, AppTheme.darkPrimaryColor);
     } else {
       await _saveThemePreference(0);
       emit(AppTheme.lightTheme);
-      _setSystemBarsColors(AppTheme.lightTheme);
+      AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor, AppTheme.lightPrimaryColor);
     }
   }
 
-  void _setSystemBarsColors(ThemeData theme) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: theme.primaryColor, // Set status bar color
-      systemNavigationBarColor: theme.primaryColor, // Set navigation bar color
-      systemNavigationBarIconBrightness:
-      theme.brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-    ));
+  void updateTheme() {
+    if (state == AppTheme.lightTheme) {
+      AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor, AppTheme.lightPrimaryColor);
+    } else {
+      AppTheme.setSystemBarColors(Brightness.dark, AppTheme.darkPrimaryColor, AppTheme.darkPrimaryColor);
+    }
   }
-
 
   Future<void> _saveThemePreference(int value) async {
     final prefs = await SharedPreferences.getInstance();

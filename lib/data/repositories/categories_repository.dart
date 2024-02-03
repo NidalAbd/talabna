@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
@@ -15,10 +14,7 @@ class CategoriesRepository {
   Future<List<Category>> getCategories() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/categories_list'),
       headers: {'Authorization': 'Bearer $token'},
@@ -34,11 +30,7 @@ class CategoriesRepository {
   Future<List<CategoryMenu>> getCategoryMenu() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
 
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
 
     final response = await http.get(
       Uri.parse('$baseUrl/api/categories_menu'),
@@ -58,10 +50,7 @@ class CategoriesRepository {
   Future<List<SubCategory>> getSubCategories(int categoryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/categories_list/$categoryId/sub_categories/'),
       headers: {'Authorization': 'Bearer $token'},
@@ -80,10 +69,7 @@ class CategoriesRepository {
   Future<List<SubCategoryMenu>> getSubCategoriesMenu(int categoryId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/categories_list/$categoryId/sub_categories/'),
       headers: {'Authorization': 'Bearer $token'},

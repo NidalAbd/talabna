@@ -6,7 +6,7 @@ import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/auth/welcome_screen.dart';
 
 class LogoutListTile extends StatefulWidget {
-  const LogoutListTile({Key? key, required this.language}) : super(key: key);
+  const LogoutListTile({super.key, required this.language});
   final  Language language;
 
   @override
@@ -18,23 +18,59 @@ class _LogoutListTileState extends State<LogoutListTile> {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.logout_outlined),
-      title:  Text(widget.language.tLogoutText()),
+      title: Text(widget.language.tLogoutText()),
       onTap: () async {
         final authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title:  Text(widget.language.tLogoutText()),
-              content:  Text(widget.language.logoutConfirmationText()),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.logout),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.language.tLogoutText(),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(
+                widget.language.logoutConfirmationText(),
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child:  Text(widget.language.cancelText()),
+                  child: Text(
+                    widget.language.cancelText(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
-                TextButton(
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ), backgroundColor: Theme.of(context).colorScheme.primary,
+                  ),
                   onPressed: () => Navigator.of(context).pop(true),
-                  child:  Text(widget.language.tLogoutText()),
+                  child: Text(
+                    widget.language.tLogoutText(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ],
             );

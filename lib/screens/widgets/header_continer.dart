@@ -49,7 +49,7 @@ class _HeaderWidgetState extends State<HeaderWidget> with SingleTickerProviderSt
             decoration: BoxDecoration(
               gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.4),
+                    Theme.of(context).primaryColorDark.withOpacity(0.8),
                     Theme.of(context).colorScheme.secondary.withOpacity(0.4),
                   ],
                   begin: const FractionalOffset(0.0, 0.0),

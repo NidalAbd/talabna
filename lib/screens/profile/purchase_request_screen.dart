@@ -75,9 +75,7 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
               return Directionality(
                 textDirection: TextDirection.rtl,
                 child: Card(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.lightForegroundColor
-                      : AppTheme.darkForegroundColor,
+
                   child: ListTile(
                     leading: const Icon(Icons.watch_later),
                     title: Text(
@@ -220,9 +218,7 @@ class PurchaseRequestScreenState extends State<PurchaseRequestScreen> with Singl
                     if (state is PurchaseRequestsLoaded)
                        _buildRequestList(state.requests, context.read<PurchaseRequestBloc>()),
                     Card(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightForegroundColor
-                          : AppTheme.darkForegroundColor,
+
                       child:  ListTile(
                         contentPadding: const EdgeInsets.all(8),
                         leading: const Icon(Icons.info),

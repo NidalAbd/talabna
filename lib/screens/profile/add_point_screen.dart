@@ -12,8 +12,7 @@ class AddPointScreen extends StatefulWidget {
   final int fromUserID;
   final int toUserId;
 
-  const AddPointScreen({Key? key, required this.fromUserID, required this.toUserId})
-      : super(key: key);
+  const AddPointScreen({super.key, required this.fromUserID, required this.toUserId});
 
   @override
   _AddPointScreenState createState() => _AddPointScreenState();

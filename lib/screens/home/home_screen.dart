@@ -22,13 +22,13 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late UserProfileBloc _userProfileBloc;
   late ServicePostBloc _servicePostBloc;
-  late bool showSubcategoryGridView = false;
+  bool showSubcategoryGridView = false;
   int _selectedCategory = 1;
   final Language language = Language();
+
   Future<void> _saveShowSubcategoryGridView(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('showSubcategoryGridView', value);
@@ -36,59 +36,31 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _toggleSubcategoryGridView({required bool canToggle}) async {
     if (canToggle == true) {
-      showSubcategoryGridView = !showSubcategoryGridView;
-    } else {
-      if (_selectedCategory == 6 || _selectedCategory == 0) {
-        showSubcategoryGridView = false;
-      }
+      setState(() {
+        showSubcategoryGridView = !showSubcategoryGridView;
+      });
+      await _saveShowSubcategoryGridView(showSubcategoryGridView);
     }
-    await _saveShowSubcategoryGridView(showSubcategoryGridView);
-    setState(() {});
   }
 
-  // Define a function to get the icon for a category
-  Widget _getCategoryIcon(Category category) {
+  IconData _getCategoryIcon(Category category) {
     switch (category.id) {
       case 1:
-        return const Icon(
-          Icons.work,
-          size: 25,
-        );
+        return Icons.work_outline_outlined;
       case 2:
-        return const Icon(
-          Icons.devices,
-          size: 25,
-        );
+        return Icons.devices;
       case 3:
-        return const Icon(
-          Icons.home,
-          size: 25,
-        );
+        return Icons.home_outlined;
       case 7:
-        return const Icon(
-          Icons.play_circle_sharp,
-          size: 35,
-          color: Colors.red,
-        );
+        return Icons.play_circle_sharp;
       case 4:
-        return const Icon(
-          Icons.directions_car_sharp,
-          size: 25,
-        );
+        return Icons.directions_car_sharp;
       case 5:
-        return const Icon(
-          Icons.home_repair_service,
-          size: 25,
-        );
+        return Icons.room_service_outlined;
       case 6:
-        return const Icon(
-          Icons.my_location_outlined,
-          size: 25,
-        );
+        return Icons.my_location;
       default:
-        return const Icon(
-          Icons.category,
-        );
+        return Icons.work_outline_outlined;
     }
   }
 
@@ -108,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen>
     });
     _userProfileBloc = BlocProvider.of<UserProfileBloc>(context);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _userProfileBloc.add(UserProfileRequested(id: widget.userId)); // Added line
+    _userProfileBloc.add(UserProfileRequested(id: widget.userId));
   }
 
   void _onCategorySelected(int categoryId, BuildContext context, User user) {
@@ -118,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen>
         _toggleSubcategoryGridView(canToggle: false);
       }
 
-      // Navigate to ReelsHomeScreen if category 7 is selected
       if (_selectedCategory == 7) {
         Navigator.of(context)
             .push(
@@ -130,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         )
             .then((value) {
-          // When you navigate back from the ReelsHomeScreen, select category 1
           setState(() {
             _selectedCategory = 1;
           });
@@ -164,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     language.getLanguage();
 
-    // Update category names with language translations
     _categories[0].name = language.tJobTextHome();
     _categories[1].name = language.tDeviceTextHome();
     _categories[2].name = language.tRealEstateTextHome();
@@ -174,115 +143,120 @@ class _HomeScreenState extends State<HomeScreen>
     _categories[6].name = language.tNearYouText();
 
     return BlocBuilder<UserProfileBloc, UserProfileState>(
-        builder: (BuildContext context, UserProfileState state) {
-      if (state is UserProfileInitial) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (state is UserProfileLoadInProgress) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (state is UserProfileLoadFailure) {
-        return Center(child: Text(state.error));
-      } else if (state is UserProfileLoadSuccess) {
-        if (state.user.city == null ||
-            state.user.locationLongitudes == null ||
-            state.user.locationLatitudes == null ||
-            state.user.phones == null ||
-            state.user.watsNumber == null ||
-            state.user.gender == null ||
-            state.user.dateOfBirth == null) {
-        } else {
-          _saveDataToSharedPreferences(state.user);
-        }
-        final user = state.user;
+      builder: (BuildContext context, UserProfileState state) {
+        if (state is UserProfileInitial) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is UserProfileLoadInProgress) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is UserProfileLoadFailure) {
+          return Center(child: Text(state.error));
+        } else if (state is UserProfileLoadSuccess) {
+          if (state.user.city == null ||
+              state.user.locationLongitudes == null ||
+              state.user.locationLatitudes == null ||
+              state.user.phones == null ||
+              state.user.watsNumber == null ||
+              state.user.gender == null ||
+              state.user.dateOfBirth == null) {
+          } else {
+            _saveDataToSharedPreferences(state.user);
+          }
+          final user = state.user;
 
-        return Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            title: Row(
-              children: [
-                Text(
-                  'Info',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontFamily: GoogleFonts.bungee().fontFamily,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppTheme.lightPrimaryColor
-                        : AppTheme.darkPrimaryColor,
-                  ),
+          return Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              title: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
+                child: Row(
+                  children: [
+                    Text(
+                      'TALAB',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: GoogleFonts.bungee().fontFamily,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightSecondaryColor
+                            : AppTheme.darkPrimaryColor,
+                      ),
+                    ),
+                    Text(
+                      'NA',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: GoogleFonts.bungee().fontFamily,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.lightBackgroundColor
+                            : AppTheme.lightBackgroundColor,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Quest',
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontFamily: GoogleFonts.bungee().fontFamily,
-                      color: AppTheme.accentColor),
+              ),
+              actions: [
+                VertIconAppBar(
+                  userId: widget.userId,
+                  user: user,
+                  showSubcategoryGridView: showSubcategoryGridView,
+                  toggleSubcategoryGridView: _toggleSubcategoryGridView,
                 ),
               ],
             ),
-            actions: [VertIconAppBar(userId: widget.userId, user: user)],
-          ),
-          body: _selectedCategory != 7
-              ? MainMenuPostScreen(
-                  key: ValueKey(_selectedCategory),
-                  category: _selectedCategory,
-                  userID: widget.userId,
-                  servicePostBloc: _servicePostBloc,
-                  showSubcategoryGridView: showSubcategoryGridView,
-                  user: user,
-                )
-              : Container(),
-          bottomNavigationBar: BottomAppBar(
-            height: 70,
-            shape: const CircularNotchedRectangle(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _categories
-                  .map(
-                    (category) => IconButton(
-                      icon: _getCategoryIcon(category),
-                      onPressed: () {
-                        _onCategorySelected(category.id, context, user);
-                      },
+            body: _selectedCategory != 7
+                ? MainMenuPostScreen(
+              key: ValueKey(_selectedCategory),
+              category: _selectedCategory,
+              userID: widget.userId,
+              servicePostBloc: _servicePostBloc,
+              showSubcategoryGridView: showSubcategoryGridView,
+              user: user,
+            )
+                : Container(),
+            bottomNavigationBar: BottomAppBar(
+              elevation: 0,
+              height: 55,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: _categories.map((category) {
+                  bool isSelected = _selectedCategory == category.id;
+                  return GestureDetector(
+                    onTap: () {
+                      _onCategorySelected(category.id, context, user);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            _getCategoryIcon(category),
+                            size: isSelected ? 30 : 25,
+                            color: isSelected ? Theme.of(context).brightness == Brightness.dark ? AppTheme.lightSecondaryColor : AppTheme.darkPrimaryColor : Colors.white70,
+                          ),
+                        ),
+                        // Text(
+                        //   category.name,
+                        //   style: TextStyle(
+                        //     color: isSelected
+                        //         ? Theme.of(context).brightness == Brightness.dark
+                        //         ? AppTheme.lightPrimaryColor
+                        //         : AppTheme.darkPrimaryColor
+                        //         : Colors.grey,
+                        //     fontSize: 7,
+                        //     overflow: TextOverflow.ellipsis,
+                        //   ),
+                        // )
+                      ],
                     ),
-                  )
-                  .toList(),
-            ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: "unique_tag_2",
-            onPressed: () async {
-              await _toggleSubcategoryGridView(canToggle: true);
-            },
-            backgroundColor: Theme.of(context).brightness == Brightness.dark
-                ? AppTheme.darkPrimaryColor
-                : AppTheme.lightPrimaryColor,
-            child: Container(
-              width: 56.0,
-              height: 56.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).brightness == Brightness.dark
-                  ? AppTheme.darkPrimaryColor.withOpacity(0.5)
-                  : AppTheme.darkPrimaryColor.withOpacity(0.1), // Shadow color
-                    spreadRadius: 1, // Spread radius
-                    blurRadius: 1, // Blur radius
-                    offset: const Offset(0, 1), // Offset of the shadow
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
-                ),
+                  );
+                }).toList(),
               ),
             ),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        );
-      } else {
-        return const Center(child: Text('No user home data found.'));
-      }
-    });
+          );
+        } else {
+          return const Center(child: Text('No user home data found.'));
+        }
+      },
+    );
   }
 }

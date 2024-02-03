@@ -59,7 +59,10 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   final Language _language = Language();
 
   Future<void> _updateUserProfile(BuildContext context, User user) async {
-   context.read<UserProfileBloc>().add(UserProfileUpdated(user: user));
+    print(user.phones);
+    print(user.watsNumber);
+
+    context.read<UserProfileBloc>().add(UserProfileUpdated(user: user));
   }
 
   @override
@@ -176,6 +179,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   }
 
   void updatePhoneNumber(String newPhoneNumber) {
+    print(newPhoneNumber);
     setState(() {
       _phoneController.text = newPhoneNumber;
       isPhoneChanged = true;
@@ -183,6 +187,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   }
 
   void updateWhatsAppNumber(String newWhatsAppNumber) {
+    print(newWhatsAppNumber);
+
     setState(() {
       _whatsAppController.text = newWhatsAppNumber;
       isWatsChanged = true;
@@ -322,10 +328,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                             _updateDateOfBirthController(value);
                           });
                           return Card(
-                            color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? AppTheme.lightForegroundColor
-                                : AppTheme.darkForegroundColor,
                             child: Padding(
                               padding:
                               const EdgeInsets.symmetric(horizontal: 12.0),
@@ -402,11 +404,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              if (_selectedCountry == null || _selectedCity == null) {
-                                ErrorCustomWidget.show(context,
-                                    message: 'Select country and city');
-                                return;
-                              }
+
                               DateTime? parseDateOfBirth(String dateOfBirthText) {
                                 // Define the date format that matches the one expected by the Laravel backend
                                 final DateFormat format = DateFormat('yyyy-MM-dd');
@@ -430,6 +428,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                               // print(newCountrySelected!.name);
                               // print(newCitySelected!.name);
                               // print(_gender);
+                              print('object3');
 
                               User updatedUser = User(
                                 id: user.id,

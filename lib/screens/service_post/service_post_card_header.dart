@@ -67,8 +67,8 @@ class _ServicePostHeaderContainerState extends State<ServicePostHeaderContainer>
         Material(
           elevation: 4.0,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(5),
-            topRight: Radius.circular(5),
+            bottomRight: Radius.circular(10),
+            topRight: Radius.circular(10),
           ),
           child: widget.haveBadge == 'ذهبي' || widget.haveBadge == 'ماسي'
               ? ShaderMask(
@@ -87,8 +87,8 @@ class _ServicePostHeaderContainerState extends State<ServicePostHeaderContainer>
   Center buildContainer() {
     return Center(
       child: Container(
-        height: 50,
-        width: 55,
+        height: 25,
+        width: 70,
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0),
         decoration: BoxDecoration(
           color: widget.haveBadge == 'ذهبي'
@@ -98,7 +98,7 @@ class _ServicePostHeaderContainerState extends State<ServicePostHeaderContainer>
               : Colors.transparent,
           borderRadius: const BorderRadius.only(
             topRight: Radius.circular(5),
-            topLeft: Radius.circular(5),
+            bottomRight: Radius.circular(5),
           ),
           boxShadow: [
             BoxShadow(

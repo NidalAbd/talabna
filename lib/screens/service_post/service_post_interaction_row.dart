@@ -94,10 +94,7 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                     children: [
                       Icon(
                         Icons.remove_red_eye,
-                        color:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightBackgroundColor
-                            : AppTheme.lightForegroundColor,
+
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -121,10 +118,6 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                         formatNumber(widget.servicePost.commentsCount ?? 0),
                         style: TextStyle(
                           fontSize: 16,
-                          color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppTheme.lightBackgroundColor
-                              : AppTheme.lightForegroundColor,
                         ),
                       ),
                     ],
@@ -135,19 +128,13 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                     children: [
                       Icon(
                         Icons.fmd_bad,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightBackgroundColor
-                            : AppTheme.lightForegroundColor,
                       ),
                       const SizedBox(width: 5),
                       Text(
                         formatNumber(widget.servicePost.reportCount ?? 0),
                         style: TextStyle(
                           fontSize: 16,
-                          color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? AppTheme.lightBackgroundColor
-                              : AppTheme.lightForegroundColor,
+
                         ),
                       ),
                     ],
@@ -158,7 +145,9 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
                             size: 22,
-                            color: isFavorite ? Colors.red : Colors.grey,
+                            color: isFavorite ? Colors.red : Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.darkIconColor
+                              : AppTheme.lightIconColor,
                           ),
                           onPressed: () {
                             // printWidgetHierarchy(context);
@@ -176,10 +165,7 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                   IconButton(
                     icon: Icon(
                       Icons.share,
-                      color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightBackgroundColor
-                          : AppTheme.lightForegroundColor,
+
                     ),
                     onPressed: () async {
                       await Share.share(

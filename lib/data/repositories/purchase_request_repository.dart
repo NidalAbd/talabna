@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/data/models/point_balance.dart';
 import 'package:talbna/data/models/purchase_request.dart';
@@ -12,10 +11,7 @@ class PurchaseRequestRepository {
   Future<List<PurchaseRequest>> fetchPurchaseRequests(int userId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/purchase-requests/user/$userId'),
       headers: <String, String>{
@@ -39,10 +35,7 @@ class PurchaseRequestRepository {
   Future<void> createPurchaseRequest(PurchaseRequest request) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/purchase-requests'),
       body: jsonEncode(request.toJson()),
@@ -62,12 +55,9 @@ class PurchaseRequestRepository {
       {required int pointsRequested,required int fromUser,required int toUser}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
-      Uri.parse('$baseUrl/api/talbna_points/transfer/$pointsRequested/fromUser/$fromUser/toUser/$toUser'),
+      Uri.parse('$baseUrl/api/talabna_points/transfer/$pointsRequested/fromUser/$fromUser/toUser/$toUser'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -85,10 +75,7 @@ print(response.statusCode);
   Future<PointBalance> getUserPointsBalance({required int userId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/point/$userId'),
       headers: {
@@ -116,10 +103,6 @@ print(response.statusCode);
   Future<void> cancelPurchaseRequest(int requestId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      throw Exception('لا يوجد اتصال بالإنترنت');
-    }
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/api/purchase-requests/$requestId'),

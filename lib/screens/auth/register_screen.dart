@@ -69,7 +69,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 Theme.of(context).brightness == Brightness.dark
                     ? AppTheme.lightPrimaryColor
                     : AppTheme.darkPrimaryColor,
-                AppTheme.accentColor,
               ],
             ),
           ),
@@ -283,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                             ? AppTheme.lightPrimaryColor
                             : AppTheme.darkPrimaryColor,
                         radius: 40,
-                        child: Icon(Icons.lock, size: 60, color: AppTheme.accentColor,),
+                        child: Icon(Icons.lock, size: 60,),
                       ),
                     ),
                   ),

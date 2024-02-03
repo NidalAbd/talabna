@@ -118,7 +118,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                           child: ServicePostHeaderContainer(
                             haveBadge: widget.servicePost.haveBadge!,
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
+                              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                               child: Text(
                                 getHaveBadgeText(widget.servicePost.haveBadge!),
                                 style: const TextStyle(
@@ -136,9 +136,6 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppTheme.lightForegroundColor
-                          : AppTheme.darkForegroundColor,
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Column(
@@ -187,22 +184,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                flex: 2,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '${widget.servicePost.title!} ',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ],
-                                ),
-                              ),
+
                               ServicePostAction(
                                 key:
                                     Key('servicePost_${widget.servicePost.id}'),

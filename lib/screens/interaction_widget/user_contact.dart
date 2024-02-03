@@ -44,9 +44,7 @@ class UserContact extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? AppTheme.lightForegroundColor
-          : AppTheme.darkForegroundColor,
+
       child: ListTile(
         leading: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.person)),
         title: const Text('UserName'),

@@ -39,6 +39,7 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
   final ScrollController _scrollController = ScrollController();
   bool isDeleting = false;
   bool isAdding = false;
+  final FocusNode _focusNode = FocusNode();
 
   final TextEditingController _commentController = TextEditingController();
   int page = 1; // Initialize the page
@@ -80,7 +81,9 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
         servicePostId: widget.servicePost!.id!,
         user: widget.user,
       );
-      widget.commentBloc.add(AddCommentEvent(comment: newComment, page: page)); // Assuming this is an async operation
+      widget.commentBloc.add(AddCommentEvent(
+          comment: newComment,
+          page: page)); // Assuming this is an async operation
       _commentController.clear();
       setState(() {
         isAdding = false;
@@ -92,12 +95,14 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
     setState(() {
       isDeleting = true;
     });
-     widget.commentBloc.add(DeleteCommentEvent(commentId: commentId, page: page, comment: comment)); // Assuming this is an async operation
+    widget.commentBloc.add(DeleteCommentEvent(
+        commentId: commentId,
+        page: page,
+        comment: comment)); // Assuming this is an async operation
     setState(() {
       isDeleting = false;
     });
   }
-
 
   @override
   void dispose() {
@@ -118,20 +123,26 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
             context: context,
             isScrollControlled: true,
             builder: (BuildContext context) {
-              return BlocBuilder<CommentBloc, CommentState>(
-                bloc: widget.commentBloc,
-                builder: (context, state) {
-                  if (state is CommentLoadSuccessState) {
-                    return _buildCommentsSheet(
-                        context, state.comments, widget.commentBloc.isFetching);
-                  }else if (state is CommentInitialState) {
-                    widget.commentBloc.add(LoadCommentsEvent(
-                        postId: widget.servicePost!.id!, page: page));
-                    return const Center(child: Text('Loading . .'));
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                },
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: BlocBuilder<CommentBloc, CommentState>(
+                    bloc: widget.commentBloc,
+                    builder: (context, state) {
+                      if (state is CommentLoadSuccessState) {
+                        return _buildCommentsSheet(context, state.comments,
+                            widget.commentBloc.isFetching);
+                      } else if (state is CommentInitialState) {
+                        widget.commentBloc.add(LoadCommentsEvent(
+                            postId: widget.servicePost!.id!, page: page));
+                        return const Center(child: Text('Loading . .'));
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
+                ),
               );
             },
           );
@@ -139,7 +150,6 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
         icon: Icon(
           Icons.comment,
           size: widget.iconSize,
-          color: Colors.white,
           shadows: [
             Shadow(
               color: Colors.black.withOpacity(1),
@@ -240,9 +250,10 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
                       isDeleting
                           ? const CircularProgressIndicator()
                           : IconButton(
-                        onPressed: () => _deleteComment(comment.id!, comment),
-                        icon: const Icon(Icons.delete),
-                      ),
+                              onPressed: () =>
+                                  _deleteComment(comment.id!, comment),
+                              icon: const Icon(Icons.delete),
+                            ),
                     ],
                   ],
                 ),
@@ -259,31 +270,57 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
       children: [
         Expanded(
           child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800]
+                  : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: Colors.grey.shade300, width: 1),
             ),
             child: Row(
               children: [
-                const SizedBox(width: 12),
                 Expanded(
                   child: TextFormField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Add a comment',
-                      border: InputBorder.none,
-                    ),
-                  ),
+                      focusNode: _focusNode,
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: 'Add a comment...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade500,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                      onTap: () {
+                        Future.delayed(Duration(milliseconds: 300), () {
+                          _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent);
+                        });
+                      }),
                 ),
-                IconButton(
-                  onPressed: isAdding ? null : _addComment, // Disable the button while adding
-                  icon: isAdding
-                      ? const CircularProgressIndicator()
-                      : Icon(
-                    Icons.send,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppTheme.lightPrimaryColor
-                        : AppTheme.darkPrimaryColor,
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: IconButton(
+                    onPressed: isAdding
+                        ? null
+                        : _addComment, // Disable the button while adding
+                    icon: isAdding
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            Icons.send,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppTheme.lightPrimaryColor
+                                    : AppTheme.darkPrimaryColor,
+                          ),
+                    splashRadius: 24,
                   ),
                 ),
               ],

@@ -25,17 +25,6 @@ class _LoginScreenState extends State<LoginScreen>
   late  bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final primaryGradient = const LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF007D75),
-      Color(0xFF007DFA),
-    ],
-  );
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,9 +36,9 @@ class _LoginScreenState extends State<LoginScreen>
               end: Alignment.bottomCenter,
               colors: [
                 Theme.of(context).brightness == Brightness.dark
-                    ? AppTheme.lightPrimaryColor
-                    : AppTheme.darkPrimaryColor,
-                AppTheme.accentColor,
+                    ? AppTheme.darkPrimaryColor
+                    : AppTheme.lightPrimaryColor,
+
               ],
             ),
           ),
@@ -238,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     ? AppTheme.lightPrimaryColor
                                     : AppTheme.darkPrimaryColor,
                                 radius: 40,
-                                child: Icon(Icons.lock, size: 60,color: AppTheme.accentColor,),
+                                child: Icon(Icons.lock, size: 60),
                               ),
                             ),
                           ),

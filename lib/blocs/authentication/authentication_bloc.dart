@@ -25,8 +25,13 @@ class AuthenticationBloc
         );
         final userId = result['userId'];
         final token = result['token'];
+        print(userId);
+        print(token);
+
         emit(AuthenticationSuccess(userId: userId, token: token));
       } catch (e) {
+        print(e);
+
         emit(AuthenticationFailure(error: e.toString()));
       }
     });
@@ -41,6 +46,7 @@ class AuthenticationBloc
         print(result);
         emit(AuthenticationSuccess(userId: userId, token: token));
       } catch (e) {
+        print(e);
         emit(AuthenticationFailure(error: e.toString()));
       }
     });
@@ -51,6 +57,8 @@ class AuthenticationBloc
         final userId = await _authenticationRepository.getUserId(); // Assuming you pass userId in LoggedIn event
         emit(AuthenticationSuccess(userId: userId, token: token));
       } catch (e) {
+        print(e);
+
         emit(AuthenticationFailure(error: e.toString()));
       }
     });

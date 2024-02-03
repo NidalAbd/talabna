@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_state.dart';
 import 'package:talbna/screens/auth/login_screen.dart';
@@ -19,23 +18,13 @@ class CheckAuthScreen extends StatefulWidget {
 }
 
 class _CheckAuthScreenState extends State<CheckAuthScreen> {
-  bool _isConnected = true; // Initially assuming there is internet connection
 
   @override
   void initState() {
     super.initState();
-    checkConnectivity();
   }
 
-  Future<void> checkConnectivity() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    setState(() {
-      _isConnected =
-          connectivityResult != ConnectivityResult.none; // Update the connectivity status
-    });
-  }
-
-  void getSuccessScreen(BuildContext context) {
+   void getSuccessScreen(BuildContext context) {
     Navigator.pushReplacementNamed(context, "home");
   }
 
@@ -55,7 +44,6 @@ class _CheckAuthScreenState extends State<CheckAuthScreen> {
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         } else if (state is AuthenticationFailure) {
-          if (_isConnected) {
             print(state.error);
             ScaffoldMessenger.of(context).showSnackBar(
                SnackBar(
@@ -63,13 +51,7 @@ class _CheckAuthScreenState extends State<CheckAuthScreen> {
 
               ),
             );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('You are currently offline'),
-              ),
-            );
-          }
+
         } else if (state is AuthenticationSuccess) {
           SuccessWidget.show(context, 'User operation successful');
           Navigator.pushReplacementNamed(context, "home");

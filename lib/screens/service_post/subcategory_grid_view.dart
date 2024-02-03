@@ -91,9 +91,6 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
 
   Widget _buildSubcategoryListItem(SubCategoryMenu subcategory) {
     return Card(
-      color: Theme.of(context).brightness == Brightness.dark
-        ? AppTheme.lightPrimaryColor.withOpacity(0.05)
-        : AppTheme.darkForegroundColor.withOpacity(0.95),
       child: ListTile(
         onTap: () {
           Navigator.of(context).push(
@@ -119,7 +116,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
         ),
         title: Text(
           subcategory.name,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -128,7 +125,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
         ),
         subtitle: Text(
           'Total : ${formatNumber(subcategory.servicePostsCount)}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: Colors.grey,
           ),
@@ -146,7 +143,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
               ),
             ),
           );
-        }, icon: Icon(Icons.arrow_forward_ios)),
+        }, icon: const Icon(Icons.arrow_forward_ios)),
       ),
     );
   }

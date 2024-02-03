@@ -8,7 +8,7 @@ import 'package:talbna/theme_cubit.dart';
 import '../../app_theme.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -31,22 +31,33 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Stack(
             children: [
               Center(
-                child: Text(
-                  'Discover What We Offer',
-                  style: GoogleFonts.cairo(
-                    // Use Cairo font
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: const Offset(2.0, 2.0),
-                        blurRadius: 3.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 100),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Image(
+                          image: AssetImage('assets/welcomeInfo.png'),
+                      ),
+                      Text(
+                        'Discover What We Offer',
+                        style: GoogleFonts.cairo(
+                          // Use Cairo font
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.2),
+                              offset: const Offset(2.0, 2.0),
+                              blurRadius: 3.0,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
               Column(
@@ -73,7 +84,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             },
                             child:  Text(
                               language.signUpText(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -123,9 +134,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 top: 30,
                 right: 10,
                 child: IconButton(
-                  icon:  Icon(Icons.brightness_6_sharp ,color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.darkPrimaryColor
-                      : AppTheme.lightPrimaryColor,),
+                  icon:  const Icon(Icons.brightness_6_sharp ),
                   onPressed: () =>
                       BlocProvider.of<ThemeCubit>(context).toggleTheme(),
                 ),
@@ -134,9 +143,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 top: 30,
                 left: 10,
                 child: IconButton(
-                  icon:  Icon(Icons.language , color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.darkPrimaryColor
-                      : AppTheme.lightPrimaryColor,),
+                  icon:  const Icon(Icons.language ),
                   onPressed: () {
                     Navigator.pushNamed(context, 'SelectLanguage');
                   },
@@ -150,31 +157,3 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 }
 
-class CustomShapeClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(
-        0, size.height / 4.2); // Start from the first fourth from the top
-
-    var firstControlPoint = Offset(size.width / 4, size.height / 5);
-    var firstEndPoint = Offset(size.width / 2, size.height / 4.2);
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
-        firstEndPoint.dx, firstEndPoint.dy);
-
-    var secondControlPoint =
-        Offset(size.width - (size.width / 4), size.height / 3.5);
-    var secondEndPoint = Offset(size.width, size.height / 4.2);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
-        secondEndPoint.dx, secondEndPoint.dy);
-
-    path.lineTo(size.width, 0);
-    path.lineTo(0, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}

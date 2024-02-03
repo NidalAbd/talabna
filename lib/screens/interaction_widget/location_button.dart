@@ -38,9 +38,9 @@ class LocationButtonWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
                SizedBox(width: width), // Add a fixed width SizedBox before the icon
-               const Icon(Icons.location_on_outlined,size: 25,),
+                const Icon(Icons.location_on_outlined,size: 25),
                SizedBox(width: width), // Add some space between the icon and text
-              const Text(
+               Text(
                 'show location on google map',
                 textAlign: TextAlign.center,
                 style: TextStyle(

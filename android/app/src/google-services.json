@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:808302489355:android:8a9a35d5355efde5837c0e",
+        "mobilesdk_app_id": "1:808302489355:android:c4021799723c4af9837c0e",
         "android_client_info": {
-          "package_name": "com.example.talbna"
+          "package_name": "com.talabna.talabna"
         }
       },
       "oauth_client": [

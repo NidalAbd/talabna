@@ -1,51 +1,48 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.talbna">
+    package="com.talabna.talabna">
+
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- Optional for Android 13+ notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Optional for background location on Android 10+ -->
 
-    <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>
-        <!-- If your app checks for SMS support -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="sms" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="sms"/>
         </intent>
-        <!-- If your app checks for call support -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="tel" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="tel"/>
         </intent>
-        <!-- For https scheme -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
-        <!-- For mailto scheme -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="mailto" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="mailto"/>
         </intent>
-        <!-- For file scheme -->
         <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="file" />
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="file"/>
         </intent>
     </queries>
+
     <application
         android:label="talbna"
-        android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
-        tools:targetApi="m">
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"
@@ -54,16 +51,11 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize"
-            tools:targetApi="honeycomb">
-            <!-- Specifies an Android theme to apply to this Activity as soon as
-                 the Android process has started. This theme is visible to the user
-                 while the Flutter UI initializes. After that, this theme continues
-                 to determine the Window background behind the Flutter UI. -->
+            android:windowSoftInputMode="adjustResize">
+
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -73,11 +65,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+
         <meta-data
             android:name="flutterEmbedding"
-            android:value="2" />
+            android:value="2"/>
+        <!-- Add API key securely if required -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBtF4Mz-vpzJFGSuOj1o5krujUu-MZuW0k" />

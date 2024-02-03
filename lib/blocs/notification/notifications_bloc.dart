@@ -5,11 +5,11 @@ import 'package:talbna/data/repositories/notification_repository.dart';
 import 'notifications_event.dart';
 import 'notifications_state.dart';
 
-class TalbnaNotificationBloc
-    extends Bloc<TalbnaNotificationEvent, TalbnaNotificationState> {
+class talabnaNotificationBloc
+    extends Bloc<talabnaNotificationEvent, talabnaNotificationState> {
   final NotificationRepository notificationRepository;
 
-  TalbnaNotificationBloc({required this.notificationRepository})
+  talabnaNotificationBloc({required this.notificationRepository})
       : super(NotificationInitial()) {
     on<FetchNotifications>((event, emit) async {
       emit(NotificationLoading());
