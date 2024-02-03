@@ -46,51 +46,29 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() {});
   }
 
-  // Define a function to get the icon for a category
-  Widget _getCategoryIcon(Category category) {
+// Adjust _getCategoryIcon to return IconData
+  IconData _getCategoryIcon(Category category) {
     switch (category.id) {
       case 1:
-        return const Icon(
-          Icons.work,
-          size: 25,
-        );
+        return Icons.work_outline_outlined;
       case 2:
-        return const Icon(
-          Icons.devices,
-          size: 25,
-        );
+        return Icons.devices;
       case 3:
-        return const Icon(
-          Icons.home,
-          size: 25,
-        );
+        return Icons.home_outlined;
       case 7:
-        return const Icon(
-          Icons.play_circle_sharp,
-          size: 35,
-          color: Colors.red,
-        );
+        return Icons.play_circle_sharp;
       case 4:
-        return const Icon(
-          Icons.directions_car_sharp,
-          size: 25,
-        );
+        return Icons.directions_car_sharp;
       case 5:
-        return const Icon(
-          Icons.home_repair_service,
-          size: 25,
-        );
+        return Icons.room_service_outlined;
       case 6:
-        return const Icon(
-          Icons.my_location_outlined,
-          size: 25,
-        );
+        return Icons.my_location;
+
       default:
-        return const Icon(
-          Icons.category,
-        );
+        return Icons.work_outline_outlined;
     }
   }
+
 
   Future<bool> _loadShowSubcategoryGridView() async {
     final prefs = await SharedPreferences.getInstance();
@@ -147,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen>
     Category(id: 4, name: ''),
     Category(id: 5, name: ''),
     Category(id: 6, name: ''),
+
   ];
 
   Future<void> _saveDataToSharedPreferences(User user) async {
@@ -200,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen>
             title: Row(
               children: [
                 Text(
-                  'Info',
+                  'TALAB',
                   style: TextStyle(
                     fontSize: 22,
                     fontFamily: GoogleFonts.bungee().fontFamily,
@@ -210,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 Text(
-                  'Quest',
+                  'NA',
                   style: TextStyle(
                       fontSize: 22,
                       fontFamily: GoogleFonts.bungee().fontFamily,
@@ -218,7 +197,9 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
-            actions: [VertIconAppBar(userId: widget.userId, user: user)],
+            actions: [
+
+              VertIconAppBar(userId: widget.userId, user: user)],
           ),
           body: _selectedCategory != 7
               ? MainMenuPostScreen(
@@ -231,22 +212,50 @@ class _HomeScreenState extends State<HomeScreen>
                 )
               : Container(),
           bottomNavigationBar: BottomAppBar(
-            height: 70,
-            shape: const CircularNotchedRectangle(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _categories
-                  .map(
-                    (category) => IconButton(
-                      icon: _getCategoryIcon(category),
-                      onPressed: () {
-                        _onCategorySelected(category.id, context, user);
-                      },
+            shape: const CircularNotchedRectangle(), // Notch for FloatingActionButton
+            elevation: 10.0, // Added elevation for depth
+            child: SizedBox(
+              height: 70,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: _categories.map((category) {
+                  bool isSelected = _selectedCategory == category.id;
+                  return GestureDetector(
+                    onTap: () {
+                      _onCategorySelected(category.id, context, user);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: EdgeInsets.all(isSelected ? 8.0 : 10.0),
+                          child: Icon(
+                            _getCategoryIcon(category),
+                            size: isSelected ? 30 : 25,
+                            color: isSelected ? Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightPrimaryColor
+                                : AppTheme.darkPrimaryColor : Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          category.name,
+                          style: TextStyle(
+                            color: isSelected ? Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.lightPrimaryColor
+                                : AppTheme.darkPrimaryColor : Colors.grey,
+                            fontSize: 12,
+                            overflow: TextOverflow.ellipsis, // Add this line
+                          ),
+                        )
+                      ],
                     ),
-                  )
-                  .toList(),
+                  );
+                }).toList(),
+              ),
             ),
           ),
+
           floatingActionButton: FloatingActionButton(
             heroTag: "unique_tag_2",
             onPressed: () async {

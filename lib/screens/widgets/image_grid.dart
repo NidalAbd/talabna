@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ImageGrid extends StatefulWidget {
   final List<String> imageUrls;
   final Function(String)? onImageTap;
 
-  const ImageGrid({
-    Key? key,
-    required this.imageUrls,
-    this.onImageTap,
-  }) : super(key: key);
+  const ImageGrid({Key? key, required this.imageUrls, this.onImageTap})
+      : super(key: key);
 
   @override
   State<ImageGrid> createState() => _ImageGridState();
@@ -28,7 +26,7 @@ class _ImageGridState extends State<ImageGrid> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.width * (4 / 3), // Aspect ratio of 16:9
+      height: MediaQuery.of(context).size.width * (4 / 3),
       child: PageView.builder(
         controller: _pageController,
         itemCount: widget.imageUrls.length,
@@ -41,7 +39,9 @@ class _ImageGridState extends State<ImageGrid> {
           final url = widget.imageUrls[index];
           return GestureDetector(
             onTap: () => widget.onImageTap?.call(url),
-            child: url.endsWith('.mp4') ? VideoItem(url: url) : _buildImageWidget(url),
+            child: url.endsWith('.mp4')
+                ? VideoItem(url: url, shouldPlay: _currentIndex == index)
+                : _buildImageWidget(url),
           );
         },
       ),
@@ -51,10 +51,9 @@ class _ImageGridState extends State<ImageGrid> {
   Widget _buildImageWidget(String url) {
     return Image.network(
       url,
-      fit: BoxFit.fitHeight, // This will ensure the image is fully visible, but could leave space on the sides
+      fit: BoxFit.fitHeight,
     );
   }
-
 
   @override
   void dispose() {
@@ -65,8 +64,11 @@ class _ImageGridState extends State<ImageGrid> {
 
 class VideoItem extends StatefulWidget {
   final String url;
+  // Add the shouldPlay parameter
+  final bool shouldPlay;
 
-  const VideoItem({Key? key, required this.url}) : super(key: key);
+  // Update the constructor to include the shouldPlay parameter
+  const VideoItem({Key? key, required this.url, this.shouldPlay = false}) : super(key: key);
 
   @override
   _VideoItemState createState() => _VideoItemState();
@@ -74,46 +76,49 @@ class VideoItem extends StatefulWidget {
 
 class _VideoItemState extends State<VideoItem> {
   late VideoPlayerController _controller;
-  bool _isPlaying = false; // To keep track of playing state
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.network(widget.url)
       ..initialize().then((_) {
-        setState(() {
-          _controller.play(); // Play the video as soon as it's initialized
-          _isPlaying = true;
-        });
+        setState(() {});
       });
-    _controller.setLooping(true); // Loop the video
+    _controller.setLooping(true);
+    // Auto-play based on the shouldPlay parameter is handled in didUpdateWidget
   }
 
-  void _togglePlayPause() {
-    setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-        _isPlaying = false;
-      } else {
-        _controller.play();
-        _isPlaying = true;
-      }
-    });
+  @override
+  void didUpdateWidget(VideoItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Control play/pause based on the shouldPlay parameter
+    if (widget.shouldPlay) {
+      _controller.play();
+    } else {
+      _controller.pause();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_controller.value.isInitialized) {
-      return GestureDetector(
-        onTap: _togglePlayPause, // Toggle play/pause on tap
-        child: AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: VideoPlayer(_controller),
-        ),
-      );
-    } else {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return VisibilityDetector(
+      key: Key(widget.url),
+      onVisibilityChanged: (VisibilityInfo info) {
+        if (info.visibleFraction > 0.5) {
+          if (!_controller.value.isPlaying) {
+            _controller.play();
+          }
+        } else {
+          if (_controller.value.isPlaying) {
+            _controller.pause();
+          }
+        }
+      },
+      child: AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: VideoPlayer(_controller),
+      ),
+    );
   }
 
   @override

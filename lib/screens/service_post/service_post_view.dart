@@ -187,22 +187,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                flex: 2,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '${widget.servicePost.title!} ',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ],
-                                ),
-                              ),
+
                               ServicePostAction(
                                 key:
                                     Key('servicePost_${widget.servicePost.id}'),

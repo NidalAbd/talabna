@@ -18,6 +18,7 @@ import 'package:talbna/screens/widgets/comment_sheet.dart';
 import 'package:talbna/screens/widgets/contact_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ReelsHomeScreen extends StatefulWidget {
   const ReelsHomeScreen({Key? key, required this.userId, this.servicePost, required this.user})
@@ -518,16 +519,29 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   }
 
   Widget _buildVideoDisplay(Photo media) {
-    return Center(
-      child: SizedBox(
-        width: MediaQuery.of(context)
-            .size
-            .width, // Set the width to the screen width
-        height: MediaQuery.of(context).size.height,
-        child: VideoPlayer(_getVideoPlayerController(media)),
+    return VisibilityDetector(
+      key: Key('video_${media.id}'), // Ensure a unique key for each video
+      onVisibilityChanged: (VisibilityInfo info) {
+        // Retrieve the corresponding video controller
+        final controller = _videoControllers[media.id];
+        if (controller != null && controller.value.isInitialized) {
+          if (info.visibleFraction > 0.5) {
+            controller.play();
+          } else {
+            controller.pause();
+          }
+        }
+      },
+      child: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: VideoPlayer(_getVideoPlayerController(media)),
+        ),
       ),
     );
   }
+
 
   Widget _buildImageDisplay(Photo media) {
     return Center(

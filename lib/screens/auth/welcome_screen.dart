@@ -31,22 +31,33 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Stack(
             children: [
               Center(
-                child: Text(
-                  'Discover What We Offer',
-                  style: GoogleFonts.cairo(
-                    // Use Cairo font
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: const Offset(2.0, 2.0),
-                        blurRadius: 3.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 100),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Image(
+                          image: AssetImage('assets/welcomeInfo.png'),
+                      ),
+                      Text(
+                        'Discover What We Offer',
+                        style: GoogleFonts.cairo(
+                          // Use Cairo font
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.2),
+                              offset: const Offset(2.0, 2.0),
+                              blurRadius: 3.0,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
               Column(

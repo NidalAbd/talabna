@@ -104,9 +104,9 @@ class _ServicePostCardState extends State<ServicePostCard> {
   String getHaveBadgeText(String haveBadge) {
     switch (haveBadge) {
       case 'ماسي':
-        return 'مميز ماسي';
+        return 'Feature';
       case 'ذهبي':
-        return 'مميز ذهبي';
+        return 'Feature';
       case 'عادي':
         return 'عادي';
       default:
@@ -265,12 +265,11 @@ class _ServicePostCardState extends State<ServicePostCard> {
                     },
                     child: Column(
                       children: [
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 5),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             description!,
-                            textAlign: TextAlign.justify,
                             maxLines: isMoreThanTwoLines ? 2 : null,
                             style: textStyle,
                           ),
@@ -292,14 +291,18 @@ class _ServicePostCardState extends State<ServicePostCard> {
                                   ),
                                 );
                               },
-                              child: Text(
-                                _language.getMoreText(),
-                                style: TextStyle(
-                                  color: Theme.of(context).brightness == Brightness.dark
-                                      ? AppTheme.darkForegroundColor.withOpacity(0.5)
-                                      : AppTheme.lightForegroundColor.withOpacity(0.5),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                              child: Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Text(
+                                  _language.getMoreText(),
+                                  style: TextStyle(
+
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? AppTheme.darkForegroundColor.withOpacity(0.5)
+                                        : AppTheme.lightForegroundColor.withOpacity(0.5),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
