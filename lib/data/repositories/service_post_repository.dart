@@ -223,7 +223,7 @@ class ServicePostRepository {
     // Create a Map object
     Map<String, String> formData = {
       'category': servicePost.category ?? 'null',
-      'subCategory': servicePost.subCategory ?? 'null',
+      'subCategory': servicePost.subCategory?.name.toString() ?? 'null', // ✅ Extract name instead of object
     };
     // Encode formData as a query string
     String encodedFormData = Uri(queryParameters: formData).query;
@@ -270,7 +270,7 @@ class ServicePostRepository {
     request.fields['haveBadge'] = servicePost.haveBadge?? 'null';
     request.fields['badgeDuration'] = servicePost.badgeDuration.toString();
     request.fields['category'] = servicePost.category ?? 'null';
-    request.fields['subCategory'] = servicePost.subCategory ?? 'null';
+    request.fields['subCategory'] = servicePost.subCategory!.name.toString() ?? 'null';
     if (imageFiles.isNotEmpty) {
       request.files.addAll(imageFiles);
     }
@@ -315,7 +315,7 @@ class ServicePostRepository {
       'userId': servicePost.userId.toString(),
       'type': servicePost.type?? 'null',
       'category': servicePost.category ?? 'null',
-      'subCategory': servicePost.subCategory ?? 'null',
+      'subCategory': servicePost.subCategory?.name.toString() ?? 'null',
     };
     // Encode formData as a query string
     String encodedFormData = Uri(queryParameters: formData).query;

@@ -1,5 +1,7 @@
 import 'package:talbna/utils/constants.dart';
 
+import 'categories.dart';
+
 class ServicePost {
   final int? id;
   final int? userId;
@@ -11,7 +13,7 @@ class ServicePost {
   final String? title;
   final String? description;
   final String? category;
-  final String? subCategory;
+  final SubCategory? subCategory; // ✅ Change it to SubCategory type
   final double? price;
   final String? priceCurrency;
   final double? locationLatitudes;
@@ -82,7 +84,7 @@ class ServicePost {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? '',
-      subCategory: json['sub_category'] ?? '',
+      subCategory: json['subcategory'] != null ? SubCategory.fromJson(json['subcategory']) : null, // ✅ Parse it properly
       country: json['country'] ?? '',
       price: (json['price'] is int ? json['price'].toDouble() : json['price']) ?? 0,
       priceCurrency: json['price_currency'] ?? '',

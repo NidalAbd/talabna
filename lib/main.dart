@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,31 +36,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'data/repositories/categories_repository.dart';
 import 'data/repositories/purchase_request_repository.dart';
 
-String language = 'العربية';
-
-Future<void> requestPermissions() async {
-  Map<Permission, PermissionStatus> statuses = await [
-    Permission.locationWhenInUse,
-    Permission.contacts,
-    Permission.camera,
-    Permission.storage,
-    Permission.notification,
-  ].request();
-
-  if (statuses[Permission.locationWhenInUse]?.isDenied == true) {
-    print('Location permission denied.');
-  }
-  if (statuses[Permission.contacts]?.isDenied == true) {
-    print('Contacts permission denied.');
-  }
-  if (statuses[Permission.camera]?.isDenied == true) {
-    print('Camera permission denied.');
-  }
-  if (statuses[Permission.storage]?.isPermanentlyDenied == true) {
-    print('Storage permission permanently denied. Redirecting to settings...');
-    await openAppSettings();
-  }
-}
+String language = 'ar';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,9 +45,11 @@ void main() async {
   await fcmHandler.initializeFCM();
   await requestPermissions();
 
+  // Load saved theme preference
   final prefs = await SharedPreferences.getInstance();
   final bool isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
 
+  // Set system bar colors based on the saved theme
   final brightness = isDarkTheme ? Brightness.dark : Brightness.light;
   final statusBarColor = isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor;
   final navigationBarColor = isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor;
@@ -84,7 +64,7 @@ void main() async {
   if (prefs.containsKey('language')) {
     language = prefs.getString('language')!;
   } else {
-    language = 'English';
+    language = 'en'; // Set default language
   }
 
   final authenticationRepository = AuthenticationRepository();
@@ -157,3 +137,12 @@ void main() async {
   );
 }
 
+Future<void> requestPermissions() async {
+  // Request necessary permissions
+  await Permission.location.request();
+  await Permission.storage.request();
+  await Permission.photos.request();
+  await Permission.contacts.request();
+  await Permission.camera.request();
+  await Permission.notification.request();
+}

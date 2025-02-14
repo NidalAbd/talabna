@@ -8,6 +8,7 @@ import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/screens/service_post/subcategory_post_screen.dart';
 import 'package:talbna/utils/constants.dart';
 
@@ -115,7 +116,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
           backgroundColor: Colors.transparent,
         ),
         title: Text(
-          subcategory.name,
+          subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown', // Fallback to English
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

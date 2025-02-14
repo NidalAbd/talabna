@@ -121,7 +121,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         haveBadge: _selectedHaveBadge,
         badgeDuration: _selectedBadgeDuration,
         category: _selectedCategory?.id.toString(),
-        subCategory: _selectedSubCategory?.id.toString(),
+        subCategory: _selectedSubCategory,
         photos: _pickedImages,
       );
 
@@ -233,7 +233,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a title';
+                      return 'الرجاء كتابة العنوان';
                     }
                     return null;
                   },
@@ -256,7 +256,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
+                      return 'الرجاء كتابة بعض الوصف';
                     }
                     return null;
                   },
@@ -288,10 +288,10 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a price';
+                        return 'الرجاء تحديد السعر';
                       }
                       if (double.tryParse(value) == null) {
-                        return 'Please enter a valid number';
+                        return 'اختر رقم صحيح';
                       }
                       return null;
                     },
@@ -320,18 +320,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     items: <String>[
                       'دولار امريكي',
                       'دينار اردني',
-                      'دينار تونسي',
-                      'ريال سعودي',
-                      'جنيه مصري',
-                      ' شيكل فلسطيني',
-                      'ليرة لبنانية',
-                      'درهم إماراتي',
-                      'درهم مغربي',
-                      'دينار كويتي',
-                      'ريال قطري',
-                      'دينار بحريني',
-                      'دينار ليبي',
-                      'ريال عماني',
+                      'شيكل',
                     ]
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(

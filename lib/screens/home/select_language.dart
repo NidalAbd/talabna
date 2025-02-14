@@ -14,8 +14,8 @@ class LanguageSelectionScreen extends StatefulWidget {
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   final Language _language = Language();
   final List<String> _languages = [
-    'العربية',
-    'English',
+    'ar',
+    'en',
     'Español',
     '中文',
     'हिन्दी',
@@ -37,9 +37,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     final prefs = await SharedPreferences.getInstance();
     final selectedLanguage = prefs.getString('language');
 
-    // If no language is selected, set a default language (e.g., 'العربية')
+    // If no language is selected, set a default language (e.g., 'ar')
     setState(() {
-      this.selectedLanguage = selectedLanguage ?? 'العربية';
+      this.selectedLanguage = selectedLanguage ?? 'ar';
     });
   }
   Future<void> _showLanguageChangeConfirmationDialog() async {

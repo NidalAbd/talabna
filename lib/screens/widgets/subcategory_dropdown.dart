@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
+import 'package:talbna/main.dart';
 
 import '../../provider/language.dart';
 
@@ -38,37 +39,51 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
   @override
   void didUpdateWidget(covariant SubCategoriesDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedCategory != null && oldWidget.selectedCategory != widget.selectedCategory) {
+    if (widget.selectedCategory != null &&
+        oldWidget.selectedCategory != widget.selectedCategory) {
       _fetchSubCategories(widget.selectedCategory!.id);
     }
   }
 
   void _fetchSubCategories(int? categoryId) async {
+    if (categoryId == null) return; // Prevent API call if category is null
+
     try {
       CategoriesRepository repository = CategoriesRepository();
-      _subCategories = await repository.getSubCategories(categoryId!);
-      setState(() {
-        _selectedSubCategory = _subCategories.first;
-      });
-      widget.onSubCategorySelected(_selectedSubCategory!); // Add this line
+      _subCategories = await repository.getSubCategories(categoryId);
+      if (_subCategories.isNotEmpty) {
+        setState(() {
+          _selectedSubCategory = _subCategories.first;
+        });
+        widget.onSubCategorySelected(_selectedSubCategory!);
+      }
     } catch (e) {
-      // Handle error
+      print("Error fetching subcategories: $e"); // Handle error properly
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
+    String languageCode = Localizations.localeOf(context).languageCode;
+
     return DropdownButtonFormField<SubCategory>(
       value: _selectedSubCategory,
-      decoration:  InputDecoration(
+      decoration: InputDecoration(
         labelText: _language.tSubcategoryText(),
       ),
       items: _subCategories
           .map((subCategory) => DropdownMenuItem<SubCategory>(
         value: subCategory,
-        child: Text(subCategory.name , style:  TextStyle(  color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black,),),
+        child: Text(
+          subCategory.name[_language.getLanguage()] ??
+              subCategory.name['en'] ?? 'Unknown', // Handle missing translations
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
+          ),
+        ),
       ))
           .toList(),
       dropdownColor: Theme.of(context).brightness == Brightness.dark

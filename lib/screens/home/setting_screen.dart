@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/profile/change_email_screen.dart';
 import 'package:talbna/screens/profile/change_password_screen.dart';
 
+import '../../utils/restart_helper.dart';
 import '../interaction_widget/logout_list_tile.dart';
 import '../interaction_widget/theme_toggle.dart';
 
@@ -20,8 +23,8 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   final Language _language = Language();
   final List<String> _languages = [
-    'العربية',
-    'English',
+    'ar',
+    'en',
     'Español',
     '中文',
     'हिन्दी',
@@ -32,49 +35,31 @@ class _SettingScreenState extends State<SettingScreen> {
     'Deutsch',
   ];
   String selectedLanguage = '';
-  Future<void> _showLanguageChangeConfirmationDialog() async {
-    bool? confirmChange = await showDialog<bool>(
+  Future<bool?> _showLanguageChangeConfirmationDialog() async {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Change Language'),
-          content: Text('Are you sure you want to change the language?'),
+          title: const Text('Change Language'),
+          content: const Text('Are you sure you want to change the language?'),
           actions: <Widget>[
             TextButton.icon(
-              icon: const Icon(
-                Icons.cancel, // Replace 'Icons.cancel' with the icon you want
-                // You can adjust the size and color of the icon as needed
-              ),
-              label: Text('Cancel'), // Replace 'Cancel' with your desired label
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              icon: const Icon(Icons.cancel),
+              label: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false), // Return false
             ),
             TextButton.icon(
-              icon: const Icon(
-                Icons.check, // Replace 'Icons.check' with the icon you want
-                // You can adjust the size and color of the icon as needed
-              ),
-              label: Text('Confirm'), // Replace 'Confirm' with your desired label
+              icon: const Icon(Icons.check),
+              label: const Text('Confirm'),
               onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            )
+                  print(true);
+                  RestartHelper.restartApp();
+                }
+            ),
           ],
         );
       },
     );
-
-    if (confirmChange == true) {
-      // User confirmed language change
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString('language', selectedLanguage);
-      // You can set the new language using your BLoC or method
-      // _language.setLanguage(selectedLanguage);
-
-      // Restart the app
-      SystemNavigator.routeInformationUpdated();
-    }
   }
   @override
   void initState() {
@@ -94,16 +79,20 @@ class _SettingScreenState extends State<SettingScreen> {
                   child: ListTile(
                     title: Text(language),
                     trailing: const Icon(Icons.arrow_circle_right),
-                    onTap: () async {
-                      SharedPreferences pref = await SharedPreferences.getInstance();
-                      pref.setString('language', language);
-                      _language.setLanguage(language);
-                      language = language;
-                      setState(() {
-                        selectedLanguage = language;
-                      });
-                      _showLanguageChangeConfirmationDialog();
-                    },
+                      onTap: () async {
+                        SharedPreferences pref = await SharedPreferences.getInstance();
+                        pref.setString('language', language);
+                        setState(() {
+                          selectedLanguage = language;
+                        });
+
+                        // Call the confirmation dialog when a language is selected
+                        bool? confirmed = await _showLanguageChangeConfirmationDialog();
+
+                        if (confirmed == true) {
+                          Restart.restartApp(); // Restart app if confirmed
+                        }
+                      },
                   ),
                 ),
             ],
@@ -111,7 +100,6 @@ class _SettingScreenState extends State<SettingScreen> {
         );
       },
     );
-
   }
 
   @override

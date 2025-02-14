@@ -183,7 +183,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                   child: CircularProgressIndicator(),
                 );
               } else if (_servicePostsSubCategory.isNotEmpty) {
-                subcategoryTitle = _servicePostsSubCategory.first.subCategory!;
+                subcategoryTitle = _servicePostsSubCategory.first.subCategory!.id.toString(); // Get ID
                 // show list of service posts
                 return RefreshIndicator(
                     onRefresh: _handleRefreshSubcategories,

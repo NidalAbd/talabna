@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 class SubCategoryMenu {
   final int id;
-  final String name;
+  final Map<String, String> name; // Store names as a map for multiple languages
   final int categoriesId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -20,7 +22,10 @@ class SubCategoryMenu {
   factory SubCategoryMenu.fromJson(Map<String, dynamic> json) {
     return SubCategoryMenu(
       id: json['id'],
-      name: json['name'],
+      // Check if 'name' is a Map or a String and decode accordingly
+      name: json['name'] is Map<String, dynamic>
+          ? Map<String, String>.from(json['name'])  // Directly cast if it's already a Map
+          : Map<String, String>.from(jsonDecode(json['name'])), // Decode if it's a String
       categoriesId: json['categories_id'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -31,6 +36,7 @@ class SubCategoryMenu {
     );
   }
 }
+
 
 class Photo {
   final int id;

@@ -36,7 +36,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
       }
       final servicePost = ServicePost(
           category: _selectedCategory?.id.toString(), // use the category ID instead of the name
-          subCategory: _selectedSubCategory?.id.toString(), // use the subcategory ID instead of the name
+        subCategory: _selectedSubCategory, // ✅ Pass the object, not a string
       );
       context.read<ServicePostBloc>().add(ServicePostCategoryUpdateEvent(servicePost, widget.servicePostId));
     }

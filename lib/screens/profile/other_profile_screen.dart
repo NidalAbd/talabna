@@ -84,15 +84,15 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                 children: [
                   GestureDetector(
                     onTap: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FullScreenImage(
-                            mediaUrls: userImageURl,
-                            initialIndex: userImageURl.length,
-                          ),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => FullScreenImage(
+                      //       mediaUrls: userImageURl,
+                      //       initialIndex: userImageURl.length,
+                      //     ),
+                      //   ),
+                      // );
                     },
                     child: CircleAvatar(
                       radius: 18,

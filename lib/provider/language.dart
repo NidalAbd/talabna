@@ -3,6 +3,7 @@ import 'package:talbna/main.dart';
 
 class Language extends ChangeNotifier {
   String _lang = language;
+
   getLanguage(){
     return _lang;
   }
@@ -13,11 +14,11 @@ class Language extends ChangeNotifier {
   String tJobTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'وظائف';
-      case 'English':
+      case 'en':
         return 'jobs';
-      case 'Español':
+      case 'Es':
         return 'trabajos';
       case '中文':
         return '工作';
@@ -40,11 +41,11 @@ class Language extends ChangeNotifier {
   String tDeviceTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'أجهزة';
-      case 'English':
+      case 'en':
         return 'devices';
-      case 'Español':
+      case 'Es':
         return 'dispositivos';
       case '中文':
         return '设备';
@@ -67,11 +68,11 @@ class Language extends ChangeNotifier {
   String tRealEstateTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'عقارات';
-      case 'English':
+      case 'en':
         return 'real estate';
-      case 'Español':
+      case 'Es':
         return 'bienes raíces';
       case '中文':
         return '房地产';
@@ -94,11 +95,11 @@ class Language extends ChangeNotifier {
   String tVideoTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'فيديو';
-      case 'English':
+      case 'en':
         return 'video';
-      case 'Español':
+      case 'Es':
         return 'video';
       case '中文':
         return '视频';
@@ -121,11 +122,11 @@ class Language extends ChangeNotifier {
   String tCarsTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'سيارات';
-      case 'English':
+      case 'en':
         return 'cars';
-      case 'Español':
+      case 'Es':
         return 'coches';
       case '中文':
         return '汽车';
@@ -148,11 +149,11 @@ class Language extends ChangeNotifier {
   String tServicesTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'خدمات';
-      case 'English':
+      case 'en':
         return 'services';
-      case 'Español':
+      case 'Es':
         return 'servicios';
       case '中文':
         return '服务';
@@ -175,11 +176,11 @@ class Language extends ChangeNotifier {
   String tNearYouText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'بالقرب';
-      case 'English':
+      case 'en':
         return 'near';
-      case 'Español':
+      case 'Es':
         return 'cerca';
       case '中文':
         return '附近';
@@ -202,11 +203,11 @@ class Language extends ChangeNotifier {
   String tProfileText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الملف الشخصي';
-      case 'English':
+      case 'en':
         return 'Profile';
-      case 'Español':
+      case 'Es':
         return 'Perfil';
       case '中文':
         return '个人资料';
@@ -229,11 +230,11 @@ class Language extends ChangeNotifier {
   String tFavoriteText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المفضلة';
-      case 'English':
+      case 'en':
         return 'Favorite';
-      case 'Español':
+      case 'Es':
         return 'Favorito';
       case '中文':
         return '收藏';
@@ -256,11 +257,11 @@ class Language extends ChangeNotifier {
   String tUpdateInfoText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تحديث المعلومات';
-      case 'English':
+      case 'en':
         return 'Update Info';
-      case 'Español':
+      case 'Es':
         return 'Actualizar información';
       case '中文':
         return '更新信息';
@@ -283,11 +284,11 @@ class Language extends ChangeNotifier {
   String tPurchasePointsText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'شراء النقاط';
-      case 'English':
+      case 'en':
         return 'Purchase Points';
-      case 'Español':
+      case 'Es':
         return 'Comprar puntos';
       case '中文':
         return '购买积分';
@@ -310,11 +311,11 @@ class Language extends ChangeNotifier {
   String tSettingsText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الإعدادات';
-      case 'English':
+      case 'en':
         return 'Settings';
-      case 'Español':
+      case 'Es':
         return 'Ajustes';
       case '中文':
         return '设置';
@@ -337,11 +338,11 @@ class Language extends ChangeNotifier {
   String tChangeLanguageText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير اللغة';
-      case 'English':
+      case 'en':
         return 'Change Language';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Idioma';
       case '中文':
         return '更改语言';
@@ -364,11 +365,11 @@ class Language extends ChangeNotifier {
   String tChangeEmailText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير البريد الإلكتروني';
-      case 'English':
+      case 'en':
         return 'Change Email';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Correo Electrónico';
       case '中文':
         return '更改电子邮件';
@@ -391,11 +392,11 @@ class Language extends ChangeNotifier {
   String tChangePasswordText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير كلمة المرور';
-      case 'English':
+      case 'en':
         return 'Change Password';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Contraseña';
       case '中文':
         return '更改密码';
@@ -418,11 +419,11 @@ class Language extends ChangeNotifier {
   String tDarkModeText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الوضع الليلي';
-      case 'English':
+      case 'en':
         return 'Dark Mode';
-      case 'Español':
+      case 'Es':
         return 'Modo Oscuro';
       case '中文':
         return '深色模式';
@@ -445,11 +446,11 @@ class Language extends ChangeNotifier {
   String tLogoutText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تسجيل الخروج';
-      case 'English':
+      case 'en':
         return 'Logout';
-      case 'Español':
+      case 'Es':
         return 'Cerrar sesión';
       case '中文':
         return '登出';
@@ -472,11 +473,11 @@ class Language extends ChangeNotifier {
   String tPasswordText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'كلمة المرور';
-      case 'English':
+      case 'en':
         return 'Password';
-      case 'Español':
+      case 'Es':
         return 'Contraseña';
       case '中文':
         return '密码';
@@ -499,11 +500,11 @@ class Language extends ChangeNotifier {
   String tNewPasswordText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'كلمة المرور الجديدة';
-      case 'English':
+      case 'en':
         return 'New Password';
-      case 'Español':
+      case 'Es':
         return 'Nueva Contraseña';
       case '中文':
         return '新密码';
@@ -526,11 +527,11 @@ class Language extends ChangeNotifier {
   String tSaveText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'حفظ';
-      case 'English':
+      case 'en':
         return 'Save';
-      case 'Español':
+      case 'Es':
         return 'Guardar';
       case '中文':
         return '保存';
@@ -553,11 +554,11 @@ class Language extends ChangeNotifier {
   String tUpdateText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تحديث';
-      case 'English':
+      case 'en':
         return 'Update';
-      case 'Español':
+      case 'Es':
         return 'Actualizar';
       case '中文':
         return '更新';
@@ -580,11 +581,11 @@ class Language extends ChangeNotifier {
   String tDeleteText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'حذف';
-      case 'English':
+      case 'en':
         return 'Delete';
-      case 'Español':
+      case 'Es':
         return 'Eliminar';
       case '中文':
         return '删除';
@@ -607,11 +608,11 @@ class Language extends ChangeNotifier {
   String tPurchaseText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'شراء';
-      case 'English':
+      case 'en':
         return 'Purchase';
-      case 'Español':
+      case 'Es':
         return 'Comprar';
       case '中文':
         return '购买';
@@ -634,11 +635,11 @@ class Language extends ChangeNotifier {
   String tReportText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الإبلاغ';
-      case 'English':
+      case 'en':
         return 'Report';
-      case 'Español':
+      case 'Es':
         return 'Reportar';
       case '中文':
         return '举报';
@@ -661,11 +662,11 @@ class Language extends ChangeNotifier {
   String tTitleText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'العنوان';
-      case 'English':
+      case 'en':
         return 'Title';
-      case 'Español':
+      case 'Es':
         return 'Título';
       case '中文':
         return '标题';
@@ -688,11 +689,11 @@ class Language extends ChangeNotifier {
   String tDescriptionText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الوصف';
-      case 'English':
+      case 'en':
         return 'Description';
-      case 'Español':
+      case 'Es':
         return 'Descripción';
       case '中文':
         return '描述';
@@ -715,11 +716,11 @@ class Language extends ChangeNotifier {
   String tCategoryText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الفئة';
-      case 'English':
+      case 'en':
         return 'Category';
-      case 'Español':
+      case 'Es':
         return 'Categoría';
       case '中文':
         return '类别';
@@ -742,11 +743,11 @@ class Language extends ChangeNotifier {
   String tSubcategoryText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الفئة الفرعية';
-      case 'English':
+      case 'en':
         return 'Subcategory';
-      case 'Español':
+      case 'Es':
         return 'Subcategoría';
       case '中文':
         return '子类别';
@@ -769,11 +770,11 @@ class Language extends ChangeNotifier {
   String tPriceText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'السعر';
-      case 'English':
+      case 'en':
         return 'Price';
-      case 'Español':
+      case 'Es':
         return 'Precio';
       case '中文':
         return '价格';
@@ -796,11 +797,11 @@ class Language extends ChangeNotifier {
   String tCurrencyText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'العملة';
-      case 'English':
+      case 'en':
         return 'Currency';
-      case 'Español':
+      case 'Es':
         return 'Moneda';
       case '中文':
         return '货币';
@@ -823,11 +824,11 @@ class Language extends ChangeNotifier {
   String tTypeText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'نوع';
-      case 'English':
+      case 'en':
         return 'Type';
-      case 'Español':
+      case 'Es':
         return 'Tipo';
       case '中文':
         return '类型';
@@ -850,11 +851,11 @@ class Language extends ChangeNotifier {
   String tFeaturedText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'مميز';
-      case 'English':
+      case 'en':
         return 'Featured';
-      case 'Español':
+      case 'Es':
         return 'Destacado';
       case '中文':
         return '精选';
@@ -877,11 +878,11 @@ class Language extends ChangeNotifier {
   String tDurationText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المدة';
-      case 'English':
+      case 'en':
         return 'Duration';
-      case 'Español':
+      case 'Es':
         return 'Duración';
       case '中文':
         return '持续时间';
@@ -904,11 +905,11 @@ class Language extends ChangeNotifier {
   String tCountryText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الدولة';
-      case 'English':
+      case 'en':
         return 'Country';
-      case 'Español':
+      case 'Es':
         return 'País';
       case '中文':
         return '国家';
@@ -931,11 +932,11 @@ class Language extends ChangeNotifier {
   String tCityText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المدينة';
-      case 'English':
+      case 'en':
         return 'City';
-      case 'Español':
+      case 'Es':
         return 'Ciudad';
       case '中文':
         return '城市';
@@ -958,11 +959,11 @@ class Language extends ChangeNotifier {
   String tGenderText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الجنس';
-      case 'English':
+      case 'en':
         return 'Gender';
-      case 'Español':
+      case 'Es':
         return 'Género';
       case '中文':
         return '性别';
@@ -985,11 +986,11 @@ class Language extends ChangeNotifier {
   String tDateOfBirthText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تاريخ الميلاد';
-      case 'English':
+      case 'en':
         return 'Date of Birth';
-      case 'Español':
+      case 'Es':
         return 'Fecha de Nacimiento';
       case '中文':
         return '出生日期';
@@ -1012,11 +1013,11 @@ class Language extends ChangeNotifier {
   String tWhatsappNumberText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'رقم الواتساب';
-      case 'English':
+      case 'en':
         return 'WhatsApp Number';
-      case 'Español':
+      case 'Es':
         return 'Número de WhatsApp';
       case '中文':
         return 'WhatsApp号码';
@@ -1039,11 +1040,11 @@ class Language extends ChangeNotifier {
   String tPhoneNumberText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'رقم الهاتف';
-      case 'English':
+      case 'en':
         return 'Phone Number';
-      case 'Español':
+      case 'Es':
         return 'Número de teléfono';
       case '中文':
         return '电话号码';
@@ -1066,11 +1067,11 @@ class Language extends ChangeNotifier {
   String tEditText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تعديل';
-      case 'English':
+      case 'en':
         return 'Edit';
-      case 'Español':
+      case 'Es':
         return 'Editar';
       case '中文':
         return '编辑';
@@ -1093,11 +1094,11 @@ class Language extends ChangeNotifier {
   String tChangeCategoryText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير الفئة';
-      case 'English':
+      case 'en':
         return 'Change Category';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Categoría';
       case '中文':
         return '更改类别';
@@ -1120,11 +1121,11 @@ class Language extends ChangeNotifier {
   String tChangeBadgeText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير التمييز';
-      case 'English':
+      case 'en':
         return 'Change Badge';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Insignia';
       case '中文':
         return '更改徽章';
@@ -1147,11 +1148,11 @@ class Language extends ChangeNotifier {
   String tPostsText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المنشورات';
-      case 'English':
+      case 'en':
         return 'Posts';
-      case 'Español':
+      case 'Es':
         return 'Publicaciones';
       case '中文':
         return '帖子';
@@ -1174,11 +1175,11 @@ class Language extends ChangeNotifier {
   String tFollowersText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المتابعين';
-      case 'English':
+      case 'en':
         return 'Followers';
-      case 'Español':
+      case 'Es':
         return 'Seguidores';
       case '中文':
         return '粉丝';
@@ -1201,11 +1202,11 @@ class Language extends ChangeNotifier {
   String tFollowingText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'متابع';
-      case 'English':
+      case 'en':
         return 'Following';
-      case 'Español':
+      case 'Es':
         return 'Siguiendo';
       case '中文':
         return '正在关注';
@@ -1228,11 +1229,11 @@ class Language extends ChangeNotifier {
   String tOverviewText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'لمحة';
-      case 'English':
+      case 'en':
         return 'Overview';
-      case 'Español':
+      case 'Es':
         return 'Resumen';
       case '中文':
         return '概览';
@@ -1255,11 +1256,11 @@ class Language extends ChangeNotifier {
   String tStatusText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الحالة';
-      case 'English':
+      case 'en':
         return 'Status';
-      case 'Español':
+      case 'Es':
         return 'Estado';
       case '中文':
         return '状态';
@@ -1282,11 +1283,11 @@ class Language extends ChangeNotifier {
   String tConvertPointsText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'ارسال النقاط';
-      case 'English':
+      case 'en':
         return 'Send Points';
-      case 'Español':
+      case 'Es':
         return 'Enviar Puntos';
       case '中文':
         return '发送积分';
@@ -1303,17 +1304,17 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Punkte senden';
       default:
-        return 'Send Points'; // Default to English if the language is not recognized
+        return 'Send Points'; // Default to en if the language is not recognized
     }
   }
   String incompleteInformationText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'معلومات غير مكتملة';
-      case 'English':
+      case 'en':
         return 'Incomplete Information';
-      case 'Español':
+      case 'Es':
         return 'Información Incompleta';
       case '中文':
         return '信息不完整';
@@ -1336,11 +1337,11 @@ class Language extends ChangeNotifier {
   String completeInformationText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'يرجى استكمال المعلومات الخاصة بك.';
-      case 'English':
+      case 'en':
         return 'Please complete your information.';
-      case 'Español':
+      case 'Es':
         return 'Por favor, complete su información.';
       case '中文':
         return '请完善您的信息。';
@@ -1363,11 +1364,11 @@ class Language extends ChangeNotifier {
   String okText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'موافق';
-      case 'English':
+      case 'en':
         return 'OK';
-      case 'Español':
+      case 'Es':
         return 'Aceptar';
       case '中文':
         return '确定';
@@ -1390,11 +1391,11 @@ class Language extends ChangeNotifier {
   String cancelText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'إلغاء';
-      case 'English':
+      case 'en':
         return 'Cancel';
-      case 'Español':
+      case 'Es':
         return 'Cancelar';
       case '中文':
         return '取消';
@@ -1417,11 +1418,11 @@ class Language extends ChangeNotifier {
   String logoutConfirmationText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
-      case 'English':
+      case 'en':
         return 'Are you sure you want to log out?';
-      case 'Español':
+      case 'Es':
         return '¿Estás seguro de que quieres cerrar sesión?';
       case '中文':
         return '您确定要注销吗？';
@@ -1444,11 +1445,11 @@ class Language extends ChangeNotifier {
   String emailText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'البريد الإلكتروني';
-      case 'English':
+      case 'en':
         return 'Email';
-      case 'Español':
+      case 'Es':
         return 'Correo electrónico';
       case '中文':
         return '电子邮件';
@@ -1471,11 +1472,11 @@ class Language extends ChangeNotifier {
   String enterEmailText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الرجاء إدخال البريد الإلكتروني';
-      case 'English':
+      case 'en':
         return 'Please enter your email';
-      case 'Español':
+      case 'Es':
         return 'Por favor, ingrese su correo electrónico';
       case '中文':
         return '请输入您的电子邮件';
@@ -1498,11 +1499,11 @@ class Language extends ChangeNotifier {
   String enterPasswordText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الرجاء إدخال كلمة المرور';
-      case 'English':
+      case 'en':
         return 'Please enter your password';
-      case 'Español':
+      case 'Es':
         return 'Por favor, introduzca su contraseña';
       case '中文':
         return '请输入您的密码';
@@ -1525,11 +1526,11 @@ class Language extends ChangeNotifier {
   String loginText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تسجيل الدخول';
-      case 'English':
+      case 'en':
         return 'Login';
-      case 'Español':
+      case 'Es':
         return 'Iniciar sesión';
       case '中文':
         return '登录';
@@ -1552,11 +1553,11 @@ class Language extends ChangeNotifier {
   String createAccountText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'لا تمتلك حساب؟ إنشاء حساب';
-      case 'English':
+      case 'en':
         return 'Don\'t have an account? Create an account';
-      case 'Español':
+      case 'Es':
         return '¿No tienes una cuenta? Crea una cuenta';
       case '中文':
         return '没有帐号？创建一个帐号';
@@ -1579,11 +1580,11 @@ class Language extends ChangeNotifier {
   String usernameText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'اسم المستخدم';
-      case 'English':
+      case 'en':
         return 'Username';
-      case 'Español':
+      case 'Es':
         return 'Nombre de usuario';
       case '中文':
         return '用户名';
@@ -1606,11 +1607,11 @@ class Language extends ChangeNotifier {
   String pleaseEnterUsernameText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الرجاء إدخال اسم المستخدم';
-      case 'English':
+      case 'en':
         return 'Please enter your username';
-      case 'Español':
+      case 'Es':
         return 'Por favor, ingrese su nombre de usuario';
       case '中文':
         return '请输入您的用户名';
@@ -1633,11 +1634,11 @@ class Language extends ChangeNotifier {
   String confirmPasswordText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تأكيد كلمة المرور';
-      case 'English':
+      case 'en':
         return 'Confirm Password';
-      case 'Español':
+      case 'Es':
         return 'Confirmar contraseña';
       case '中文':
         return '确认密码';
@@ -1660,11 +1661,11 @@ class Language extends ChangeNotifier {
   String passwordsDoNotMatchText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'كلمات المرور غير متطابقة';
-      case 'English':
+      case 'en':
         return 'Passwords do not match';
-      case 'Español':
+      case 'Es':
         return 'Las contraseñas no coinciden';
       case '中文':
         return '密码不匹配';
@@ -1687,11 +1688,11 @@ class Language extends ChangeNotifier {
   String signUpText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تسجيل';
-      case 'English':
+      case 'en':
         return 'Sign Up';
-      case 'Español':
+      case 'Es':
         return 'Registrarse';
       case '中文':
         return '注册';
@@ -1714,11 +1715,11 @@ class Language extends ChangeNotifier {
   String alreadyHaveAccountText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'هل لديك حساب؟ تسجيل الدخول';
-      case 'English':
+      case 'en':
         return 'Already have an account? Log in';
-      case 'Español':
+      case 'Es':
         return '¿Ya tienes una cuenta? Iniciar sesión';
       case '中文':
         return '已经有账号了吗？登录';
@@ -1742,11 +1743,11 @@ class Language extends ChangeNotifier {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'يجب تحديد عدد النقاط المطلوبة';
-      case 'English':
+      case 'en':
         return 'You must specify the required points';
-      case 'Español':
+      case 'Es':
         return 'Debe especificar la cantidad de puntos requeridos';
       case '中文':
         return '必须指定所需的积分数';
@@ -1763,18 +1764,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Sie müssen die erforderliche Punktzahl angeben';
       default:
-        return 'You must specify the required number of points'; // Default to English if the language is not recognized
+        return 'You must specify the required number of points'; // Default to en if the language is not recognized
     }
   }
   String getAddRequiredPointsText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'اضافة النقاط المطلوبة';
-      case 'English':
+      case 'en':
         return 'Add the required points';
-      case 'Español':
+      case 'Es':
         return 'Agregar los puntos requeridos';
       case '中文':
         return '添加所需的积分';
@@ -1791,18 +1792,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Fügen Sie die erforderlichen Punkte hinzu';
       default:
-        return 'Add the required points'; // Default to English if the language is not recognized
+        return 'Add the required points'; // Default to en if the language is not recognized
     }
   }
   String getChangePasswordText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'تغيير كلمة المرور';
-      case 'English':
+      case 'en':
         return 'Change Password';
-      case 'Español':
+      case 'Es':
         return 'Cambiar Contraseña';
       case '中文':
         return '修改密码';
@@ -1819,18 +1820,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Passwort ändern';
       default:
-        return 'Change Password'; // Default to English if the language is not recognized
+        return 'Change Password'; // Default to en if the language is not recognized
     }
   }
   String getCurrentPasswordText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'كلمة المرور الحالية';
-      case 'English':
+      case 'en':
         return 'Current Password';
-      case 'Español':
+      case 'Es':
         return 'Contraseña Actual';
       case '中文':
         return '当前密码';
@@ -1847,18 +1848,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Aktuelles Passwort';
       default:
-        return 'Current Password'; // Default to English if the language is not recognized
+        return 'Current Password'; // Default to en if the language is not recognized
     }
   }
   String getNewPasswordText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'كلمة المرور الجديدة';
-      case 'English':
+      case 'en':
         return 'New Password';
-      case 'Español':
+      case 'Es':
         return 'Nueva Contraseña';
       case '中文':
         return '新密码';
@@ -1875,17 +1876,17 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Neues Passwort';
       default:
-        return 'New Password'; // Default to English if the language is not recognized
+        return 'New Password'; // Default to en if the language is not recognized
     }
   }
   String getCodeText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الكود';
-      case 'English':
+      case 'en':
         return 'Code';
-      case 'Español':
+      case 'Es':
         return 'Código';
       case '中文':
         return '代码';
@@ -1902,17 +1903,17 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Code';
       default:
-        return 'Code'; // Default to English if the language is not recognized
+        return 'Code'; // Default to en if the language is not recognized
     }
   }
   String getPurchaseInstructionText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'بعد إرسال الطلب بعدد النقاط المطلوبة،قم بنسخ الرقم التعريفي وتواصل مع فريق المبيعات لاتمام عملية الشراء';
-      case 'English':
+      case 'en':
         return 'After submitting the order with the required points, copy the reference number and contact the sales team to complete the purchase process';
-      case 'Español':
+      case 'Es':
         return 'Después de enviar el pedido con los puntos requeridos, copie el número de referencia y póngase en contacto con el equipo de ventas para completar el proceso de compra';
       case '中文':
         return '在提交具有所需积分的订单后，复制参考号码并与销售团队联系以完成购买过程';
@@ -1929,17 +1930,17 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Nach dem Einreichen der Bestellung mit den erforderlichen Punkten kopieren Sie die Referenznummer und kontaktieren Sie das Verkaufsteam, um den Kaufprozess abzuschließen';
       default:
-        return 'After submitting the order with the required points, copy the reference number and contact the sales team to complete the purchase process'; // Default to English if the language is not recognized
+        return 'After submitting the order with the required points, copy the reference number and contact the sales team to complete the purchase process'; // Default to en if the language is not recognized
     }
   }
   String getFollowText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'متابعة';
-      case 'English':
+      case 'en':
         return 'Follow';
-      case 'Español':
+      case 'Es':
         return 'Seguir';
       case '中文':
         return '关注';
@@ -1956,18 +1957,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Folgen';
       default:
-        return 'Follow'; // Default to English if the language is not recognized
+        return 'Follow'; // Default to en if the language is not recognized
     }
   }
   String getUnfollowText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'إلغاء المتابعة';
-      case 'English':
+      case 'en':
         return 'Unfollow';
-      case 'Español':
+      case 'Es':
         return 'Dejar de seguir';
       case '中文':
         return '取消关注';
@@ -1984,17 +1985,17 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Nicht mehr folgen';
       default:
-        return 'Unfollow'; // Default to English if the language is not recognized
+        return 'Unfollow'; // Default to en if the language is not recognized
     }
   }
   String getMoreText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'المزيد...';
-      case 'English':
+      case 'en':
         return 'More...';
-      case 'Español':
+      case 'Es':
         return 'Más...';
       case '中文':
         return '更多...';
@@ -2011,18 +2012,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Mehr...';
       default:
-        return 'More...'; // Default to English if the language is not recognized
+        return 'More...'; // Default to en if the language is not recognized
     }
   }
   String getShowDetailsText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'عرض التفاصيل';
-      case 'English':
+      case 'en':
         return 'Show Details';
-      case 'Español':
+      case 'Es':
         return 'Mostrar Detalles';
       case '中文':
         return '显示详细信息';
@@ -2039,18 +2040,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Details anzeigen';
       default:
-        return 'Show Details'; // Default to English if the language is not recognized
+        return 'Show Details'; // Default to en if the language is not recognized
     }
   }
   String getCreateText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'إنشاء';
-      case 'English':
+      case 'en':
         return 'Create';
-      case 'Español':
+      case 'Es':
         return 'Crear';
       case '中文':
         return '创建';
@@ -2067,18 +2068,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Erstellen';
       default:
-        return 'Create'; // Default to English if the language is not recognized
+        return 'Create'; // Default to en if the language is not recognized
     }
   }
   String getCommentsText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'التعليقات';
-      case 'English':
+      case 'en':
         return 'Comments';
-      case 'Español':
+      case 'Es':
         return 'Comentarios';
       case '中文':
         return '评论';
@@ -2095,18 +2096,18 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Kommentare';
       default:
-        return 'Comments'; // Default to English if the language is not recognized
+        return 'Comments'; // Default to en if the language is not recognized
     }
   }
   String getNotificationText() {
     final currentLanguage = getLanguage();
 
     switch (currentLanguage) {
-      case 'العربية':
+      case 'ar':
         return 'الإشعارات';
-      case 'English':
+      case 'en':
         return 'Notification';
-      case 'Español':
+      case 'Es':
         return 'Notificación';
       case '中文':
         return '通知';
@@ -2123,7 +2124,7 @@ class Language extends ChangeNotifier {
       case 'Deutsch':
         return 'Benachrichtigung';
       default:
-        return 'Notification'; // Default to English if the language is not recognized
+        return 'Notification'; // Default to en if the language is not recognized
     }
   }
 

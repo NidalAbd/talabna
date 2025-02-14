@@ -142,7 +142,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
               _oldLocationLatitudesController.text = state.servicePost!.locationLatitudes.toString();
               _oldLocationLongitudesController.text = state.servicePost!.locationLongitudes.toString();
               _selectedCategory?.name = state.servicePost!.category!;
-              _selectedSubCategory?.name = state.servicePost!.subCategory!;
+              _selectedSubCategory = state.servicePost!.subCategory;
               _initialPhotos.value = state.servicePost!.photos;
             }
             return Form(
@@ -326,8 +326,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                 type: _oldTypeController.text,
                                 category: _selectedCategory!.id
                                     .toString(), // use the category ID instead of the name
-                                subCategory: _selectedSubCategory!.id
-                                    .toString(), // use the subcategory ID instead of the name
+                                subCategory: _selectedSubCategory, // use the subcategory ID instead of the name
                                 photos: _pickedImages);
                       context.read<ServicePostBloc>().add(UpdateServicePostEvent(servicePost, imageFiles));
                           },

@@ -75,13 +75,43 @@ class CategoriesRepository {
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseJson = jsonDecode(response.body);
-      final List<dynamic> subcategoriesJson = responseJson['subcategories'];
-      return subcategoriesJson
-          .map((json) => SubCategoryMenu.fromJson(json))
-          .toList();
+      try {
+        final Map<String, dynamic> responseJson = jsonDecode(response.body);
+
+        // Debugging: Print the structure of responseJson
+        print('Response JSON: $responseJson');
+
+        // ✅ Case 1: Check if 'subcategories' exists and is a List
+        if (!responseJson.containsKey('subcategories') || responseJson['subcategories'] == null) {
+          throw Exception('⚠️ خطأ: لا توجد بيانات للفئات الفرعية');
+        }
+
+        final subcategoriesData = responseJson['subcategories'];
+
+        // ✅ Case 2: Check if subcategoriesData is a List
+        if (subcategoriesData is List) {
+          return subcategoriesData
+              .map((json) => SubCategoryMenu.fromJson(json))
+              .toList();
+        } else {
+          // If it's not a List, try printing its type for debugging
+          throw Exception('⚠️ خطأ: استجابة غير صحيحة من الخادم، البيانات ليست قائمة. هي من النوع: ${subcategoriesData.runtimeType}');
+        }
+      } catch (e) {
+        throw Exception('⚠️ خطأ أثناء معالجة الاستجابة: ${e.toString()}');
+      }
+    }else if (response.statusCode == 400) {
+      throw Exception('❌ طلب غير صالح (400): تحقق من بيانات الإدخال.');
+    } else if (response.statusCode == 401) {
+      throw Exception('🔒 غير مصرح لك بالوصول (401): يرجى تسجيل الدخول.');
+    } else if (response.statusCode == 403) {
+      throw Exception('🚫 لا تملك الصلاحية (403): لا يمكنك الوصول إلى هذه البيانات.');
+    } else if (response.statusCode == 404) {
+      throw Exception('🔍 لم يتم العثور على الفئات الفرعية (404): تحقق من ID الفئة.');
+    } else if (response.statusCode == 500) {
+      throw Exception('🔥 خطأ في الخادم (500): يرجى المحاولة لاحقًا.');
     } else {
-      throw Exception('فشل في تحميل الفئات الفرعية $categoryId');
+      throw Exception('⚠️ خطأ غير معروف: ${response.statusCode}');
     }
   }
 
