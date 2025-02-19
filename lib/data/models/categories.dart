@@ -1,15 +1,29 @@
 import 'dart:convert';
-
 class Category {
-  late int id;
-  late String name;
-  Category({required this.id, required this.name});
+  final int id;
+  final Map<String, String> name; // A map to handle multi-language names
 
-  Category.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
+  Category({
+    required this.id,
+    required this.name,
+  });
+
+  // Factory constructor to parse the API response
+  factory Category.fromJson(Map<String, dynamic> json) {
+    // Ensure the name is only initialized once
+    final Map<String, String> categoryName = Map<String, String>.from(json['name']);
+    return Category(
+      id: json['id'],
+      name: categoryName, // Extracting name for different languages
+    );
+  }
+
+  String getLocalizedName(String languageCode) {
+    return name[languageCode] ?? name['en'] ?? 'Unknown';
   }
 }
+
+
 
 class SubCategory {
   final int id;
@@ -25,12 +39,13 @@ class SubCategory {
   factory SubCategory.fromJson(Map<String, dynamic> json) {
     return SubCategory(
       id: json['id'],
-      name: json['name'] is String
-          ? Map<String, String>.from(jsonDecode(json['name'])) // Decode only if it's a String
-          : Map<String, String>.from(json['name']), // Directly cast if already a Map
+      name: json['name'] is Map<String, dynamic>
+          ? Map<String, String>.from(json['name'])  // Directly cast if it's already a Map
+          : Map<String, String>.from(jsonDecode(json['name'])), // Decode if it's a String
       categoryId: json['categories_id'],
     );
   }
 }
+
 
 

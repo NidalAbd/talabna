@@ -1,15 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class Notifications {
   final int id;
   final int userId;
-  final String message;
+  final Map<String, String> message; // Multilingual message
   late final bool read;
   final String type;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Notifications( {
+  Notifications({
     required this.id,
     required this.userId,
     required this.message,
@@ -23,7 +24,9 @@ class Notifications {
     return Notifications(
       id: json['id'],
       userId: json['user_id'],
-      message: json['message'],
+      message: json['message'] is String
+          ? Map<String, String>.from(jsonDecode(json['message']))  // Decode JSON string
+          : Map<String, String>.from(json['message']), // Already a Map
       read: json['read'] == 1 ? true : false,
       type: json['type'],
       createdAt: DateTime.parse(json['created_at']),
@@ -31,15 +34,20 @@ class Notifications {
     );
   }
 
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'user_id': userId,
-    'message': message,
+    'message': jsonEncode(message), // ✅ Convert Map to JSON string
     'read': read ? 1 : 0,
     'type': type,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt.toIso8601String(),
   };
+
+
+  // Get message by language (default to English)
+  String getMessage(String lang) => message[lang] ?? message['en'] ?? "Message unavailable";
 
   IconData getIconData() {
     switch (type) {

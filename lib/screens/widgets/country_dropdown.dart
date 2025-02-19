@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/repositories/countries_repository.dart';
 import 'package:talbna/data/models/countries.dart';
+import 'package:talbna/main.dart';
 
 import '../../provider/language.dart';
 
@@ -121,7 +122,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
               items: _countries.map((country) {
                 return DropdownMenuItem<Country>(
                   value: country,
-                  child: Text(country.name ,style:  TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                  child: Text(country.countryCode ,style:  TextStyle(color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
                       : Colors.black,),),
                 );
@@ -157,7 +158,7 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
                 items: _cities.map((city) {
                   return DropdownMenuItem<City>(
                     value: city,
-                    child: Text(city.name ,style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                    child: Text(city.getName(language) ,style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : Colors.black,),),
                   );

@@ -103,6 +103,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
                 servicePostBloc: widget.servicePostBloc,
                 userProfileBloc: widget.userProfileBloc,
                 user: widget.user,
+                titleSubcategory: subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown', // Fallback to English
               ),
             ),
           );
@@ -141,6 +142,7 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
                 servicePostBloc: widget.servicePostBloc,
                 userProfileBloc: widget.userProfileBloc,
                 user: widget.user,
+                titleSubcategory: subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown', // Fallback to English
               ),
             ),
           );

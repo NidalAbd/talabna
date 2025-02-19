@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 class Country {
   final int id;
-  final String name;
+  final Map<String, String> name; // Multilingual name
   final String countryCode;
 
   Country({
@@ -12,7 +14,7 @@ class Country {
   factory Country.fromJson(Map<String, dynamic> json) {
     return Country(
       id: json['id'],
-      name: json['name'],
+      name: Map<String, String>.from(json['name']), // Parse JSON object
       countryCode: json['country_code'],
     );
   }
@@ -20,15 +22,18 @@ class Country {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'name': name, // Store as JSON
       'country_code': countryCode,
     };
   }
+
+  // Get country name by language (default to English)
+  String getName(String lang) => name[lang] ?? name['en'] ?? "Unknown";
 }
 
 class City {
   final int id;
-  final String name;
+  final Map<String, String> name; // Multilingual name
   final int countryId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -37,35 +42,32 @@ class City {
     required this.id,
     required this.name,
     required this.countryId,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory City.fromJson(Map<String, dynamic> json) {
-    DateTime? createdAt;
-    if (json['created_at'] != null) {
-      createdAt = DateTime.tryParse(json['created_at']);
-    }
-
-    DateTime? updatedAt;
-    if (json['updated_at'] != null) {
-      updatedAt = DateTime.tryParse(json['updated_at']);
-    }
     return City(
       id: json['id'],
-      name: json['name'],
+      name: json['name'] is String
+          ? Map<String, String>.from(jsonDecode(json['name']))
+          : Map<String, String>.from(json['name']),
       countryId: json['country_id'],
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at']) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'name': name, // Store as JSON
       'country_id': countryId,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
-}
 
+  // Get city name by language (default to English)
+  String getName(String lang) => name[lang] ?? name['en'] ?? "Unknown";
+}

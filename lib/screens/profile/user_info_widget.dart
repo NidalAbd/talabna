@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/screens/interaction_widget/email_tile.dart';
 import 'package:talbna/screens/interaction_widget/phone_tile.dart';
 import 'package:talbna/screens/interaction_widget/user_contact.dart';
@@ -50,7 +51,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               child: ListTile(
                 leading: const Icon(Icons.location_city),
                 title: const Text('city'),
-                subtitle: Text(widget.user.city!.name),
+                subtitle: Text(widget.user.city!.getName(language)),
               ),
             ),
             const Divider(),

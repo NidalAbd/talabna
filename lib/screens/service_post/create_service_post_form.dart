@@ -13,6 +13,7 @@ import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/widgets/category_dropdown.dart';
@@ -120,8 +121,8 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         type: _selectedType,
         haveBadge: _selectedHaveBadge,
         badgeDuration: _selectedBadgeDuration,
-        category: _selectedCategory?.id.toString(),
-        subCategory: _selectedSubCategory,
+        category: _selectedCategory,
+        subCategory: _selectedSubCategory!,
         photos: _pickedImages,
       );
 
@@ -267,7 +268,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                   },
                 ),
                 CategoriesDropdown(
-                  onCategorySelected: _onCategorySelected,
+                  onCategorySelected: _onCategorySelected, language: language,
                 ),
                 const SizedBox(height: 8.0),
                 SubCategoriesDropdown(

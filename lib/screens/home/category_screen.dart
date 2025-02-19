@@ -73,7 +73,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               child: IconButton(
                 onPressed: () {},
                 icon:  Icon(
-                  Icons.sentiment_very_dissatisfied,
+                  Icons.sentiment_satisfied_alt_outlined,
                   color: Theme.of(context).brightness == Brightness.dark
                       ? AppTheme.lightDisabledColor
                       : AppTheme.darkDisabledColor,

@@ -6,6 +6,7 @@ import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
 import 'package:talbna/screens/widgets/category_dropdown.dart';
 import 'package:talbna/screens/widgets/subcategory_dropdown.dart';
@@ -35,7 +36,6 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
         return;
       }
       final servicePost = ServicePost(
-          category: _selectedCategory?.id.toString(), // use the category ID instead of the name
         subCategory: _selectedSubCategory, // ✅ Pass the object, not a string
       );
       context.read<ServicePostBloc>().add(ServicePostCategoryUpdateEvent(servicePost, widget.servicePostId));
@@ -86,7 +86,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
             children: [
 
               CategoriesDropdown(
-                onCategorySelected: _onCategorySelected,
+                onCategorySelected: _onCategorySelected, language: language,
               ),
               const SizedBox(height: 8.0),
               SubCategoriesDropdown(

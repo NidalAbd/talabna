@@ -12,8 +12,8 @@ class ServicePost {
   String? watsNumber;
   final String? title;
   final String? description;
-  final String? category;
-  final SubCategory? subCategory; // ✅ Change it to SubCategory type
+  final Category? category;
+  final SubCategory? subCategory; // Change this to a proper object instead of String
   final double? price;
   final String? priceCurrency;
   final double? locationLatitudes;
@@ -73,26 +73,31 @@ class ServicePost {
 
 
   factory ServicePost.fromJson(Map<String, dynamic> json) {
+
     return ServicePost(
       id: json['id'] ?? 0,
       userId: json['user_id'] ?? 0,
-      userName: json['user_name'] ?? '',
-      userPhoto: json['user_photo'] ?? '',
-      email: json['email'] ?? '',
-      watsNumber: json['WatsNumber'] ?? '',
-      phones: json['phones'] ?? '',
+      userName: json['user_name'] ?? '',  // Handle null gracefully
+      userPhoto: json['user_photo'] ?? '', // Handle null gracefully
+      email: json['email'] ?? '', // Handle null gracefully
+      watsNumber: json['WatsNumber'] ?? '',  // Handle null gracefully
+      phones: json['phones'] ?? '',  // Handle null gracefully
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      category: json['category'] ?? '',
-      subCategory: json['subcategory'] != null ? SubCategory.fromJson(json['subcategory']) : null, // ✅ Parse it properly
+      category: json['category'] is Map<String, dynamic>
+          ? Category.fromJson(json['category'])
+          : null, // Handle null properly
+      subCategory: json['sub_category'] is Map<String, dynamic>
+          ? SubCategory.fromJson(json['sub_category'])
+          : SubCategory(id: 0, name: {'ar': json['sub_category']}, categoryId: 0),
       country: json['country'] ?? '',
-      price: (json['price'] is int ? json['price'].toDouble() : json['price']) ?? 0,
+      price: (json['price'] is int ? json['price'].toDouble() : json['price']) ?? 0.0,
       priceCurrency: json['price_currency'] ?? '',
-      locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0,
-      locationLongitudes: double.tryParse(json['location_longitudes'] ?? '') ?? 0,
-      distance: (json['distance'] is int ? json['distance'].toDouble() : json['distance']) ?? 0,
+      locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0.0,
+      locationLongitudes: double.tryParse(json['location_longitudes'] ?? '') ?? 0.0,
+      distance: (json['distance'] is int ? json['distance'].toDouble() : json['distance']) ?? 0.0,
       type: json['type'] ?? '',
-      haveBadge: json['have_badge'] ??  '',
+      haveBadge: json['have_badge'] ?? '',
       badgeDuration: int.tryParse(json['badge_duration']?.toString() ?? '') ?? 0,
       favoritesCount: json['favorites_count'] ?? 0,
       commentsCount: json['comments_count'] ?? 0,
@@ -105,9 +110,10 @@ class ServicePost {
       subCategoriesId: json['sub_categories_id'] ?? 0,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      photos: (json['photos'] as List<dynamic>?)?.map((photo) => Photo.fromJson(photo)).toList() ?? [],
+      photos: (json['photos'] as List<dynamic>?)?.map((photoJson) => Photo.fromJson(photoJson)).toList() ?? [],
     );
   }
+
 
 
   Map<String, dynamic> toJson() => {

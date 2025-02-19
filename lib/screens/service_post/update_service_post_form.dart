@@ -12,6 +12,7 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/service_post.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
 import 'package:talbna/screens/widgets/category_dropdown.dart';
 import 'package:talbna/screens/widgets/error_widget.dart';
@@ -141,7 +142,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
               _selectedPriceCurrency.text = state.servicePost!.priceCurrency!;
               _oldLocationLatitudesController.text = state.servicePost!.locationLatitudes.toString();
               _oldLocationLongitudesController.text = state.servicePost!.locationLongitudes.toString();
-              _selectedCategory?.name = state.servicePost!.category!;
+              _selectedCategory = state.servicePost!.category; // ✅ Assign object, not modify it
               _selectedSubCategory = state.servicePost!.subCategory;
               _initialPhotos.value = state.servicePost!.photos;
             }
@@ -196,7 +197,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                   ),
                   CategoriesDropdown(
                     onCategorySelected: _onCategorySelected,
-                    initialCategory: _selectedCategory,
+                    initialCategory: _selectedCategory, language: language,
                   ),
                   const SizedBox(height: 8.0),
                   SubCategoriesDropdown(
@@ -324,8 +325,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                                     0,
                                 userId: widget.userId,
                                 type: _oldTypeController.text,
-                                category: _selectedCategory!.id
-                                    .toString(), // use the category ID instead of the name
+                                category: _selectedCategory, // ✅ Pass the entire Category object
                                 subCategory: _selectedSubCategory, // use the subcategory ID instead of the name
                                 photos: _pickedImages);
                       context.read<ServicePostBloc>().add(UpdateServicePostEvent(servicePost, imageFiles));

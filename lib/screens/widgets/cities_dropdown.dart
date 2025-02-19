@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/countries.dart';
 import 'package:talbna/data/repositories/countries_repository.dart';
+import '../../provider/language.dart';
 
 class CitiesDropdown extends StatefulWidget {
   final Country? selectedCountry;
   final Function(City) onCitySelected;
   final City? initialCity;
+  final String language; // Add language parameter
 
   const CitiesDropdown({
     Key? key,
     required this.selectedCountry,
     required this.onCitySelected,
     this.initialCity,
+    required this.language, // Pass language to widget
   }) : super(key: key);
 
   @override
@@ -57,7 +60,7 @@ class _CitiesDropdownState extends State<CitiesDropdown> {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<City>(
       value: _selectedCity,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'المدينة',
       ),
       dropdownColor: Theme.of(context).brightness == Brightness.dark
@@ -67,7 +70,7 @@ class _CitiesDropdownState extends State<CitiesDropdown> {
           .map((city) => DropdownMenuItem<City>(
         value: city,
         child: Text(
-          city.name,
+          city.getName(widget.language), // Dynamically fetch city name based on language
         ),
       ))
           .toList(),

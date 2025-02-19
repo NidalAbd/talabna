@@ -9,10 +9,12 @@ import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/main.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/home/home_screen_list_appBar_icon.dart';
 import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/main_post_menu.dart';
+import 'package:talbna/data/repositories/categories_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.userId}) : super(key: key);
@@ -25,9 +27,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late UserProfileBloc _userProfileBloc;
   late ServicePostBloc _servicePostBloc;
+  late CategoriesRepository _categoryRepository;
+
   bool showSubcategoryGridView = false;
   int _selectedCategory = 1;
-  final Language language = Language();
+  late List<Category> _categories = [];
+  bool isLoading = true;
+
+  // Animation controllers
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   Future<void> _saveShowSubcategoryGridView(bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -46,21 +55,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   IconData _getCategoryIcon(Category category) {
     switch (category.id) {
       case 1:
-        return Icons.work_outline_outlined;
+        return Icons.work_outline_rounded;
       case 2:
-        return Icons.devices;
+        return Icons.devices_rounded;
       case 3:
-        return Icons.home_outlined;
+        return Icons.home_rounded;
       case 7:
-        return Icons.play_circle_sharp;
+        return Icons.play_circle_rounded;
       case 4:
-        return Icons.directions_car_sharp;
+        return Icons.directions_car_rounded;
       case 5:
-        return Icons.room_service_outlined;
+        return Icons.miscellaneous_services_rounded;
       case 6:
-        return Icons.my_location;
+        return Icons.location_on_rounded;
       default:
-        return Icons.work_outline_outlined;
+        return Icons.work_outline_rounded;
     }
   }
 
@@ -72,15 +81,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    print('HomeScreen: initState started');
+
+    // Initialize animation controller
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+
+    _animationController.forward();
+
     _loadShowSubcategoryGridView().then((value) {
       setState(() {
-        language.getLanguage();
         showSubcategoryGridView = value;
       });
+      print('Loaded showSubcategoryGridView: $showSubcategoryGridView');
     });
+
     _userProfileBloc = BlocProvider.of<UserProfileBloc>(context);
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
+    _categoryRepository = CategoriesRepository();
+
     _userProfileBloc.add(UserProfileRequested(id: widget.userId));
+    print('UserProfileRequested event dispatched with userId: ${widget.userId}');
+
+    _fetchCategories();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      print('Fetching categories...');
+      final categories = await _categoryRepository.getCategories();
+      print('Categories fetched successfully: $categories');
+
+      setState(() {
+        _categories = categories;
+        isLoading = false;
+      });
+    } catch (e, stackTrace) {
+      print('Error fetching categories: $e');
+      print('StackTrace: $stackTrace');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void _onCategorySelected(int categoryId, BuildContext context, User user) {
@@ -109,47 +167,91 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     });
   }
 
-  final List<Category> _categories = [
-    Category(id: 1, name: ''),
-    Category(id: 2, name: ''),
-    Category(id: 3, name: ''),
-    Category(id: 7, name: ''),
-    Category(id: 4, name: ''),
-    Category(id: 5, name: ''),
-    Category(id: 6, name: ''),
-  ];
-
   Future<void> _saveDataToSharedPreferences(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('userName', user.userName!);
-    prefs.setString('phones', user.phones!);
-    prefs.setString('watsNumber', user.watsNumber!);
-    prefs.setString('country', user.country!.name);
-    prefs.setString('city', user.city!.name);
-    prefs.setString('gender', user.email);
-    prefs.setString('dob', user.email);
+    prefs.setString('userName', user.userName ?? '');
+    prefs.setString('phones', user.phones ?? '');
+    prefs.setString('watsNumber', user.watsNumber ?? '');
+    prefs.setString(
+        'country', user.country?.getName(language) ?? '');
+    prefs.setString('city', user.city?.getName(language.toString()) ?? '');
+    prefs.setString('gender', user.gender ?? '');
+    prefs.setString('dob', user.dateOfBirth.toString() ?? '');
   }
 
   @override
   Widget build(BuildContext context) {
-    language.getLanguage();
-
-    _categories[0].name = language.tJobTextHome();
-    _categories[1].name = language.tDeviceTextHome();
-    _categories[2].name = language.tRealEstateTextHome();
-    _categories[3].name = language.tVideoTextHome();
-    _categories[4].name = language.tCarsTextHome();
-    _categories[5].name = language.tServicesTextHome();
-    _categories[6].name = language.tNearYouText();
+    // Initialize language at the start of the build method
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? Color(0xFF121212)
+        : Color(0xFFF5F7FA);
+    final cardColor = isDarkMode
+        ? Color(0xFF1E1E1E)
+        : Colors.white;
+    final primaryColor = isDarkMode
+        ? AppTheme.lightSecondaryColor
+        : AppTheme.darkPrimaryColor;
+    final navBarColor = isDarkMode
+        ? Color(0xFF292929)
+        : Colors.white;
 
     return BlocBuilder<UserProfileBloc, UserProfileState>(
       builder: (BuildContext context, UserProfileState state) {
-        if (state is UserProfileInitial) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is UserProfileLoadInProgress) {
-          return const Center(child: CircularProgressIndicator());
+        if (state is UserProfileInitial || state is UserProfileLoadInProgress) {
+          return Scaffold(
+            backgroundColor: backgroundColor,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: primaryColor,
+                  ),
+                ],
+              ),
+            ),
+          );
         } else if (state is UserProfileLoadFailure) {
-          return Center(child: Text(state.error));
+          return Scaffold(
+            backgroundColor: backgroundColor,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 60,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    state.error,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      _userProfileBloc.add(UserProfileRequested(id: widget.userId));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
         } else if (state is UserProfileLoadSuccess) {
           if (state.user.city == null ||
               state.user.locationLongitudes == null ||
@@ -158,103 +260,192 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               state.user.watsNumber == null ||
               state.user.gender == null ||
               state.user.dateOfBirth == null) {
+            // Handle incomplete profile later
           } else {
             _saveDataToSharedPreferences(state.user);
           }
           final user = state.user;
-
-          return Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              title: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
-                child: Row(
+          if (isLoading) {
+            return Scaffold(
+              backgroundColor: backgroundColor,
+              body: Center(child: CircularProgressIndicator(color: primaryColor)),
+            );
+          }
+          if (_categories.isEmpty) {
+            return Scaffold(
+              backgroundColor: backgroundColor,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Icon(
+                      Icons.category_outlined,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
                     Text(
-                      'TALAB',
+                      'No categories available',
                       style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: GoogleFonts.bungee().fontFamily,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightSecondaryColor
-                            : AppTheme.darkPrimaryColor,
+                        fontSize: 18,
+                        color: Colors.grey,
                       ),
                     ),
-                    Text(
-                      'NA',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: GoogleFonts.bungee().fontFamily,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? AppTheme.lightBackgroundColor
-                            : AppTheme.lightBackgroundColor,
+                    SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _fetchCategories,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      child: Text('Refresh'),
                     ),
                   ],
                 ),
               ),
-              actions: [
-                VertIconAppBar(
-                  userId: widget.userId,
-                  user: user,
-                  showSubcategoryGridView: showSubcategoryGridView,
-                  toggleSubcategoryGridView: _toggleSubcategoryGridView,
-                ),
-              ],
-            ),
-            body: _selectedCategory != 7
-                ? MainMenuPostScreen(
-              key: ValueKey(_selectedCategory),
-              category: _selectedCategory,
-              userID: widget.userId,
-              servicePostBloc: _servicePostBloc,
-              showSubcategoryGridView: showSubcategoryGridView,
-              user: user,
-            )
-                : Container(),
-            bottomNavigationBar: BottomAppBar(
-              elevation: 0,
-              height: 55,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: _categories.map((category) {
-                  bool isSelected = _selectedCategory == category.id;
-                  return GestureDetector(
-                    onTap: () {
-                      _onCategorySelected(category.id, context, user);
-                    },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          child: Icon(
-                            _getCategoryIcon(category),
-                            size: isSelected ? 30 : 25,
-                            color: isSelected ? Theme.of(context).brightness == Brightness.dark ? AppTheme.lightSecondaryColor : AppTheme.darkPrimaryColor : Colors.white70,
-                          ),
+            );
+          }
+
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: Scaffold(
+              backgroundColor: backgroundColor,
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: backgroundColor,
+                centerTitle: false,
+                title: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 2, 0, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'TALAB',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          color: primaryColor,
                         ),
-                        // Text(
-                        //   category.name,
-                        //   style: TextStyle(
-                        //     color: isSelected
-                        //         ? Theme.of(context).brightness == Brightness.dark
-                        //         ? AppTheme.lightPrimaryColor
-                        //         : AppTheme.darkPrimaryColor
-                        //         : Colors.grey,
-                        //     fontSize: 7,
-                        //     overflow: TextOverflow.ellipsis,
-                        //   ),
-                        // )
-                      ],
+                      ),
+                      Text(
+                        'NA',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          color: isDarkMode ? Colors.white : Color(0xFF515C6F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  VertIconAppBar(
+                    userId: widget.userId,
+                    user: user,
+                    showSubcategoryGridView: showSubcategoryGridView,
+                    toggleSubcategoryGridView: _toggleSubcategoryGridView,
+                  ),
+                ],
+              ),
+              body: _selectedCategory != 7
+                  ? Container(
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                ),
+                child: MainMenuPostScreen(
+                  key: ValueKey(_selectedCategory),
+                  category: _selectedCategory,
+                  userID: widget.userId,
+                  servicePostBloc: _servicePostBloc,
+                  showSubcategoryGridView: showSubcategoryGridView,
+                  user: user,
+                ),
+              )
+                  : Container(),
+              bottomNavigationBar: Container(
+                decoration: BoxDecoration(
+                  color: navBarColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      spreadRadius: 1,
+                      blurRadius: 10,
+                      offset: Offset(0, -3),
                     ),
-                  );
-                }).toList(),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: SafeArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: _categories.map((category) {
+                        bool isSelected = _selectedCategory == category.id;
+                        return GestureDetector(
+                          onTap: () {
+                            _onCategorySelected(category.id, context, user);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: EdgeInsets.all(isSelected ? 12 : 8),
+                                decoration: isSelected
+                                    ? BoxDecoration(
+                                  color: primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                )
+                                    : null,
+                                child: Icon(
+                                  _getCategoryIcon(category),
+                                  size: isSelected ? 28 : 24,
+                                  color: isSelected
+                                      ? primaryColor
+                                      : isDarkMode
+                                      ? Colors.grey
+                                      : Color(0xFF8F959E),
+                                ),
+                              ),
+                              SizedBox(height: 4),
+
+                              Text(
+                                category.name[language.toString()] ?? category.name['en'] ?? 'Unknown',
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? primaryColor
+                                      : isDarkMode
+                                      ? Colors.grey
+                                      : Color(0xFF8F959E),
+                                  fontSize: 11,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  fontFamily: GoogleFonts.poppins().fontFamily,
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
               ),
             ),
           );
         } else {
-          return const Center(child: Text('No user home data found.'));
+          return Scaffold(
+            backgroundColor: backgroundColor,
+            body: Center(child: Text('No user home data found.')),
+          );
         }
       },
     );

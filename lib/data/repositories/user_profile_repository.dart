@@ -12,25 +12,47 @@ import '../models/service_post.dart';
 class UserProfileRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
 
-  Future<User> getUserProfileById(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
 
-    final response = await http.get(Uri.parse('$_baseUrl/api/user/profile/$id'),
-        headers: {'Authorization': 'Bearer $token'});
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final jsonData = jsonDecode(response.body);
-      if (jsonData.containsKey('userData') && jsonData['userData'] != null) {
-        return User.fromJson(jsonData['userData']);
+  Future<User> getUserProfileById(int id) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/user/profile/$id'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      print("HTTP Response Status: ${response.statusCode}");
+      print("HTTP Response Body: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+
+        if (!jsonData.containsKey('userData') || jsonData['userData'] == null) {
+          print("Error: JSON response does not contain 'userData'");
+          throw Exception('JSON response does not contain userData');
+        }
+
+        try {
+          return User.fromJson(jsonData['userData']);
+        } catch (e) {
+          print("Error parsing userData: $e");
+          throw Exception('Failed to parse userData: $e');
+        }
+      } else if (response.statusCode == 404) {
+        print("Error: User profile not found (404)");
+        throw Exception('هذا الملف الشخصي غير موجود');
       } else {
-        throw Exception('JSON response does not contain userData');
+        print("Error: Failed to load profile, status code: ${response.statusCode}");
+        throw Exception('فشل في تحميل الملف الشخصي');
       }
-    } else if (response.statusCode == 404) {
-      throw Exception('هذا الملف الشخصي غير موجود');
-    } else {
-      throw Exception('فشل في تحميل الملف الشخصي');
+    } catch (e) {
+      print("Unexpected error: $e");
+      throw Exception('خطأ غير متوقع: $e');
     }
   }
+
 
   Future<List<User>> getFollowerByUserId(
       {required int userId, int page = 1}) async {

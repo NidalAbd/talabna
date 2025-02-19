@@ -11,6 +11,8 @@ import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
+import '../../main.dart';
+
 class SubCategoryPostScreen extends StatefulWidget {
   const SubCategoryPostScreen(
       {Key? key,
@@ -18,12 +20,13 @@ class SubCategoryPostScreen extends StatefulWidget {
       required this.categoryId,
       required this.subcategoryId,
       required this.servicePostBloc,
-      required this.userProfileBloc, required this.user})
+      required this.userProfileBloc, required this.user, required this.titleSubcategory})
       : super(key: key);
   final int userID;
   final User user;
   final int categoryId;
   final int subcategoryId;
+  final String titleSubcategory;
   final ServicePostBloc servicePostBloc;
   final UserProfileBloc userProfileBloc;
   @override
@@ -112,15 +115,15 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title:  Text(subcategoryTitle),
+        title:  Text(widget.titleSubcategory),
         actions: [
           BlocConsumer<UserActionBloc, UserActionState>(
             listener: (context, state) {
               if (state is UserMakeFollowSubcategoriesSuccess) {
                 isFollowing = state.followSuccess; // Update the isFollowing variable
                 final message = state.followSuccess
-                    ? 'You are now following  $subcategoryTitle'
-                    : 'You have unfollowed $subcategoryTitle';
+                    ? 'You are now following  ${widget.titleSubcategory}'
+                    : 'You have unfollowed ${widget.titleSubcategory}';
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(message),
@@ -183,7 +186,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                   child: CircularProgressIndicator(),
                 );
               } else if (_servicePostsSubCategory.isNotEmpty) {
-                subcategoryTitle = _servicePostsSubCategory.first.subCategory!.id.toString(); // Get ID
+
                 // show list of service posts
                 return RefreshIndicator(
                     onRefresh: _handleRefreshSubcategories,

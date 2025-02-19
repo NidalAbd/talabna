@@ -7,19 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ServicePostRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
-
   Future<List<ServicePost>> getAllServicePosts() async {
-
     try {
       final response = await http.get(Uri.parse('$_baseUrl/api/service_posts'));
-
       if (response.statusCode == 200) {
         final List<ServicePost> servicePosts = [];
         final List<dynamic> data = jsonDecode(response.body);
         for (var element in data) {
           servicePosts.add(ServicePost.fromJson(element));
         }
-
         return servicePosts;
       } else {
         throw Exception('فشل في تحميل المنشورات');
@@ -32,7 +28,6 @@ class ServicePostRepository {
   Future<ServicePost> getServicePostById(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/service_posts/$id'),
@@ -53,7 +48,6 @@ class ServicePostRepository {
       { required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-
     try {
       final response = await http.get(
         Uri.parse(
@@ -75,32 +69,39 @@ class ServicePostRepository {
       throw Exception('Failed to connect to server ');
     }
   }
+
   Future<List<ServicePost>> getServicePostsByCategory(
       {required int categories, required int page}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
     try {
+      final uri = Uri.parse('$_baseUrl/api/service_posts/categories/$categories?page=$page');
+      print('Requesting URL: $uri'); // Debugging line to check the URL
+
       final response = await http.get(
-        Uri.parse(
-            '$_baseUrl/api/service_posts/categories/$categories?page=$page'),
+        uri,
         headers: {'Authorization': 'Bearer $token'},
       );
-      print(jsonDecode(response.body));
+
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.body}'); // Debugging line to check response
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final List<dynamic> data = responseBody['servicePosts']['data'];
         final List<ServicePost> servicePosts =
-            data.map((e) => ServicePost.fromJson(e)).toList();
+        data.map((e) => ServicePost.fromJson(e)).toList();
         return servicePosts;
       } else {
         throw Exception('Failed to load service posts for this category');
       }
     } catch (e) {
-      print(e);
-      throw Exception('Failed to connect to server ');
+      print('Error: $e'); // This will print the specific error
+      throw Exception('Failed to connect to server');
     }
   }
+
 
   Future<List<ServicePost>> getServicePostsByUserFavourite(
       {required int userId, required int page}) async {
@@ -170,6 +171,7 @@ class ServicePostRepository {
         final List<dynamic> data = responseBody['servicePosts']['data'];
         final List<ServicePost> servicePosts =
         data.map((e) => ServicePost.fromJson(e)).toList();
+        print('🔍 API Response: ${response.body}');
 
         return servicePosts;
       } else {
@@ -222,9 +224,10 @@ class ServicePostRepository {
 
     // Create a Map object
     Map<String, String> formData = {
-      'category': servicePost.category ?? 'null',
-      'subCategory': servicePost.subCategory?.name.toString() ?? 'null', // ✅ Extract name instead of object
+      'category': servicePost.category?.name.toString() ?? 'null', // ✅ Extract name instead of object
+      'subCategory': servicePost.subCategory?.name.toString() ?? 'null',
     };
+
     // Encode formData as a query string
     String encodedFormData = Uri(queryParameters: formData).query;
     // Send the request
@@ -257,6 +260,7 @@ class ServicePostRepository {
     http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts'));
     request.headers['Authorization'] = 'Bearer $token';
     request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+
     request.fields['title'] = servicePost.title?? 'null';
     request.fields['description'] = servicePost.description?? 'null';
     request.fields['price'] = servicePost.price.toString();
@@ -268,17 +272,22 @@ class ServicePostRepository {
     request.fields['userId'] = servicePost.userId.toString();
     request.fields['type'] = servicePost.type ?? 'null';
     request.fields['haveBadge'] = servicePost.haveBadge?? 'null';
-    request.fields['badgeDuration'] = servicePost.badgeDuration.toString();
-    request.fields['category'] = servicePost.category ?? 'null';
-    request.fields['subCategory'] = servicePost.subCategory!.name.toString() ?? 'null';
+    request.fields['badgeDuration'] = servicePost.badgeDuration.toString() ?? 'null';
+    request.fields['categories_id'] = servicePost.category?.id.toString() ?? 'null';
+    request.fields['sub_categories_id'] = servicePost.subCategory!.id.toString() ?? 'null';
     if (imageFiles.isNotEmpty) {
       request.files.addAll(imageFiles);
     }
+
     print(imageFiles);
     try {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print(responseBody);
+        print('categories_id ${request.fields['categories_id']}');
+        print('servicePost category ${servicePost.category}');
+
         return ServicePost.fromJson(jsonDecode(responseBody));
       }else if (response.statusCode == 400 ) {
         print(  'error : $responseBody',);
@@ -314,7 +323,7 @@ class ServicePostRepository {
       'locationLongitudes': servicePost.locationLongitudes.toString(),
       'userId': servicePost.userId.toString(),
       'type': servicePost.type?? 'null',
-      'category': servicePost.category ?? 'null',
+      'category': servicePost.category?.id.toString() ?? 'null', // ✅ Extract id
       'subCategory': servicePost.subCategory?.name.toString() ?? 'null',
     };
     // Encode formData as a query string

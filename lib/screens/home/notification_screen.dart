@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +10,7 @@ import 'package:talbna/blocs/notification/notifications_state.dart';
 
 import 'package:talbna/data/models/notifications.dart';
 
+import '../../main.dart';
 import '../../provider/language.dart';
 
 
@@ -150,7 +153,7 @@ class NotificationsScreenState extends State<NotificationsScreen> {
                               semanticLabel: _notification[index].type,
                             ),
                           ),
-                          title: Text(notification.message),
+                          title: Text(notification.getMessage(language)),
                           subtitle: Text(DateFormat('yyyy-MM-dd | HH:mm:ss').format(notification.createdAt)),
                           trailing: notification.read
                               ? null

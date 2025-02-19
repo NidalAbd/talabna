@@ -12,21 +12,71 @@ class CategoriesRepository {
   CategoriesRepository();
 
   Future<List<Category>> getCategories() async {
+    print('CategoriesRepository: getCategories() started');
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/categories_list'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseJson = jsonDecode(response.body);
-      final List<dynamic> categoriesJson = responseJson['categories'];
-      return categoriesJson.map((json) => Category.fromJson(json)).toList();
-    } else {
-      throw Exception('فشل في تحميل الفئات الرئيسية');
+    if (token == null) {
+      print('Error: Auth token is null');
+      throw Exception('User is not authenticated');
+    }
+    print('Auth token retrieved: $token');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/categories_list'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      print('API Response status code: ${response.statusCode}');
+      print('API Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(response.body);
+
+        print('Decoded JSON: $decodedResponse');
+
+        if (decodedResponse is! Map<String, dynamic>) {
+          print('Error: API response is not a JSON object');
+          throw Exception('Invalid API response format');
+        }
+
+        if (!decodedResponse.containsKey('categories')) {
+          print('Error: "categories" key is missing in the response');
+          throw Exception('Missing "categories" key in API response');
+        }
+
+        final categoriesJson = decodedResponse['categories'];
+        if (categoriesJson is! List) {
+          print('Error: "categories" is not a list');
+          throw Exception('"categories" field must be a list');
+        }
+
+        final categories = categoriesJson.map((json) {
+          try {
+            print('Parsing category: $json');
+            return Category.fromJson(json);
+          } catch (e) {
+            print('Error parsing category: $json - $e');
+            throw Exception('Failed to parse category');
+          }
+        }).toList();
+
+        print('Categories successfully parsed: $categories');
+        return categories;
+      } else {
+        print('Error: Failed to load categories, status: ${response.statusCode}');
+        throw Exception('Failed to load categories');
+      }
+    } catch (e, stackTrace) {
+      print('Exception occurred in getCategories: $e');
+      print('StackTrace: $stackTrace');
+      throw Exception('Error fetching categories');
     }
   }
+
+
   Future<List<CategoryMenu>> getCategoryMenu() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
