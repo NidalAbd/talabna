@@ -18,10 +18,11 @@ import '../../provider/language.dart';
 
 class ChangeBadge extends StatefulWidget {
   const ChangeBadge(
-      {Key? key, required this.userId, required this.servicePostId})
-      : super(key: key);
+      {super.key, required this.userId, required this.servicePostId, required this.haveBadge, required this.badgeDuration});
   final int userId;
   final int servicePostId;
+  final String? haveBadge;
+  final int? badgeDuration;
   @override
   State<ChangeBadge> createState() => _ChangeBadgeState();
 }
@@ -80,8 +81,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
         listener: (context, state) {
           print(state);
           if (state is ServicePostOperationSuccess) {
-            SuccessWidget.show(
-                context, 'Service Post Badge changed successfully');
+            showCustomSnackBar(context, 'success', type: SnackBarType.success);
             Navigator.of(context).pop();
           } else if (state is ServicePostOperationFailure) {
             bool balance =
@@ -94,9 +94,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
                 content: Text('Error: Your Balance Point not enough'),
               ));
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Error: ${state.errorMessage}'),
-              ));
+              showCustomSnackBar(context, 'error', type: SnackBarType.error);
             }
           }
         },

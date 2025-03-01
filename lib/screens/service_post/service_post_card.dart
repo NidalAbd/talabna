@@ -180,7 +180,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
           MaterialPageRoute(
             builder: (context) => ServicePostCardView(
               key: Key('servicePost_${widget.servicePost.id}'),
-              onPostDeleted: widget.onPostDeleted,
+              onPostDeleted: widget.onPostDeleted ?? (){},
               userProfileId: widget.userProfileId,
               servicePost: widget.servicePost,
               canViewProfile: widget.canViewProfile,
@@ -211,7 +211,7 @@ class _ServicePostCardState extends State<ServicePostCard> {
       MaterialPageRoute(
         builder: (context) => ServicePostCardView(
           key: Key('servicePost_${widget.servicePost.id}'),
-          onPostDeleted: widget.onPostDeleted,
+          onPostDeleted: widget.onPostDeleted ?? (){},
           userProfileId: widget.userProfileId,
           servicePost: widget.servicePost,
           canViewProfile: widget.canViewProfile,

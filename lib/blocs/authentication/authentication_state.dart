@@ -1,3 +1,4 @@
+import '../../screens/check_auth.dart';
 
 abstract class AuthenticationState {}
 
@@ -23,22 +24,27 @@ class AuthenticationInProgress extends AuthenticationState {}
 
 class AuthenticationFailure extends AuthenticationState {
   final String error;
+  final AuthErrorType errorType;
 
-  AuthenticationFailure({required this.error});
+  AuthenticationFailure({
+    required this.error,
+    this.errorType = AuthErrorType.unknownError,
+  });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is AuthenticationFailure && runtimeType == other.runtimeType && error == other.error;
+          other is AuthenticationFailure &&
+              runtimeType == other.runtimeType &&
+              error == other.error &&
+              errorType == other.errorType;
 
   @override
-  int get hashCode => error.hashCode;
+  int get hashCode => Object.hash(error, errorType);
 }
+
 class ForgotPasswordSuccess extends AuthenticationState {
   final String message;
 
   ForgotPasswordSuccess({required this.message});
-
-  @override
-  List<Object?> get props => [message];
 }

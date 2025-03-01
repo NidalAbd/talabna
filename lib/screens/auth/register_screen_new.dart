@@ -9,6 +9,8 @@ import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
 
 import '../../provider/language.dart';
+import '../../routes.dart';
+import '../check_auth.dart';
 
 class RegisterScreenNew extends StatefulWidget {
   const RegisterScreenNew({
@@ -67,22 +69,82 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
   Widget build(BuildContext context) {
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
-        if (state is AuthenticationFailure) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Some Error Happen ${state.error}'),
-            ),
-          );
+         if (state is AuthenticationFailure) {
+        // Set isLoading to false when authentication fails
+        setState(() {
+        _isLoading = false;
+        });
+
+        // Determine the most appropriate error type and message
+        AuthErrorType errorType;
+        String userFriendlyMessage;
+
+        // Convert error to lowercase for case-insensitive checking
+        String errorMessage = state.error.toLowerCase();
+
+        // Handle validation errors
+        if (errorMessage.contains('email') || errorMessage.contains('password')) {
+        errorType = AuthErrorType.invalidCredentials;
+        userFriendlyMessage = 'Please check your email and password format.';
+        }
+        // Handle unauthorized access (wrong credentials)
+        else if (errorMessage.contains('unauthorized')) {
+        errorType = AuthErrorType.invalidCredentials;
+        userFriendlyMessage = 'Incorrect email or password. Please try again.';
+        }
+        // Handle unique email constraint during registration
+        else if (errorMessage.contains('unique') || errorMessage.contains('already exists')) {
+        errorType = AuthErrorType.invalidCredentials;
+        userFriendlyMessage = 'This email is already registered. Try logging in or use a different email.';
+        }
+        // Handle network or connection issues
+        else if (errorMessage.contains('network') ||
+        errorMessage.contains('connection') ||
+        errorMessage.contains('timeout')) {
+        errorType = AuthErrorType.networkError;
+        userFriendlyMessage = 'Unable to connect. Please check your internet connection.';
+        }
+        // Handle server-side errors
+        else if (errorMessage.contains('server') ||
+        errorMessage.contains('internal') ||
+        errorMessage.contains('unable to')) {
+        errorType = AuthErrorType.serverError;
+        userFriendlyMessage = 'We\'re experiencing technical difficulties. Please try again later.';
+        }
+        // Handle password-related issues
+        else if (errorMessage.contains('password confirmation') ||
+        errorMessage.contains('min:')) {
+        errorType = AuthErrorType.invalidCredentials;
+        userFriendlyMessage = 'Password must be at least 8 characters long.';
+        }
+        // Catch-all for unknown errors
+        else {
+        errorType = AuthErrorType.unknownError;
+        userFriendlyMessage = 'An unexpected error occurred. Please try again.';
+        }
+
+        // Show modern error handling
+        AuthSnackBar.show(
+        context,
+        errorType: errorType,
+        customMessage: userFriendlyMessage,
+        onRetry: () {
+        // Retry login with existing credentials
+        context.read<AuthenticationBloc>().add(
+        LoginRequest(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        ),
+        );
+        },
+        );
         } else if (state is AuthenticationSuccess) {
           // Set _isLoading to false when authentication succeeds.
           print(state);
           setState(() {
             _isLoading = false;
           });
-          Navigator.pushReplacementNamed(context, "home");
+          Routes.navigateToHome(context, state.userId!);
           // Example: Navigator.pushReplacementNamed(context, 'home');
         }
       },
@@ -285,12 +347,13 @@ class _RegisterScreenNewState extends State<RegisterScreenNew>
                                       TextButton(
                                         onPressed: () {
                                           Navigator.pushReplacementNamed(
-                                              context, 'loginNew');
+                                              context, '/login');
                                         },
                                         child:  Text(
                                           language.alreadyHaveAccountText(),
                                         ),
                                       ),
+
                                     ],
                                   ),
                                 ),

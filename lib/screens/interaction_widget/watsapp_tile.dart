@@ -6,14 +6,13 @@ class WhatsAppWidget extends StatelessWidget {
   final String? whatsAppNumber;
   final String username;
 
-  const WhatsAppWidget({Key? key, this.whatsAppNumber, required this.username}) : super(key: key);
+  const WhatsAppWidget({Key? key, this.whatsAppNumber, required this.username})
+      : super(key: key);
 
   String formatWhatsAppNumber(String number) {
-    // Remove leading '00'
     number = number.replaceFirst(RegExp(r'^00'), '');
     return number;
   }
-
 
   void launchWhatsApp() async {
     final url = formatWhatsAppNumber(whatsAppNumber ?? 'لا يوجد بيانات');
@@ -23,16 +22,42 @@ class WhatsAppWidget extends StatelessWidget {
       throw 'Could not launch WhatsApp';
     }
   }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor =
+        isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
 
-      child: ListTile(
-        leading: Image.asset('assets/WhatsApp_logo.png', width: 24, height: 24),
-        title: const Text('WhatsApp'),
-        subtitle: Text( '+ ${formatWhatsAppNumber(whatsAppNumber ?? 'no data')}'),
-        onTap: launchWhatsApp,
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Image.asset(
+          'assets/WhatsApp_logo.png',
+          width: 20,
+          height: 20,
+        ),
       ),
+      title: const Text(
+        'WhatsApp',
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
+      ),
+      subtitle: Text(
+        '+ ${formatWhatsAppNumber(whatsAppNumber ?? 'no data')}',
+        style: TextStyle(
+          color: Colors.grey[600],
+          fontSize: 14,
+        ),
+      ),
+      onTap: whatsAppNumber != null ? launchWhatsApp : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }
 }

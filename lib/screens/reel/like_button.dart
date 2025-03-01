@@ -1,12 +1,11 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class LikeButton extends StatefulWidget {
   final bool isFavorite;
   final int favoritesCount;
   final Function(bool) onPressed;
-  final Function(int) onFavoritesCountChanged; // Callback for count change
+  final Function(int) onFavoritesCountChanged;
 
   const LikeButton({
     Key? key,
@@ -17,14 +16,12 @@ class LikeButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LikeButtonState createState() => _LikeButtonState();
+  LikeButtonState createState() => LikeButtonState();
 }
 
-class _LikeButtonState extends State<LikeButton>
-    with SingleTickerProviderStateMixin {
+class LikeButtonState extends State<LikeButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation;
   late bool _isFavorite;
   late int _favoritesCount;
 
@@ -42,9 +39,22 @@ class _LikeButtonState extends State<LikeButton>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2)
         .chain(CurveTween(curve: Curves.easeOut))
         .animate(_controller);
+  }
 
-    _colorAnimation = ColorTween(begin: Colors.grey, end: Colors.red)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+  @override
+  void didUpdateWidget(LikeButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update local state if widget's props change
+    if (oldWidget.isFavorite != widget.isFavorite) {
+      setState(() {
+        _isFavorite = widget.isFavorite;
+      });
+    }
+    if (oldWidget.favoritesCount != widget.favoritesCount) {
+      setState(() {
+        _favoritesCount = widget.favoritesCount;
+      });
+    }
   }
 
   @override
@@ -54,22 +64,30 @@ class _LikeButtonState extends State<LikeButton>
   }
 
   void _handlePressed() async {
-    // Toggle favorite state
-    if (!_isFavorite) {
+    // Determine the new favorite state
+    bool newFavoriteState = !_isFavorite;
+
+    // Determine the new favorites count
+    int newFavoritesCount = _favoritesCount;
+    if (newFavoriteState != _isFavorite) {
+      newFavoritesCount += newFavoriteState ? 1 : -1;
+    }
+
+    // Animate the button
+    if (newFavoriteState) {
       await _controller.forward(); // Play animation forward for like
     } else {
       await _controller.reverse(); // Play animation backward for unlike
     }
+
     setState(() {
-      _isFavorite = !_isFavorite; // Toggle the state
-      if (_isFavorite) {
-        _favoritesCount++; // Increment favorites count when liked
-      } else {
-        _favoritesCount--; // Decrement favorites count when unliked
-      }
+      _isFavorite = newFavoriteState;
+      _favoritesCount = newFavoritesCount;
     });
-    widget.onPressed(_isFavorite); // Notify parent about the new state
-    widget.onFavoritesCountChanged(_favoritesCount); // Notify parent about the updated count
+
+    // Notify parent about the new state and count
+    widget.onPressed(_isFavorite);
+    widget.onFavoritesCountChanged(_favoritesCount);
   }
 
   @override
@@ -89,7 +107,7 @@ class _LikeButtonState extends State<LikeButton>
                     painter: ParticleEffectPainter(_controller.value),
                   ),
                 ),
-              // Heart icon with scaling and color animation
+              // Heart icon with scaling
               Transform.scale(
                 scale: _scaleAnimation.value,
                 child: Icon(

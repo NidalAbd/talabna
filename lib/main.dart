@@ -1,5 +1,4 @@
-import 'dart:isolate';
-
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,142 +6,151 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
-import 'package:talbna/blocs/comments/comment_bloc.dart';
-import 'package:talbna/blocs/notification/notifications_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
-import 'package:talbna/blocs/report/report_bloc.dart';
-import 'package:talbna/blocs/service_post/service_post_bloc.dart';
-import 'package:talbna/blocs/user_action/user_action_bloc.dart';
-import 'package:talbna/blocs/user_contact/user_contact_bloc.dart';
-import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
-import 'package:talbna/data/repositories/authentication_repository.dart';
-import 'package:talbna/data/repositories/comment_repository.dart';
-import 'package:talbna/data/repositories/notification_repository.dart';
-import 'package:talbna/data/repositories/report_repository.dart';
-import 'package:talbna/data/repositories/service_post_repository.dart';
-import 'package:talbna/data/repositories/user_contact_repository.dart';
-import 'package:talbna/data/repositories/user_follow_repository.dart';
-import 'package:talbna/data/repositories/user_profile_repository.dart';
+import 'package:talbna/services/deep_link_service.dart';
 import 'package:talbna/theme_cubit.dart';
+import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/utils/fcm_handler.dart';
-import 'app.dart';
-import 'blocs/category/subcategory_bloc.dart';
-import 'blocs/internet/internet_bloc.dart';
-import 'blocs/internet/internet_event.dart';
-import 'blocs/purchase_request/purchase_request_bloc.dart';
-import 'blocs/user_profile/user_profile_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'data/repositories/categories_repository.dart';
-import 'data/repositories/purchase_request_repository.dart';
+import 'app.dart';
+import 'core/app_bloc_providers.dart';
+import 'core/app_repositories.dart';
+import 'routes.dart';
 
 String language = 'ar';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  FCMHandler fcmHandler = FCMHandler();
-  await fcmHandler.initializeFCM();
-  await requestPermissions();
+class AppInitializer {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final DeepLinkService deepLinkService = DeepLinkService();
 
-  // Load saved theme preference
-  final prefs = await SharedPreferences.getInstance();
-  final bool isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
+  static Future<void> initialize() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  // Set system bar colors based on the saved theme
-  final brightness = isDarkTheme ? Brightness.dark : Brightness.light;
-  final statusBarColor = isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor;
-  final navigationBarColor = isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor;
+      // Initialize core services
+      await _initializeFoundationServices();
 
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: statusBarColor,
-    statusBarBrightness: brightness,
-    systemNavigationBarColor: navigationBarColor,
-    systemNavigationBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
-  ));
+      // Load app preferences
+      final prefs = await _loadAppPreferences();
 
-  if (prefs.containsKey('language')) {
-    language = prefs.getString('language')!;
-  } else {
-    language = 'en'; // Set default language
+      // Configure system UI
+      await _configureSystemUI(prefs.getBool('isDarkTheme') ?? true);
+
+      // Request runtime permissions
+      await _requestPermissions();
+
+      // Run the application
+      _runApplication(prefs);
+    } catch (e, stackTrace) {
+      debugPrint('App Initialization Error: $e');
+      debugPrint('Stack Trace: $stackTrace');
+      DebugLogger.log('App Initialization Error: $e\n$stackTrace', category: 'INIT');
+    }
   }
 
-  final authenticationRepository = AuthenticationRepository();
-  final servicePostRepository = ServicePostRepository();
-  final commentsRepository = CommentRepository();
-  final userProfileRepository = UserProfileRepository();
-  final subcategoryRepository = CategoriesRepository();
+  static Future<void> _initializeFoundationServices() async {
+    await Firebase.initializeApp();
 
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider<NetworkBloc>(
-          create: (context) => NetworkBloc()..add(NetworkObserve()),
+    // Initialize DeepLinkService and set the navigator key
+    deepLinkService.setNavigatorKey(navigatorKey);
+    await deepLinkService.initialize();
+
+    await FCMHandler().initializeFCM();
+  }
+
+  static Future<SharedPreferences> _loadAppPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    language = prefs.getString('language') ?? 'ar';
+    return prefs;
+  }
+
+  static Future<void> _configureSystemUI(bool isDarkTheme) async {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    final brightness = isDarkTheme ? Brightness.dark : Brightness.light;
+    AppTheme.setSystemBarColors(
+      brightness,
+      isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor,
+      isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor,
+    );
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: isDarkTheme ? AppTheme.darkPrimaryColor : AppTheme.lightPrimaryColor,
+      systemNavigationBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
+    ));
+  }
+
+  static Future<void> _requestPermissions() async {
+    final permissions = [
+      Permission.location,
+      Permission.storage,
+      Permission.photos,
+      Permission.contacts,
+      Permission.camera,
+      Permission.notification,
+    ];
+
+    try {
+      // Request permissions one by one with small delay to avoid concurrent request issues
+      for (var permission in permissions) {
+        await permission.request();
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+    } catch (e) {
+      debugPrint('Permission Request Error: $e');
+      DebugLogger.log('Permission Request Error: $e', category: 'PERMISSIONS');
+    }
+  }
+
+  // Improved navigation guard with a shorter time window
+  static final Map<String, DateTime> _recentNavigations = {};
+
+  static bool shouldAllowNavigation(String route) {
+    final now = DateTime.now();
+    final routeKey = route.split('?').first; // Remove query params for comparison
+
+    if (_recentNavigations.containsKey(routeKey)) {
+      final lastNavigation = _recentNavigations[routeKey]!;
+      if (now.difference(lastNavigation).inMilliseconds < 800) {
+        DebugLogger.log('Navigation guard: blocking duplicate navigation to $routeKey',
+            category: 'NAVIGATION');
+        return false;
+      }
+    }
+
+    // Allow this navigation and record it
+    _recentNavigations[routeKey] = now;
+    _cleanupRecentNavigations();
+    return true;
+  }
+
+  static void _cleanupRecentNavigations() {
+    if (_recentNavigations.length > 20) {
+      final now = DateTime.now();
+      _recentNavigations.removeWhere((_, timestamp) =>
+      now.difference(timestamp).inSeconds > 5);
+    }
+  }
+
+  static void _runApplication(SharedPreferences prefs) {
+    final repositories = AppRepositories.initialize();
+    final isDarkTheme = prefs.getBool('isDarkTheme') ?? true;
+
+    runApp(
+      MultiBlocProvider(
+        providers: AppBlocProviders.getProviders(repositories),
+        child: MyApp(
+          authenticationRepository: repositories.authenticationRepository,
+          isDarkTheme: isDarkTheme,
+          navigatorKey: navigatorKey, // Pass the navigator key to MyApp
         ),
-        BlocProvider<AuthenticationBloc>(
-          create: (context) => AuthenticationBloc(
-            authenticationRepository: authenticationRepository,
-          ),
-        ),
-        BlocProvider<UserProfileBloc>(
-          create: (context) => UserProfileBloc(
-            repository: userProfileRepository,
-          ),
-        ),
-        BlocProvider<PurchaseRequestBloc>(
-          create: (context) => PurchaseRequestBloc(repository: PurchaseRequestRepository()),
-        ),
-        BlocProvider<OtherUserProfileBloc>(
-          create: (context) => OtherUserProfileBloc(
-            repository: userProfileRepository,
-          ),
-        ),
-        BlocProvider<UserFollowBloc>(
-          create: (context) => UserFollowBloc(
-            repository: UserFollowRepository(),
-          ),
-        ),
-        BlocProvider<UserActionBloc>(
-          create: (context) => UserActionBloc(
-            repository: UserFollowRepository(),
-          ),
-        ),
-        BlocProvider<talabnaNotificationBloc>(
-          create: (context) => talabnaNotificationBloc(notificationRepository: NotificationRepository()),
-        ),
-        BlocProvider<ServicePostBloc>(
-          create: (context) => ServicePostBloc(servicePostRepository: servicePostRepository),
-        ),
-        BlocProvider<CommentBloc>(
-          create: (context) => CommentBloc(commentRepository: commentsRepository),
-        ),
-        BlocProvider<UserContactBloc>(
-          create: (context) => UserContactBloc(repository: UserContactRepository()),
-        ),
-        BlocProvider<ReportBloc>(
-          create: (context) => ReportBloc(repository: ReportRepository()),
-        ),
-        BlocProvider<SubcategoryBloc>(
-          create: (context) => SubcategoryBloc(categoriesRepository: subcategoryRepository),
-        ),
-        BlocProvider<ThemeCubit>(
-          create: (context) => ThemeCubit()..loadTheme(),
-        ),
-      ],
-      child: MyApp(
-        authenticationRepository: authenticationRepository,
-        isDarkTheme: isDarkTheme,
       ),
-    ),
-  );
+    );
+  }
 }
 
-Future<void> requestPermissions() async {
-  // Request necessary permissions
-  await Permission.location.request();
-  await Permission.storage.request();
-  await Permission.photos.request();
-  await Permission.contacts.request();
-  await Permission.camera.request();
-  await Permission.notification.request();
+Future<void> main() async {
+  await AppInitializer.initialize();
 }

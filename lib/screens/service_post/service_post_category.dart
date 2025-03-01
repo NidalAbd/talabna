@@ -10,13 +10,15 @@ import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
 
+import '../widgets/shimmer_widgets.dart';
+
 class ServicePostScreen extends StatefulWidget {
   final int category;
   final int userID;
   final bool showSubcategoryGridView;
   final ServicePostBloc servicePostBloc;
   final User user;
-   const ServicePostScreen({
+  const ServicePostScreen({
     Key? key,
     required this.category,
     required this.userID,
@@ -120,75 +122,79 @@ class ServicePostScreenState extends State<ServicePostScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               child: BlocBuilder<ServicePostBloc, ServicePostState>(
-                      bloc: widget.servicePostBloc,
-                      builder: (context, state) {
-                        if (_servicePostsCategory.isNotEmpty) {
-                          return RefreshIndicator(
-                            onRefresh: _handleRefreshCategoryPost,
-                            child: Column(
-                              children: [
-                               // if(widget.category == 7) NewsPostForm(
-                               //    onPostSubmitted: (String text, String? mediaType) {
-                               //    },
-                               //  ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    controller: _scrollCategoryPostController,
-                                    itemCount: _hasReachedMax
-                                        ? _servicePostsCategory.length
-                                        : _servicePostsCategory.length + 1,
-                                    itemBuilder: (context, index) {
-                                      if (index >= _servicePostsCategory.length) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                      final servicePost = _servicePostsCategory[index];
-                                      return AnimatedOpacity(
-                                        opacity: 1.0,
-                                        duration: const Duration(milliseconds: 2000),
-                                        curve: Curves.easeIn,
-                                        child: ServicePostCard(
-                                          key: Key('servicePostCategory_${servicePost.id}'),
-                                          onPostDeleted: onPostDeleted,
-                                          servicePost: servicePost,
-                                          canViewProfile: true,
-                                          userProfileId: widget.userID, user: widget.user,
+                bloc: widget.servicePostBloc,
+                builder: (context, state) {
+                  if (_servicePostsCategory.isNotEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: _handleRefreshCategoryPost,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _scrollCategoryPostController,
+                              itemCount: _hasReachedMax
+                                  ? _servicePostsCategory.length
+                                  : _servicePostsCategory.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index >= _servicePostsCategory.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Theme.of(context).primaryColor,
                                         ),
-                                      );
-                                    },
+                                      ),
+                                    ),
+                                  );
+                                }
+                                final servicePost = _servicePostsCategory[index];
+                                return AnimatedOpacity(
+                                  opacity: 1.0,
+                                  duration: const Duration(milliseconds: 2000),
+                                  curve: Curves.easeIn,
+                                  child: ServicePostCard(
+                                    key: Key('servicePostCategory_${servicePost.id}'),
+                                    onPostDeleted: onPostDeleted,
+                                    servicePost: servicePost,
+                                    canViewProfile: true,
+                                    userProfileId: widget.userID,
+                                    user: widget.user,
                                   ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
-                          );
-                        }  else if (state is ServicePostLoadFailure) {
-                          String errorMessage = state.errorMessage;
-                          if (errorMessage.contains('SocketException')) {
-                            errorMessage = 'No internet connection';
-                          }
-                          return Center(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: _handleRefreshCategoryPost,
-                                  icon: const Icon(Icons.refresh),
-                                ),
-                                 Text('some error happen , $errorMessage'),
-                              ],
-                            ),
-                          );
-                        } else {
-                          return const Center(
-                            child: SizedBox(
-                              width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator()),
-                          );
-                        }
-                      },
-                    ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (state is ServicePostLoadFailure) {
+                    String errorMessage = state.errorMessage;
+                    if (errorMessage.contains('SocketException')) {
+                      errorMessage = 'No internet connection';
+                    }
+                    return Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: _handleRefreshCategoryPost,
+                            icon: const Icon(Icons.refresh),
+                          ),
+                          Text('Some error occurred: $errorMessage'),
+                        ],
+                      ),
+                    );
+                  } else {
+                    // Replace this with shimmer loading
+                    return const ServicePostScreenShimmer();
+                  }
+                },
+              ),
             ),
           ],
         ),

@@ -15,13 +15,12 @@ class UserAvatar extends StatefulWidget {
   final int fromUser;
   final User user;
   const UserAvatar(
-      {Key? key,
+      {super.key,
       this.imageUrl,
       this.radius,
       required this.toUser,
       required this.canViewProfile,
-      required this.fromUser, required this.user})
-      : super(key: key);
+      required this.fromUser, required this.user});
 
   @override
   _UserAvatarState createState() => _UserAvatarState();

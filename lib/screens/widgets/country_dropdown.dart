@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
-import 'package:talbna/data/repositories/countries_repository.dart';
-import 'package:talbna/data/models/countries.dart';
-import 'package:talbna/main.dart';
-
+import 'package:flutter/services.dart';
+import '../../data/models/countries.dart';
+import '../../data/repositories/countries_repository.dart';
+import '../../main.dart';
 import '../../provider/language.dart';
+import '../../app_theme.dart';
 
 class CountryCityDropdown extends StatefulWidget {
   final Country? initialCountry;
@@ -40,256 +40,314 @@ class _CountryCityDropdownState extends State<CountryCityDropdown> {
   List<City> _cities = [];
   Country? _selectedCountry;
   City? _selectedCity;
-  final TextEditingController _selectedCountryCode = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController whatsappController = TextEditingController();
-  RegExp phonePattern = RegExp(r'^[0-9]{5,}$');
-  RegExp whatsappPattern = RegExp(r'^[0-9]{5,}$');
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _whatsappController = TextEditingController();
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
-    _fetchCountries();
-    phoneController.text = widget.initialPhoneNumber ?? "";
-    whatsappController.text = widget.initialWhatsappNumber ?? "";
-
-    phoneController.addListener(() {
-      widget.onPhoneNumberChanged(phoneController.text);
-    });
-
-    whatsappController.addListener(() {
-      widget.onWhatsAppNumberChanged(whatsappController.text);
-    });
-    if (widget.initialCountry != null) {
-      _selectedCountry = widget.initialCountry;
-      _selectedCountryCode.text = widget.initialCountry!.countryCode;
-    }
-    if (widget.initialCity != null) {
-      _selectedCity = widget.initialCity;
-    }
+    _initializeData();
   }
 
-  void _fetchCountries() async {
+  Future<void> _initializeData() async {
+    setState(() => _isLoading = true);
+    _phoneController.text = widget.initialPhoneNumber ?? "";
+    _whatsappController.text = widget.initialWhatsappNumber ?? "";
+
+    if (widget.initialCountry != null) {
+      _selectedCountry = widget.initialCountry;
+      await _fetchCities(widget.initialCountry!.id);
+    }
+    await _fetchCountries();
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _fetchCountries() async {
     try {
-      CountriesRepository repository = CountriesRepository();
+      final repository = CountriesRepository();
       _countries = await repository.getCountries();
+
       if (widget.initialCountry != null) {
         _selectedCountry = _countries.firstWhere(
-                (country) => country.id == widget.initialCountry!.id,
-            orElse: () => _countries.first);
-        _fetchCities(_selectedCountry!.id);
+              (country) => country.id == widget.initialCountry!.id,
+          orElse: () => _countries.first,
+        );
+        await _fetchCities(_selectedCountry!.id);
       }
-      setState(() {});
     } catch (e) {
       print('Error fetching countries: $e');
     }
   }
 
-  void _fetchCities(int? countryId) async {
+  Future<void> _fetchCities(int countryId) async {
     try {
-      CountriesRepository repository = CountriesRepository();
-      _cities = await repository.getCities(countryId!);
+      final repository = CountriesRepository();
+      _cities = await repository.getCities(countryId);
+
       if (widget.initialCity != null) {
         _selectedCity = _cities.firstWhere(
-                (city) => city.id == widget.initialCity!.id,
-            orElse: () => _cities.first);
+              (city) => city.id == widget.initialCity!.id,
+          orElse: () => _cities.first,
+        );
       } else {
-        _selectedCity = _cities.first;
+        _selectedCity = _cities.isNotEmpty ? _cities.first : null;
       }
-      setState(() {});
     } catch (e) {
       print('Error fetching cities: $e');
     }
   }
 
+  Widget _buildDropdownField({
+    required String label,
+    required Widget child,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildPhoneInput({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required Function(String) onChanged,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Country Code Section
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[50],
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(15)),
+                border: Border(
+                  right: BorderSide(
+                    color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _selectedCountry?.countryCode ?? '',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Phone Number Input
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  maxLength: 9,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(9),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: label,
+                    border: InputBorder.none,
+                    counterText: '',
+                    labelStyle: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    // Remove this condition to allow updates for all values
+                    onChanged(value);
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a number';
+                    }
+                    if (value.length != 9) {
+                      return 'Number should be 9 digits';
+                    }
+                    if (value.startsWith('0')) {
+                      return 'Number cannot start with 0';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Card(
-
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: DropdownButtonFormField<Country>(
-              value: _selectedCountry,
-              decoration:  InputDecoration(
-                labelText: _language.tCountryText(),
-                border: InputBorder.none,
+      children: [
+        // Country Dropdown
+        _buildDropdownField(
+          label: _language.tCountryText(),
+          child: DropdownButtonFormField<Country>(
+            value: _selectedCountry,
+            decoration: InputDecoration(
+              labelText: _language.tCountryText(),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
               ),
-              dropdownColor: Theme.of(context).brightness == Brightness.dark
-    ? AppTheme.darkPrimaryColor
-        : AppTheme.lightPrimaryColor,
-              items: _countries.map((country) {
-                return DropdownMenuItem<Country>(
-                  value: country,
-                  child: Text(country.countryCode ,style:  TextStyle(color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),),
+              filled: true,
+              fillColor: Colors.transparent,
+            ),
+            dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+            items: _countries.map((country) {
+              return DropdownMenuItem<Country>(
+                value: country,
+                child: Text(
+                  country.getName(language),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 15,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (Country? newCountry) async {
+              if (newCountry != null) {
+                setState(() {
+                  _selectedCountry = newCountry;
+                  _selectedCity = null;
+                });
+                await _fetchCities(newCountry.id);
+                widget.onCountryChanged(newCountry);
+                widget.updateCountryCode(newCountry.countryCode);
+              }
+            },
+          ),
+        ),
+
+        // City Dropdown
+        if (_selectedCountry != null)
+          _buildDropdownField(
+            label: _language.tCityText(),
+            child: DropdownButtonFormField<City>(
+              value: _selectedCity,
+              decoration: InputDecoration(
+                labelText: _language.tCityText(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.transparent,
+              ),
+              dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+              items: _cities.map((city) {
+                return DropdownMenuItem<City>(
+                  value: city,
+                  child: Text(
+                    city.getName(language),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 15,
+                    ),
+                  ),
                 );
               }).toList(),
-              onChanged: (Country? newCountry) {
-                if (newCountry != null) {
-                  setState(() {
-                    _selectedCountry = newCountry;
-                    _selectedCountryCode.text = newCountry.countryCode;
-                  });
-                  _fetchCities(newCountry.id);
-                  widget.onCountryChanged(newCountry);
-                  widget.updateCountryCode(_selectedCountryCode.text);
+              onChanged: (City? newCity) {
+                if (newCity != null) {
+                  setState(() => _selectedCity = newCity);
+                  widget.onCityChanged(newCity);
                 }
               },
             ),
           ),
-        ),
-        if (_selectedCountry != null)
-          Card(
 
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: DropdownButtonFormField<City>(
-                value: _selectedCity,
-                decoration:  InputDecoration(
-                  labelText: _language.tCityText(),
-                  border: InputBorder.none,
-                ),
-                dropdownColor: Theme.of(context).brightness == Brightness.dark
-    ? AppTheme.darkPrimaryColor
-        : AppTheme.lightPrimaryColor,
-                items: _cities.map((city) {
-                  return DropdownMenuItem<City>(
-                    value: city,
-                    child: Text(city.getName(language) ,style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,),),
-                  );
-                }).toList(),
-                onChanged: (City? newCity) {
-                  if (newCity != null) {
-                    setState(() {
-                      _selectedCity = newCity;
-                    });
-                    widget.onCityChanged(newCity);
-                  }
-                },
-              ),
-            ),
+        const SizedBox(height: 16),
+
+        // Phone Inputs Section
+        if (_selectedCountry != null) ...[
+          _buildPhoneInput(
+            controller: _phoneController,
+            label: _language.tPhoneNumberText(),
+            icon: Icons.phone_outlined,
+            onChanged: widget.onPhoneNumberChanged,
           ),
-        Row(
-          children: [
-            Card(
 
-              child: SizedBox(
-                height: 46,
-                width: 80,
-                child: Center(
-                  child: TextFormField(
-                    readOnly: true,
-                    controller: _selectedCountryCode,
-                    decoration:  InputDecoration(
-                      labelText: _language.getCodeText(),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Card(
-
-                child: TextFormField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 9, // Set maximum length to 9 digits
-                  minLines: 1,
-
-                  onChanged: (value) {
-                    if (value.isNotEmpty && !value.startsWith('0')) {
-                      widget.onPhoneNumberChanged(value);
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    }
-                    if (value.length < 9 || value.length > 9) {
-                      return 'Phone number should be 9 digits';
-                    }
-                    if (value.startsWith('0')) {
-                      return 'Phone number cannot start with 0';
-                    }
-                    return null;
-                  },
-                  decoration:   InputDecoration(
-                    labelText: _language.tPhoneNumberText(),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
-                    counterText: '', // Remove the counter text
-                    counterStyle: TextStyle(fontSize: 0), // Set the counter font size to 0
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Card(
-
-              child: SizedBox(
-                height: 46,
-                width: 80,
-                child: Center(
-                  child: TextFormField(
-                    readOnly: true,
-                    controller: _selectedCountryCode,
-                    decoration:  InputDecoration(
-                      labelText: _language.getCodeText(),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Card(
-
-                child: TextFormField(
-                  controller: whatsappController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 9, // Set maximum length to 9 digits
-                  minLines: 1,
-                  onChanged: (value) {
-                    if (value.isNotEmpty && !value.startsWith('0')) {
-                      widget.onWhatsAppNumberChanged(value);
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    }
-                    if (value.length < 9 || value.length > 9) {
-                      return 'Phone number should be 9 digits';
-                    }
-                    if (value.startsWith('0')) {
-                      return 'Phone number cannot start with 0';
-                    }
-                    return null;
-                  },
-                  decoration:  InputDecoration(
-                    labelText: _language.tWhatsappNumberText(),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
-                    counterText: '', // Remove the counter text
-                    counterStyle: TextStyle(fontSize: 0), // Set the counter font size to 0
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          _buildPhoneInput(
+            controller: _whatsappController,
+            label: _language.tWhatsappNumberText(),
+            icon: Icons.chat,
+            onChanged: widget.onWhatsAppNumberChanged,
+          ),
+        ],
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _whatsappController.dispose();
+    super.dispose();
   }
 }

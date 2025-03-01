@@ -296,7 +296,7 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
     try {
       final newServicePost =
       await servicePostRepository.createServicePost(event.servicePost, event.imageFiles);
-      yield ServicePostOperationSuccess( servicePost: newServicePost, event: 'CreateServicePostEvent');
+      yield ServicePostOperationSuccess( servicePost: true, event: 'CreateServicePostEvent');
     } catch (e) {
       yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'LoadOldOrNewForm');
     }
@@ -307,7 +307,7 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
     try {
       final newServicePost =
       await servicePostRepository.updateServicePostCategory(event.servicePost , event.servicePostID);
-      yield ServicePostOperationSuccess( servicePost: newServicePost, event: 'ServicePostCategoryUpdateEvent');
+      yield ServicePostOperationSuccess( servicePost: true, event: 'ServicePostCategoryUpdateEvent');
     } catch (e) {
       yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'ServicePostCategoryUpdateEvent');
     }
@@ -318,7 +318,7 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
     try {
       final newServicePost =
       await servicePostRepository.updateServicePostBadge(event.servicePost , event.servicePostID);
-      yield ServicePostOperationSuccess( servicePost: newServicePost, event: 'ServicePostBadgeUpdateEvent');
+      yield ServicePostOperationSuccess( servicePost: true, event: 'ServicePostBadgeUpdateEvent');
     } catch (e) {
       yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'ServicePostBadgeUpdateEvent');
     }
@@ -327,13 +327,25 @@ class ServicePostBloc extends Bloc<ServicePostEvent, ServicePostState> {
       UpdateServicePostEvent event) async* {
     yield const ServicePostLoading(event: 'UpdateServicePostEvent');
     try {
-      final updatedServicePost =
-      await servicePostRepository.updateServicePost(event.servicePost , event.imageFiles);
-      yield ServicePostOperationSuccess( servicePost: updatedServicePost, event: 'UpdateServicePostEvent');
+      // Pass the photos directly from the service post
+      final updatedServicePost = await servicePostRepository.updateServicePost(
+        event.servicePost,
+        event.servicePost.photos ?? [], // Pass photos directly
+      );
+
+      yield ServicePostOperationSuccess(
+          servicePost: true,
+          event: 'UpdateServicePostEvent'
+      );
     } catch (e) {
-      yield ServicePostOperationFailure(errorMessage: e.toString(), event: 'UpdateServicePostEvent');
+      yield ServicePostOperationFailure(
+          errorMessage: e.toString(),
+          event: 'UpdateServicePostEvent'
+      );
     }
   }
+
+
   Stream<ServicePostState> _mapUpdatePhotoServicePostEventToState(
       UpdatePhotoServicePostEvent event) async* {
     yield const ServicePostLoading(event: 'UpdateServicePostEvent');

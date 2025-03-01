@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../utils/debug_logger.dart';
 
 class AuthenticationRepository {
   // ignore: constant_identifier_names
@@ -112,29 +115,64 @@ class AuthenticationRepository {
     await removeAuthToken();
   }
   Future<bool> checkTokenValidity(String token) async {
-    final response = await http.get(
-      Uri.parse('$API_BASE_URL/api/user/check_token'),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+    try {
+      DebugLogger.logAuth(
+          action: 'VALIDATING',
+          source: 'AuthRepository',
+          token: token
+      );
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
-      return responseBody['valid'] ?? false;
-    } else {
-      // The token is not valid
+      final response = await http.get(
+        Uri.parse('$API_BASE_URL/api/user/check_token'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+        DebugLogger.logAuth(
+            action: responseBody['valid'] ? 'VALID' : 'INVALID',
+            source: 'AuthRepository',
+            token: token,
+            details: {'responseCode': response.statusCode}
+        );
+        return responseBody['valid'] ?? false;
+      } else {
+        // The token is not valid
+        DebugLogger.logAuth(
+            action: 'ERROR',
+            source: 'AuthRepository',
+            token: token,
+            error: e.toString()
+        );
+        return false;
+      }
+    }catch (e) {
+      DebugLogger.logAuth(
+          action: 'ERROR',
+          source: 'AuthRepository',
+          token: token,
+          error: e.toString()
+      );
       return false;
     }
+
   }
 
 
   Future<void> saveAuthToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     bool success = await prefs.setString('auth_token', token);
+
     if (success) {
       print('Token saved successfully $token');
+      DebugLogger.logToken(
+          token: token,
+          action: 'SAVED',
+          source: 'SharedPreferences'
+      );
     } else {
       print('Failed to save token');
     }
@@ -151,6 +189,10 @@ class AuthenticationRepository {
     bool success = await prefs.setInt('userId', userId);
     if (success) {
       print('User ID saved successfully $userId');
+      DebugLogger.log(
+          'UserId saved: $userId',
+          category: 'AUTH'
+      );
     } else {
       print('Failed to save User ID');
     }

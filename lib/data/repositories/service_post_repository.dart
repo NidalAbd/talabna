@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http_parser/http_parser.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../utils/debug_logger.dart';
 
 class ServicePostRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
@@ -28,19 +31,36 @@ class ServicePostRepository {
   Future<ServicePost> getServicePostById(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
+    DebugLogger.log('Fetching service post with ID: $id', category: 'SERVICE_POST');
+
     try {
+      final url = '$_baseUrl/api/service_posts/$id';
+      DebugLogger.log('API URL: $url', category: 'SERVICE_POST');
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/service_posts/$id'),
+        Uri.parse(url),
         headers: {'Authorization': 'Bearer $token'},
       );
+
+      DebugLogger.log('API Response Status: ${response.statusCode}', category: 'SERVICE_POST');
+      DebugLogger.log('API Response Body: ${response.body.substring(0, 200)}...', category: 'SERVICE_POST');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServicePost.fromJson(jsonDecode(response.body)['servicePostShow']);
+        final json = jsonDecode(response.body);
+        DebugLogger.log('Parsed JSON keys: ${json.keys.toList()}', category: 'SERVICE_POST');
+
+        if (json.containsKey('servicePostShow')) {
+          return ServicePost.fromJson(json['servicePostShow']);
+        } else {
+          throw Exception('API response missing servicePostShow key');
+        }
       } else if (response.statusCode == 404) {
         throw Exception('هذا المنشور غير موجود');
       } else {
-        throw Exception('فشل في تحميل المنشةر');
+        throw Exception('فشل في تحميل المنشةر: ${response.statusCode}');
       }
     } catch (e) {
+      DebugLogger.log('Error fetching post: $e', category: 'SERVICE_POST');
       throw Exception('$eخطا الاتصال في الخادم - المنشورات ');
     }
   }
@@ -183,7 +203,7 @@ class ServicePostRepository {
   }
 
 
-  Future<ServicePost> updateServicePostBadge(ServicePost servicePost, int servicePostID) async {
+  Future<bool> updateServicePostBadge(ServicePost servicePost, int servicePostID) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
@@ -206,10 +226,13 @@ class ServicePostRepository {
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServicePost.fromJson(jsonDecode(response.body));
+        return true;
       }else if (response.statusCode == 400) {
         throw Exception(response.body.toString());
+        return true;
+
       }else {
+        return false;
         throw Exception(
           'Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
         );
@@ -218,49 +241,62 @@ class ServicePostRepository {
       throw Exception('Error occurred: $e');
     }
   }
-  Future<ServicePost> updateServicePostCategory(ServicePost servicePost, int servicePostID) async {
+  Future<bool> updateServicePostCategory(ServicePost servicePost, int servicePostID) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
     // Create a Map object
     Map<String, String> formData = {
-      'category': servicePost.category?.name.toString() ?? 'null', // ✅ Extract name instead of object
-      'subCategory': servicePost.subCategory?.name.toString() ?? 'null',
+      'category': servicePost.category?.id.toString() ?? 'null', // ✅ Extract name instead of object
+      'subCategory': servicePost.subCategory?.id.toString() ?? 'null',
     };
 
     // Encode formData as a query string
     String encodedFormData = Uri(queryParameters: formData).query;
     // Send the request
     try {
+      final url = '$_baseUrl/api/service_posts/ChangeCategories/$servicePostID';
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+
+      print('🔵 [HTTP PUT Request]');
+      print('➡️ URL: $url');
+      print('📩 Headers: $headers');
+      print('📝 Body: $encodedFormData');
+
       final response = await http.put(
-        Uri.parse('$_baseUrl/api/service_posts/ChangeCategories/$servicePostID'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        Uri.parse(url),
+        headers: headers,
         body: encodedFormData,
       ).timeout(const Duration(seconds: 30));
+
+      print('🔵 [Response Received]');
+      print('✅ Status Code: ${response.statusCode}');
+      print('📄 Response Body: ${response.body}');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServicePost.fromJson(jsonDecode(response.body));
+        return true;
       } else {
         throw Exception(
-          'Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
+          '❌ Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
         );
       }
     } catch (e) {
+      return false;
       throw Exception('Error occurred: $e');
     }
+
   }
 
   Future<ServicePost> createServicePost(ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-
     final request =
     http.MultipartRequest('POST', Uri.parse('$_baseUrl/api/service_posts'));
     request.headers['Authorization'] = 'Bearer $token';
     request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-
     request.fields['title'] = servicePost.title?? 'null';
     request.fields['description'] = servicePost.description?? 'null';
     request.fields['price'] = servicePost.price.toString();
@@ -284,11 +320,19 @@ class ServicePostRepository {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print(responseBody);
-        print('categories_id ${request.fields['categories_id']}');
-        print('servicePost category ${servicePost.category}');
+        final Map<String, dynamic> responseMap = jsonDecode(responseBody);
+        final Map<String, dynamic> servicePostData = responseMap['data'];
 
-        return ServicePost.fromJson(jsonDecode(responseBody));
+        print('Response: $servicePostData');
+
+        // Create ServicePost from the 'data' section
+        ServicePost servicePost = ServicePost.fromJson(servicePostData);
+
+        // Additional logging if needed
+        print('categories_id: ${servicePostData['categories_id']}');
+        print('Service Post Category: ${servicePostData['category']}');
+
+        return servicePost;
       }else if (response.statusCode == 400 ) {
         print(  'error : $responseBody',);
         throw Exception(
@@ -307,46 +351,81 @@ class ServicePostRepository {
     }
   }
 
-  Future<ServicePost> updateServicePost(
-      ServicePost servicePost, List<http.MultipartFile> imageFiles) async {
+  Future<bool> updateServicePost(
+      ServicePost servicePost, List<Photo> photos) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
-    // Create a Map object
-    Map<String, String> formData = {
-      'id': servicePost.id.toString(),
-      'title': servicePost.title?? 'null',
-      'description': servicePost.description?? 'null',
-      'price': servicePost.price.toString(),
-      'priceCurrency': servicePost.priceCurrency?? 'null',
-      'locationLatitudes': servicePost.locationLatitudes.toString(),
-      'locationLongitudes': servicePost.locationLongitudes.toString(),
-      'userId': servicePost.userId.toString(),
-      'type': servicePost.type?? 'null',
-      'category': servicePost.category?.id.toString() ?? 'null', // ✅ Extract id
-      'subCategory': servicePost.subCategory?.name.toString() ?? 'null',
-    };
-    // Encode formData as a query string
-    String encodedFormData = Uri(queryParameters: formData).query;
-    // Send the request
-
     try {
-      final response = await http.put(
+      // Create multipart request
+      final request = http.MultipartRequest(
+        'POST', // Use POST method with _method field for PUT
         Uri.parse('$_baseUrl/api/service_posts/${servicePost.id}'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: encodedFormData,
-      ).timeout(const Duration(seconds: 30));
+      );
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      // Add form fields
+      request.fields.addAll({
+        '_method': 'PUT', // This simulates a PUT request
+        'id': servicePost.id.toString(),
+        'title': servicePost.title ?? '',
+        'description': servicePost.description ?? '',
+        'price': servicePost.price.toString(),
+        'priceCurrency': servicePost.priceCurrency ?? '',
+        'locationLatitudes': servicePost.locationLatitudes.toString(),
+        'locationLongitudes': servicePost.locationLongitudes.toString(),
+        'userId': servicePost.userId.toString(),
+        'type': servicePost.type ?? '',
+        'categories_id': servicePost.category?.id.toString() ?? '',
+        'sub_categories_id': servicePost.subCategory?.id.toString() ?? '',
+      });
+
+      // Add image files
+      for (var photo in photos) {
+        // Only add new photos (ones without an ID)
+        if (photo.id == null && photo.src != null) {
+          final file = File(photo.src!);
+          if (await file.exists()) {
+            final filename = file.path.split('/').last;
+            final stream = http.ByteStream(file.openRead());
+            final length = await file.length();
+
+            final multipartFile = http.MultipartFile(
+              'images[]', // Make sure this matches your Laravel field name
+              stream,
+              length,
+              filename: filename,
+              // Set content type based on whether it's a video or image
+              contentType: photo.isVideo ?? false
+                  ? MediaType('video', 'mp4')
+                  : MediaType('image', 'jpeg'),
+            );
+
+            request.files.add(multipartFile);
+          }
+        }
+      }
+
+      // Send the request
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 30),
+      );
+
+      // Get the response
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServicePost.fromJson(jsonDecode(response.body));
-      }else if (response.statusCode == 400 ) {
+        return true;
+      } else if (response.statusCode == 400) {
+        final errorData = json.decode(response.body);
         throw Exception(
-          'error : ${response.body}',
+          'Validation error: ${errorData['errors'] ?? response.body}',
         );
-      }  else {
+      } else {
         throw Exception(
           'Error updating service post: ${response.reasonPhrase}. Response body: ${response.body}',
         );

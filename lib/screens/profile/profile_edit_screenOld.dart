@@ -190,14 +190,13 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
             _saveDataToSharedPreferences(state.user);
-            SuccessWidget.show(context, 'Profile updated successfully.');
+            showCustomSnackBar(context, 'success', type: SnackBarType.success);
           } else if (state is UserProfileUpdateFailure) {
             BlocProvider.of<UserProfileBloc>(context)
                 .add(UserProfileRequested(id: widget.userId));
-            ErrorCustomWidget.show(context, message: 'Profile updated failed.');
+            showCustomSnackBar(context, 'error', type: SnackBarType.success);
           } else if (state is UserProfileLoadFailure) {
-            ErrorCustomWidget.show(context,
-                message: 'Profile load failed , refresh the page');
+            showCustomSnackBar(context, 'error', type: SnackBarType.success);
           }
         },
         builder: (context, state) {

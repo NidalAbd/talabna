@@ -1,25 +1,22 @@
 import 'dart:convert';
 class Category {
   final int id;
-  final Map<String, String> name; // A map to handle multi-language names
+  final Map<String, String> name;
 
   Category({
     required this.id,
     required this.name,
   });
 
-  // Factory constructor to parse the API response
   factory Category.fromJson(Map<String, dynamic> json) {
-    // Ensure the name is only initialized once
-    final Map<String, String> categoryName = Map<String, String>.from(json['name']);
+    final nameData = json['name'] is Map<String, dynamic>
+        ? Map<String, String>.from(json['name'])
+        : Map<String, String>.from(jsonDecode(json['name']));
+
     return Category(
       id: json['id'],
-      name: categoryName, // Extracting name for different languages
+      name: nameData,
     );
-  }
-
-  String getLocalizedName(String languageCode) {
-    return name[languageCode] ?? name['en'] ?? 'Unknown';
   }
 }
 

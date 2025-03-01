@@ -75,6 +75,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                             Center(
                               child: IconButton(
                                 onPressed: () {
+                                  Navigator.pop(context);
+
                                   showModalBottomSheet(
                                     context: context,
                                     builder: (BuildContext context) {
@@ -101,6 +103,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                             child: EmailIconButton(
                               email: widget.servicePost.email!,
                               width: 50,
+                              onDismiss: () => Navigator.pop(context),
+
                             ),
                           ),
 
@@ -114,6 +118,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                             child: WhatsAppIconButtonWidget(
                               width: 30,
                               whatsAppNumber: widget.servicePost.watsNumber,
+                              onDismiss: () => Navigator.pop(context),
+
                             ),
                           ),
                           const SizedBox(height: 10,),
@@ -127,6 +133,8 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                               child: PhoneIconButtonWidget(
                                 width: 50,
                                 phone: widget.servicePost.phones,
+                                onDismiss: () => Navigator.pop(context),
+
                               ),
                             ),
                             const Text('Call', style: TextStyle(fontSize: 12)),
@@ -135,7 +143,12 @@ class _ContactModalBottomSheetState extends State<ContactModalBottomSheet> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            LocationIconButtonWidget(locationLatitudes: widget.servicePost.locationLatitudes!, locationLongitudes: widget.servicePost.locationLongitudes!, width: 50,),
+                            LocationIconButtonWidget(
+                              locationLatitudes: widget.servicePost.locationLatitudes!,
+                              locationLongitudes: widget.servicePost.locationLongitudes!,
+                              onDismiss: () => Navigator.pop(context),
+                              width: 50,
+                            ),
                             Text(widget.servicePost.distance.toString(),style: const TextStyle(fontSize: 12) ),
                           ],
                         )

@@ -53,7 +53,7 @@ class _PointBalanceState extends State<PointBalance> {
               label: widget.showBalance ?Text(
                 pointBalance.totalPoint.toString(),
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ): const Padding(
@@ -61,14 +61,13 @@ class _PointBalanceState extends State<PointBalance> {
                 child: Text(
                   '***',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ), // Set your desired background color

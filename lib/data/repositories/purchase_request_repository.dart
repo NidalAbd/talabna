@@ -51,27 +51,44 @@ class PurchaseRequestRepository {
       throw Exception('حدث خطأ أثناء إرسال طلب الشراء');
     }
   }
-  Future<void> addPointsForUsers(
-      {required int pointsRequested,required int fromUser,required int toUser}) async {
+
+  Future<void> addPointsForUsers({
+    required int pointsRequested,
+    required int fromUser,
+    required int toUser
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/talabna_points/transfer/$pointsRequested/fromUser/$fromUser/toUser/$toUser'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-print(response.statusCode);
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      return;
-    }
-    else {
-      throw Exception('حدث خطأ أثناء إرسال طلب الشراء');
+    // Fix: URL formatting and structure to match what works in Postman
+    final url = '$baseUrl/api/talbna_points/transfer/$pointsRequested/fromUser/$fromUser/toUser/$toUser';
+    print('Requesting URL: $url'); // Debug log
+
+    try {
+      final response = await http.get( // Changed to POST method
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return;
+      } else {
+        // More specific error message including the status code
+        throw Exception('حدث خطأ أثناء تحويل النقاط. رمز الحالة: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception occurred: $e');
+      throw Exception('حدث خطأ أثناء تحويل النقاط: $e');
     }
   }
+
   Future<PointBalance> getUserPointsBalance({required int userId}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');

@@ -3,8 +3,8 @@ import 'image_gallery.dart';
 
 class ServicePostViewWidget extends StatelessWidget {
   const ServicePostViewWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key, String? postId,
+  });
 
   @override
   Widget build(BuildContext context) {

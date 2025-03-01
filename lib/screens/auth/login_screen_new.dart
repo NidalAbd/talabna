@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/app_theme.dart';
@@ -7,6 +8,9 @@ import 'package:talbna/blocs/authentication/authentication_state.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
+
+import '../../routes.dart';
+import '../check_auth.dart';
 
 class LoginScreenNew extends StatefulWidget {
   const LoginScreenNew({Key? key}) : super(key: key);
@@ -19,7 +23,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _emailController = TextEditingController();
   late final TextEditingController _passwordController =
-  TextEditingController();
+      TextEditingController();
   late bool _obscurePassword = true;
   bool _isLoading = false;
   final Language language = Language();
@@ -39,22 +43,81 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
           setState(() {
             _isLoading = true;
           });
-        } else if (state is AuthenticationFailure) {
-          // Set _isLoading to false when authentication fails.
+        }else if (state is AuthenticationFailure) {
+          // Set isLoading to false when authentication fails
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-              content: Text('Some Error Happen ${state.error},' , style: TextStyle(color: Colors.white),),
-            ),
+
+          // Determine the most appropriate error type and message
+          AuthErrorType errorType;
+          String userFriendlyMessage;
+
+          // Convert error to lowercase for case-insensitive checking
+          String errorMessage = state.error.toLowerCase();
+
+          // Handle validation errors
+          if (errorMessage.contains('email') || errorMessage.contains('password')) {
+            errorType = AuthErrorType.invalidCredentials;
+            userFriendlyMessage = 'Please check your email and password format.';
+          }
+          // Handle unauthorized access (wrong credentials)
+          else if (errorMessage.contains('unauthorized')) {
+            errorType = AuthErrorType.invalidCredentials;
+            userFriendlyMessage = 'Incorrect email or password. Please try again.';
+          }
+          // Handle unique email constraint during registration
+          else if (errorMessage.contains('unique') || errorMessage.contains('already exists')) {
+            errorType = AuthErrorType.invalidCredentials;
+            userFriendlyMessage = 'This email is already registered. Try logging in or use a different email.';
+          }
+          // Handle network or connection issues
+          else if (errorMessage.contains('network') ||
+              errorMessage.contains('connection') ||
+              errorMessage.contains('timeout')) {
+            errorType = AuthErrorType.networkError;
+            userFriendlyMessage = 'Unable to connect. Please check your internet connection.';
+          }
+          // Handle server-side errors
+          else if (errorMessage.contains('server') ||
+              errorMessage.contains('internal') ||
+              errorMessage.contains('unable to')) {
+            errorType = AuthErrorType.serverError;
+            userFriendlyMessage = 'We\'re experiencing technical difficulties. Please try again later.';
+          }
+          // Handle password-related issues
+          else if (errorMessage.contains('password confirmation') ||
+              errorMessage.contains('min:')) {
+            errorType = AuthErrorType.invalidCredentials;
+            userFriendlyMessage = 'Password must be at least 8 characters long.';
+          }
+          // Catch-all for unknown errors
+          else {
+            errorType = AuthErrorType.unknownError;
+            userFriendlyMessage = 'An unexpected error occurred. Please try again.';
+          }
+
+          // Show modern error handling
+          AuthSnackBar.show(
+            context,
+            errorType: errorType,
+            customMessage: userFriendlyMessage,
+            onRetry: () {
+              // Retry login with existing credentials
+              context.read<AuthenticationBloc>().add(
+                LoginRequest(
+                  email: _emailController.text.trim(),
+                  password: _passwordController.text,
+                ),
+              );
+            },
           );
-        } else if (state is AuthenticationSuccess) {
+        }else if (state is AuthenticationSuccess) {
           // Set _isLoading to false when authentication succeeds.
           setState(() {
             _isLoading = false;
           });
-          Navigator.pushReplacementNamed(context, "home");
+          Routes.navigateToHome(context, state.userId!);
           // Navigate to the home screen or perform any necessary action.
           // Example: Navigator.pushReplacementNamed(context, 'home');
         }
@@ -66,174 +129,174 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
               body: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              const SizedBox(height: 250.0),
-                              TextFormField(
-                                controller: _emailController,
-                                decoration: InputDecoration(
-                                  labelText: language.emailText(),
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return language.enterEmailText();
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 20.0),
-                              TextFormField(
-                                controller: _passwordController,
-                                decoration: InputDecoration(
-                                  labelText: language.tPasswordText(),
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8.0),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
+                      children: [
+                        Positioned.fill(
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: SingleChildScrollView(
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    const SizedBox(height: 250.0),
+                                    TextFormField(
+                                      controller: _emailController,
+                                      decoration: InputDecoration(
+                                        labelText: language.emailText(),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return language.enterEmailText();
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword =
-                                        !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                obscureText: _obscurePassword,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return language.enterPasswordText();
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 20.0),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width /
-                                    1.1,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(
-                                            10), // Adjust the radius as per your requirement
+                                    const SizedBox(height: 20.0),
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      decoration: InputDecoration(
+                                        labelText: language.tPasswordText(),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePassword
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscurePassword =
+                                                  !_obscurePassword;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      obscureText: _obscurePassword,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return language.enterPasswordText();
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 20.0),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.1,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 16),
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                  10), // Adjust the radius as per your requirement
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: _isLoading
+                                            ? null
+                                            : () {
+                                                if (_formKey.currentState!
+                                                    .validate()) {
+                                                  setState(() {
+                                                    _isLoading = true;
+                                                  });
+                                                  context
+                                                      .read<
+                                                          AuthenticationBloc>()
+                                                      .add(LoginRequest(
+                                                        email: _emailController
+                                                            .text,
+                                                        password:
+                                                            _passwordController
+                                                                .text,
+                                                      ));
+                                                }
+                                              },
+                                        child: _isLoading
+                                            ? const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              )
+                                            : Text(
+                                                language.loginText(),
+                                              ),
                                       ),
                                     ),
-                                  ),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () {
-                                    if (_formKey.currentState!
-                                        .validate()) {
-                                      setState(() {
-                                        _isLoading = true;
-                                      });
-                                      context
-                                          .read<
-                                          AuthenticationBloc>()
-                                          .add(LoginRequest(
-                                        email:
-                                        _emailController
-                                            .text,
-                                        password:
-                                        _passwordController
-                                            .text,
-                                      ));
-                                    }
-                                  },
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child:
-                                    CircularProgressIndicator(),
-                                  )
-                                      : Text(
-                                    language.loginText(),
-                                  ),
+                                    const SizedBox(height: 20),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Implement the "Create one" functionality here
+                                        Navigator.pushNamed(
+                                            context, '/register');
+                                      },
+                                      child: Text(
+                                        language.createAccountText(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
-                              TextButton(
-                                onPressed: () {
-                                  // Implement the "Create one" functionality here
-                                  Navigator.pushNamed(context, 'registerNew');
-                                },
-                                child: Text(
-                                  language.createAccountText(),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                        const Positioned(
+                          top: 0,
+                          left: 0,
+                          child: LogoTitle(
+                            fontSize: 40,
+                            playAnimation: false,
+                            logoSize: 60,
+                          ),
+                        ),
+                        Positioned(
+                          top: 30,
+                          right: 10,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.brightness_6_sharp,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppTheme.darkPrimaryColor
+                                  : AppTheme.lightPrimaryColor,
+                            ),
+                            onPressed: () =>
+                                BlocProvider.of<ThemeCubit>(context)
+                                    .toggleTheme(),
+                          ),
+                        ),
+                        Positioned(
+                          top: 30,
+                          left: 10,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppTheme.darkPrimaryColor
+                                  : AppTheme.lightPrimaryColor,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        )
+                      ],
                     ),
-                  ),
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    child: LogoTitle(
-                      fontSize: 40,
-                      playAnimation: false,
-                      logoSize: 60,
-                    ),
-                  ),
-                  Positioned(
-                    top: 30,
-                    right: 10,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.brightness_6_sharp,
-                        color: Theme.of(context).brightness ==
-                            Brightness.dark
-                            ? AppTheme.darkPrimaryColor
-                            : AppTheme.lightPrimaryColor,
-                      ),
-                      onPressed: () =>
-                          BlocProvider.of<ThemeCubit>(context)
-                              .toggleTheme(),
-                    ),
-                  ),
-                  Positioned(
-                    top: 30,
-                    left: 10,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: Theme.of(context).brightness ==
-                            Brightness.dark
-                            ? AppTheme.darkPrimaryColor
-                            : AppTheme.lightPrimaryColor,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  )
-                ],
-              ),
             );
           },
         );

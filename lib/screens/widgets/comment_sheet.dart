@@ -12,6 +12,7 @@ import 'package:talbna/screens/widgets/user_avatar_profile.dart';
 
 import '../../blocs/comments/comment_event.dart';
 import '../../provider/language.dart';
+import '../../utils/constants.dart';
 
 class CommentModalBottomSheet extends StatefulWidget {
   final double iconSize;
@@ -217,7 +218,7 @@ class _CommentModalBottomSheetState extends State<CommentModalBottomSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           UserAvatarProfile(
-            imageUrl: '${comment.user.photos?.first.src}',
+            imageUrl: '${Constants.apiBaseUrl}/storage/${comment.user.photos?.first.src}',
             radius: 20,
             toUser: comment.user.id,
             canViewProfile: false,

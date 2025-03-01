@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/data/models/comment.dart';
@@ -8,28 +11,67 @@ import '../../utils/constants.dart';
 class CommentRepository {
   static const String _baseUrl = Constants.apiBaseUrl;
 
-  Future<List<Comments>> fetchComments({required int postId, int page = 1}) async {
+  Future<List<Comments>> fetchComments({
+    required int postId,
+    int page = 1,
+    int maxRetries = 3
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        final response = await http.get(
+            Uri.parse('$_baseUrl/api/commentsForPost/$postId?page=$page'),
+            headers: {'Authorization': 'Bearer $token'}
+        ).timeout(
+            Duration(seconds: 10), // Add a timeout
+            onTimeout: () {
+              throw TimeoutException('The connection has timed out, please try again.');
+            }
+        );
 
-    final response = await http.get(
-        Uri.parse('$_baseUrl/api/commentsForPost/$postId?page=$page'),
-        headers: {'Authorization': 'Bearer $token'}
-    );
+        switch (response.statusCode) {
+          case 200:
+            final Map<String, dynamic> data = jsonDecode(response.body);
+            final List<Comments> comments = (data["data"] as List)
+                .map((e) => Comments.fromJson(e))
+                .toList();
+            return comments;
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      final List<Comments> comments = (data["data"] as List)
-          .map((e) => Comments.fromJson(e))
-          .toList();
-      return comments;
-    } else if (response.statusCode == 404) {
-      throw Exception('Post not found');
-    } else {
-      print('Failed to load comments. Status Code: ${response.statusCode}. Response body: ${response.body}');
-      throw Exception('Failed to load comments');
+          case 404:
+            throw Exception('Post not found');
+
+          case 429: // Too Many Requests
+          // Exponential backoff
+            int delay = (pow(2, attempt) * 1000).toInt();
+            print('Rate limited. Waiting for $delay ms before retry.');
+            await Future.delayed(Duration(milliseconds: delay));
+            continue; // Try again
+
+          default:
+            print('Failed to load comments. Status Code: ${response.statusCode}. Response body: ${response.body}');
+            throw Exception('Failed to load comments');
+        }
+      } on SocketException {
+        // No internet connection
+        if (attempt == maxRetries - 1) {
+          throw Exception('No internet connection');
+        }
+      } on TimeoutException {
+        // Connection timeout
+        if (attempt == maxRetries - 1) {
+          throw Exception('Connection timed out');
+        }
+      } catch (e) {
+        // For any other unexpected errors
+        if (attempt == maxRetries - 1) {
+          rethrow;
+        }
+      }
     }
+
+    throw Exception('Failed to load comments after multiple attempts');
   }
 
 

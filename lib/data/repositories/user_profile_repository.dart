@@ -116,7 +116,6 @@ class UserProfileRepository {
         },
         body: jsonEncode(user.toJson()),
       );
-      print('Failed to statusCode: ${response.statusCode}');
 
       try{
       if (response.statusCode == 200 || response.statusCode == 201) {

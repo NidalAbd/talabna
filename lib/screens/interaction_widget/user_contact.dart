@@ -5,17 +5,14 @@ import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class UserContact extends StatelessWidget {
-
   final String username;
   final String? whatsApp;
   final String? phone;
   final String? email;
 
-
   const UserContact({Key? key, required this.username, this.whatsApp, this.phone, this.email}) : super(key: key);
 
   String formatWhatsAppNumber(String number) {
-    // Remove leading '00'
     number = number.replaceFirst(RegExp(r'^00'), '');
     return number;
   }
@@ -28,28 +25,63 @@ class UserContact extends StatelessWidget {
     }
     if (status.isGranted) {
       final newContact = Contact(
-        name: Name(first: username),
-        phones: [Phone(whatsApp! ,label: PhoneLabel.mobile),Phone(phone! ,label: PhoneLabel.mobile)],
-        emails: [Email(email!),]
+          name: Name(first: username),
+          phones: [Phone(whatsApp!, label: PhoneLabel.mobile), Phone(phone!, label: PhoneLabel.mobile)],
+          emails: [Email(email!),]
       );
 
       await FlutterContacts.insertContact(newContact);
-      SuccessWidget.show(context,'تم اضافة المستخدم الى جهة الاتصال بنجاح');
+      showCustomSnackBar(context, 'success', type: SnackBarType.success);
     } else {
-      print('Contacts permission denied.');
+      showCustomSnackBar(context, 'error', type: SnackBarType.success);
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDarkMode
+        ? AppTheme.darkSecondaryColor
+        : AppTheme.lightPrimaryColor;
 
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 1), // Reduced padding for tight grouping
       child: ListTile(
-        leading: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.person)),
-        title: const Text('UserName'),
-        subtitle: Text(username),
-        trailing: IconButton(onPressed: () => addToContacts(context), icon: const Icon(Icons.add_box)),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            Icons.person_outline,
+            color: primaryColor,
+            size: 20,
+          ),
+        ),
+        title: const Text(
+          'Username',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          username,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+        ),
+        trailing: IconButton(
+          onPressed: () => addToContacts(context),
+          icon: Icon(
+            Icons.add_circle_outline,
+            color: primaryColor,
+          ),
+          tooltip: 'Add to Contacts',
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
   }

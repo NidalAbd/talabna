@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
@@ -20,21 +21,24 @@ import 'package:talbna/utils/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../provider/language.dart';
+import '../../utils/debug_logger.dart';
 
 class ServicePostCardView extends StatefulWidget {
-  const ServicePostCardView({
+  ServicePostCardView({
     Key? key,
     required this.userProfileId,
-    this.onPostDeleted,
+    required this.onPostDeleted,  // Make this optional again to match existing code
     required this.servicePost,
     required this.canViewProfile,
     required this.user,
-  }) : super(key: key);
-  final Function? onPostDeleted;
+  }) : super(key: key);  // Use named parameter for the super constructor
+
+  final Function onPostDeleted;
   final int userProfileId;
   final ServicePost servicePost;
   final bool canViewProfile;
   final User user;
+
   @override
   State<ServicePostCardView> createState() => _ServicePostCardViewState();
 }
@@ -45,6 +49,8 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
   late UserContactBloc _userContactBloc;
   late EdgeInsets padding;
   final Language _language = Language();
+  bool _viewIncremented = false;
+  static final Set<int> _incrementedPostIds = {};
 
   @override
   void initState() {
@@ -53,8 +59,19 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
     _userProfileBloc = BlocProvider.of<OtherUserProfileBloc>(context);
     _userContactBloc = BlocProvider.of<UserContactBloc>(context)
       ..add(UserContactRequested(user: widget.servicePost.userId!));
-    _servicePostBloc.add(
-        ViewIncrementServicePostEvent(servicePostId: widget.servicePost.id!));
+
+    // Only increment view count once per post per app session
+    if (!_incrementedPostIds.contains(widget.servicePost.id)) {
+      _incrementedPostIds.add(widget.servicePost.id!);
+      _servicePostBloc.add(
+          ViewIncrementServicePostEvent(servicePostId: widget.servicePost.id!));
+      DebugLogger.log('Incrementing view count for servicePost.id: ${widget.servicePost.id}',
+          category: 'SERVICE_POST');
+    } else {
+      DebugLogger.log('View already incremented for post ${widget.servicePost.id}, skipping',
+          category: 'SERVICE_POST');
+    }
+
     if (widget.servicePost.haveBadge == 'عادي') {
       padding = const EdgeInsets.fromLTRB(0, 2, 0, 0);
     } else {
@@ -95,11 +112,30 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
     }
   }
 
+  void _shareServicePost() {
+    final postId = widget.servicePost.id.toString();
+    final postTitle = widget.servicePost.title ?? 'منشور';
+    final url = 'https://talbna.cloud/api/deep-link/service-post/$postId';
+
+    DebugLogger.log('Sharing service post: ID=$postId, Title=$postTitle, URL=$url', category: 'SHARE');
+
+    Share.share(
+      'شاهد هذا المنشور: $postTitle\n$url',
+      subject: postTitle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.servicePost.title!),
+        title: Text(widget.servicePost.title ?? ''),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: _shareServicePost,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -110,28 +146,28 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
               widget.servicePost.haveBadge == 'عادي'
                   ? Container()
                   : Positioned(
-                      top: -20,
-                      left: 0,
-                      child: Wrap(children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(2, 1, 0, 10),
-                          child: ServicePostHeaderContainer(
-                            haveBadge: widget.servicePost.haveBadge!,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                              child: Text(
-                                getHaveBadgeText(widget.servicePost.haveBadge!),
-                                style: const TextStyle(
-                                  color: Color.fromARGB(255, 255, 255, 255),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                top: -20,
+                left: 0,
+                child: Wrap(children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(2, 1, 0, 10),
+                    child: ServicePostHeaderContainer(
+                      haveBadge: widget.servicePost.haveBadge!,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                        child: Text(
+                          getHaveBadgeText(widget.servicePost.haveBadge!),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ]),
+                      ),
                     ),
+                  ),
+                ]),
+              ),
               Column(
                 children: [
                   Container(
@@ -146,7 +182,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                             children: [
                               UserAvatar(
                                 imageUrl:
-                                    '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                                '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
                                 radius: 16,
                                 fromUser: widget.userProfileId,
                                 toUser: widget.servicePost.userId!,
@@ -166,7 +202,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                                       widget.servicePost.userName ??
                                           'Unknown', // Display full username
                                       maxLines:
-                                          1, // Allow only one line of text
+                                      1, // Allow only one line of text
                                       overflow: TextOverflow
                                           .ellipsis, // Display ellipsis if text overflows
                                       style: const TextStyle(
@@ -187,11 +223,12 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
 
                               ServicePostAction(
                                 key:
-                                    Key('servicePost_${widget.servicePost.id}'),
+                                Key('servicePost_${widget.servicePost.id}'),
                                 servicePostUserId: widget.servicePost.userId,
                                 userProfileId: widget.userProfileId,
                                 servicePostId: widget.servicePost.id,
-                                onPostDeleted: widget.onPostDeleted!,
+                                onPostDeleted: widget.onPostDeleted,
+                                servicePost: widget.servicePost,
                               ),
                             ],
                           ),
@@ -203,18 +240,18 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                widget.servicePost.description!,
+                                widget.servicePost.description ?? '',
                                 textAlign: TextAlign.justify,
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ),
                             Hero(
                               tag:
-                                  'photo_${widget.servicePost.id}', // Use a unique tag for each photo
+                              'photo_${widget.servicePost.id}', // Use a unique tag for each photo
                               child: ImageGrid(
                                 imageUrls: widget.servicePost.photos
-                                        ?.map((photo) => '${photo.src}')
-                                        .toList() ??
+                                    ?.map((photo) => '${photo.src}')
+                                    .toList() ??
                                     [],
 
                               ),
@@ -223,7 +260,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                         ),
                         const SizedBox(height: 5),
                         ServicePostInteractionRow(
-                          key: Key('servicePost_${widget.servicePost.id}'),
+                          key: Key('servicePost_interaction_${widget.servicePost.id}'),
                           servicePostId: widget.servicePost.id,
                           likes: widget.servicePost.favoritesCount.toString(),
                           views: widget.servicePost.viewCount.toString(),
@@ -231,7 +268,8 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                           servicePostBloc: _servicePostBloc,
                           userProfileBloc: _userProfileBloc,
                           isFav: widget.servicePost.isFavorited!,
-                          servicePost: widget.servicePost, user: widget.user,
+                          servicePost: widget.servicePost,
+                          user: widget.user,
                         ),
                       ],
                     ),
@@ -251,18 +289,22 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                   const SizedBox(
                     height: 10,
                   ),
-                  if (widget.servicePost.categoriesId != 7)
+                  if (widget.servicePost.categoriesId != 7 &&
+                      widget.servicePost.locationLatitudes != null &&
+                      widget.servicePost.locationLongitudes != null)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                       child: LocationButtonWidget(
                         locationLatitudes:
-                            widget.servicePost.locationLatitudes!,
+                        widget.servicePost.locationLatitudes!,
                         locationLongitudes:
-                            widget.servicePost.locationLongitudes!,
+                        widget.servicePost.locationLongitudes!,
                         width: 15,
                       ),
                     ),
-                  if (widget.servicePost.categoriesId != 7)
+                  if (widget.servicePost.categoriesId != 7 &&
+                      widget.servicePost.locationLatitudes != null &&
+                      widget.servicePost.locationLongitudes != null)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Card(

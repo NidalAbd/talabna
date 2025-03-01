@@ -10,6 +10,8 @@ import 'package:talbna/data/models/category_menu.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/main_post_menu.dart';
 
+import '../widgets/shimmer_widgets.dart';
+
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key,required this.servicePostBloc, required this.userId, required this.user});
   final ServicePostBloc servicePostBloc;
@@ -65,7 +67,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return BlocBuilder<SubcategoryBloc, SubcategoryState>(
       builder: (context, state) {
         if (state is SubcategoryLoading) {
-          return const Center(child: CircularProgressIndicator());
+          // Use the shimmer widget instead of CircularProgressIndicator
+          return Scaffold(
+            body: const CategoryScreenShimmer(),
+            floatingActionButton: FloatingActionButton(
+              onPressed: null, // Disabled during loading
+              backgroundColor: Colors.grey,
+              child: Icon(
+                Icons.grid_view_rounded,
+                color: Colors.white.withOpacity(0.7),
+              ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          );
         } else if (state is CategoryLoaded) {
           if (state.categories.isEmpty) {
             return Directionality(
@@ -85,27 +99,27 @@ class _CategoryScreenState extends State<CategoryScreen> {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: Scaffold(
-                body: Column(
-                  children: [
-                    _buildCategoryRow(state.categories),
-                    Expanded(
-                      child: selectedCategory == null ? Container() : MainMenuPostScreen(category: selectedCategory!.id, userID: widget.userId, servicePostBloc: widget.servicePostBloc, showSubcategoryGridView: showSubcategoryGridView, user: widget.user,),
-                    ),
-                  ],
-                ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () async {
-                    await _toggleSubcategoryGridView(canToggle: true);
-                  },
-                  backgroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.lightPrimaryColor
-                      : AppTheme.darkPrimaryColor,
-                  child: Icon(
-                    showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
-                    color: Colors.white,
+                  body: Column(
+                    children: [
+                      _buildCategoryRow(state.categories),
+                      Expanded(
+                        child: selectedCategory == null ? Container() : MainMenuPostScreen(category: selectedCategory!.id, userID: widget.userId, servicePostBloc: widget.servicePostBloc, showSubcategoryGridView: showSubcategoryGridView, user: widget.user,),
+                      ),
+                    ],
                   ),
-                ),
-                floatingActionButtonLocation: FloatingActionButtonLocation.endFloat
+                  floatingActionButton: FloatingActionButton(
+                    onPressed: () async {
+                      await _toggleSubcategoryGridView(canToggle: true);
+                    },
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.lightPrimaryColor
+                        : AppTheme.darkPrimaryColor,
+                    child: Icon(
+                      showSubcategoryGridView ? Icons.list : Icons.grid_view_rounded,
+                      color: Colors.white,
+                    ),
+                  ),
+                  floatingActionButtonLocation: FloatingActionButtonLocation.endFloat
               ),
             );
           }
@@ -149,7 +163,4 @@ class _CategoryScreenState extends State<CategoryScreen> {
       ),
     );
   }
-
 }
-
-

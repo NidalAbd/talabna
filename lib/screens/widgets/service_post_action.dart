@@ -6,6 +6,7 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
+import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/service_post/change_badge.dart';
 import 'package:talbna/screens/service_post/change_category_subcategory.dart';
@@ -18,7 +19,9 @@ class ServicePostAction extends StatefulWidget {
     this.userProfileId,
     this.servicePostId,
     required this.onPostDeleted,
+    required this.servicePost,
   }) : super(key: key);
+  final ServicePost servicePost;
   final int? servicePostUserId;
   final int? servicePostId;
   final int? userProfileId;
@@ -58,18 +61,7 @@ class _ServicePostActionState extends State<ServicePostAction>
   void _deletePost(BuildContext context) async {
     BlocProvider.of<ServicePostBloc>(context)
         .add(DeleteServicePostEvent(servicePostId: widget.servicePostId!));
-    // Add a listener to check for successful deletion
-    StreamSubscription<ServicePostState>? listenerSubscription;
-    listenerSubscription =
-        context.read<ServicePostBloc>().stream.listen((state) {
-      if (state is ServicePostDeletingSuccess) {
-        listenerSubscription?.cancel(); // Cancel the subscription
-        if (mounted) {
-          widget.onPostDeleted(
-              widget.servicePostId!); // Pass the servicePostId here
-        }
-      }
-    });
+    Navigator.pop(context); // Navigate back after dispatching the event
   }
 
   @override
@@ -87,8 +79,8 @@ class _ServicePostActionState extends State<ServicePostAction>
             ),
           );
           setState(() {});
-          widget.onPostDeleted(state
-              .servicePostId); // Add the ! to ensure a non-nullable value is passed
+          widget.onPostDeleted(state.servicePostId);
+          Navigator.pop(context); // Navigate back to the previous screen
         } else if (state is ServicePostOperationFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -123,7 +115,7 @@ class _ServicePostActionState extends State<ServicePostAction>
                                 MaterialPageRoute(
                                   builder: (context) => UpdatePostScreen(
                                     userId: currentUserId!,
-                                    servicePostId: widget.servicePostId!,
+                                    servicePostId: widget.servicePostId!, servicePost: widget.servicePost,
                                   ),
                                 ),
                               );
@@ -138,8 +130,12 @@ class _ServicePostActionState extends State<ServicePostAction>
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                     builder: (context) => ChangeCategoryScreen(
-                                        userId: currentUserId!,
-                                        servicePostId: widget.servicePostId!)),
+                                          userId: currentUserId!,
+                                          servicePostId: widget.servicePostId!,
+                                          category: widget.servicePost.category,
+                                          subCategory:
+                                              widget.servicePost.subCategory,
+                                        )),
                               );
                             },
                           ),
@@ -151,9 +147,14 @@ class _ServicePostActionState extends State<ServicePostAction>
                                   context); // Dismiss the bottom sheet
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (context) => ChangeBadge(
-                                        userId: currentUserId!,
-                                        servicePostId: widget.servicePostId!)),
+                                  builder: (context) => ChangeBadge(
+                                    userId: currentUserId!,
+                                    servicePostId: widget.servicePostId!,
+                                    haveBadge: widget.servicePost.haveBadge,
+                                    badgeDuration:
+                                        widget.servicePost.badgeDuration,
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -218,8 +219,11 @@ class _ServicePostActionState extends State<ServicePostAction>
                                         backgroundColor:
                                             Theme.of(context).colorScheme.error,
                                       ),
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(true),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        _deletePost(
+                                            context); // Call the _deletePost method
+                                      },
                                       child: const Text(
                                         'Delete',
                                         style: TextStyle(
@@ -231,10 +235,6 @@ class _ServicePostActionState extends State<ServicePostAction>
                                   ],
                                 ),
                               );
-
-                              if (result == true) {
-                                // Handle the delete action
-                              }
                             },
                           ),
                         ],

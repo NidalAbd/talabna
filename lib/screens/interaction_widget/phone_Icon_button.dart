@@ -5,8 +5,19 @@ import 'package:url_launcher/url_launcher.dart';
 class PhoneIconButtonWidget extends StatelessWidget {
   final String? phone;
   final double width;
+  final VoidCallback? onDismiss;
 
-  const PhoneIconButtonWidget({Key? key, this.phone, required this.width}) : super(key: key);
+  const PhoneIconButtonWidget({
+    Key? key,
+    this.phone,
+    required this.width,
+    this.onDismiss
+  }) : super(key: key);
+
+  String _formatPhoneNumber(String number) {
+    // Remove any non-digit characters
+    return number.replaceAll(RegExp(r'\D'), '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,23 +25,41 @@ class PhoneIconButtonWidget extends StatelessWidget {
       width: width,
       child: IconButton(
         onPressed: () async {
-          if (phone != null) {
-            final Uri phoneLaunchUri = Uri(
-              scheme: 'tel',
-              path: phone!,
-            );
-            if (await canLaunchUrl(phoneLaunchUri)) {
-              print('launch $phone');
-              await launchUrl(phoneLaunchUri);
-            } else {
-              print('Could not launch $phone');
+          // Call dismiss callback if provided
+          onDismiss?.call();
 
-              throw 'Could not launch phone app.';
-            }
+          // Check if phone number exists
+          if (phone == null || phone!.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('No phone number available')),
+            );
+            return;
           }
-        }, icon: const Icon(Icons.phone),
+
+          // Format the phone number
+          final formattedPhone = _formatPhoneNumber(phone!);
+
+          final Uri phoneLaunchUri = Uri(
+            scheme: 'tel',
+            path: formattedPhone,
+          );
+
+          try {
+            if (await canLaunchUrl(phoneLaunchUri)) {
+              await launchUrl(phoneLaunchUri, mode: LaunchMode.externalApplication);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Could not launch phone app')),
+              );
+            }
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('An error occurred: $e')),
+            );
+          }
+        },
+        icon: const Icon(Icons.phone),
       ),
     );
-
   }
 }

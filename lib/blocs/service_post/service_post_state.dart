@@ -46,7 +46,7 @@ class ServicePostLoadFailure extends ServicePostState {
 }
 
 class ServicePostOperationSuccess extends ServicePostState {
-  final ServicePost? servicePost;
+  final bool? servicePost;
   final String event;
 
   const ServicePostOperationSuccess({required this.event, required this.servicePost});
