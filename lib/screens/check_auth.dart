@@ -8,7 +8,7 @@ enum AuthErrorType {
   unknownError,
   emailNotVerified,
   accountLocked,
-  tooManyAttempts,
+  tooManyAttempts, emailAlreadyExists, weakPassword,
 }
 
 class AuthErrorWidget extends StatelessWidget {

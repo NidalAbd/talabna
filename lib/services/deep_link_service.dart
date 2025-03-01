@@ -28,12 +28,31 @@ class DeepLinkService {
   bool _isInitialized = false;
   bool _isAppReady = false;
 
-  // Currently active navigation - prevents multiple navigations in progress
+  // Navigation state tracking
   bool _isNavigating = false;
   String? _currentlyNavigatingTo;
+  DateTime? _lastNavigationTime;
 
-  // Store rejected/pending links to avoid lost clicks
+  // Authentication state for cold starts
+  bool _isPreAuthenticated = false;
+  int? _preAuthenticatedUserId;
+
+  // Store processed URIs to avoid duplicates
   final Set<String> _processedUris = {};
+
+  // Methods for pre-authenticated state handling
+  // This is called when the app validates the token during cold start
+  void setPreAuthenticated(int userId) {
+    _isPreAuthenticated = true;
+    _preAuthenticatedUserId = userId;
+    DebugLogger.log('DeepLinkService: Pre-authenticated with userId: $userId',
+        category: 'DEEPLINK');
+
+    // Check for pending links immediately after pre-authentication
+    Future.delayed(const Duration(milliseconds: 500), () {
+      checkPendingDeepLinks();
+    });
+  }
 
   // Set app ready state - called after home screen is loaded
   void setAppReady() {
@@ -45,7 +64,7 @@ class DeepLinkService {
     DebugLogger.log('Setting app ready state = true', category: 'DEEPLINK');
     _isAppReady = true;
 
-    // Delayed processing of pending links to ensure app is stable
+    // Process pending deep links after a delay
     Future.delayed(const Duration(milliseconds: 800), () {
       _processPendingDeepLinks();
     });
@@ -56,28 +75,33 @@ class DeepLinkService {
     _isInitialized = true;
 
     try {
-      // Handle initial deep link on app launch - but store it, don't process yet
+      // Handle initial deep link on app launch
       final initialLink = await getInitialUri();
       if (initialLink != null) {
         final uriString = initialLink.toString();
         DebugLogger.log('Initial deep link received: $uriString', category: 'DEEPLINK');
+
+        // Store deep link and mark as processed
+        _processedUris.add(uriString);
         await storePendingDeepLink(_parseRoute(initialLink), _parseId(initialLink));
       }
 
-      // Listen for runtime deep links - but don't process immediately
+      // Listen for runtime deep links
       _uriSubscription = uriLinkStream.listen(
             (Uri? uri) {
           if (uri != null) {
             final uriString = uri.toString();
+
+            // Skip if already processed
             if (_processedUris.contains(uriString)) {
               DebugLogger.log('Ignoring already processed URI: $uriString', category: 'DEEPLINK');
               return;
             }
 
-            _processedUris.add(uriString);
             DebugLogger.log('Runtime deep link received: $uriString', category: 'DEEPLINK');
+            _processedUris.add(uriString);
 
-            // Always store, only process if ready
+            // Store and process based on app state
             storePendingDeepLink(_parseRoute(uri), _parseId(uri));
 
             if (_isAppReady && !_isNavigating) {
@@ -101,7 +125,28 @@ class DeepLinkService {
     _uriSubscription?.cancel();
     _isInitialized = false;
     _isAppReady = false;
+    _isPreAuthenticated = false;
+    _preAuthenticatedUserId = null;
     _processedUris.clear();
+  }
+
+  // Check if navigation is allowed
+  bool _canNavigate() {
+    if (_isNavigating) {
+      DebugLogger.log('Navigation already in progress - skipping', category: 'DEEPLINK');
+      return false;
+    }
+
+    if (_lastNavigationTime != null) {
+      final now = DateTime.now();
+      final diff = now.difference(_lastNavigationTime!).inMilliseconds;
+      if (diff < 1000) {
+        DebugLogger.log('Last navigation was too recent ($diff ms) - skipping', category: 'DEEPLINK');
+        return false;
+      }
+    }
+
+    return true;
   }
 
   // Helper methods to parse URI components
@@ -142,34 +187,67 @@ class DeepLinkService {
     return int.tryParse(segment) != null && int.parse(segment) > 0;
   }
 
-  // Handle deep link navigation with authentication check - SIMPLIFIED
+  // Handle deep link navigation with authentication check
   Future<void> _handleDeepLinkNavigation(String route, String id) async {
-    // Prevent concurrent navigation attempts
-    if (_isNavigating) {
-      DebugLogger.log('Navigation already in progress to $_currentlyNavigatingTo - skipping',
-          category: 'DEEPLINK');
-      return;
-    }
+    // Prevent concurrent or too-recent navigation attempts
+    if (!_canNavigate()) return;
 
     // Mark as navigating
     _isNavigating = true;
     _currentlyNavigatingTo = '$route/$id';
+    _lastNavigationTime = DateTime.now();
     DebugLogger.log('Starting navigation to: $_currentlyNavigatingTo', category: 'DEEPLINK');
 
     try {
       // Check if navigation context is available
       if (_navigatorKey.currentContext == null) {
         DebugLogger.log('No navigation context available', category: 'DEEPLINK');
+        _isNavigating = false;
         return;
       }
 
-      // Get authentication state
-      final authBloc = _navigatorKey.currentContext!.read<AuthenticationBloc>();
-      final authState = authBloc.state;
+      // Check authentication status
+      bool isAuthenticated = false;
+      int? userId;
 
-      if (route == 'service-post') {
+      // First try to get from BLoC if context is available
+      try {
+        final authBloc = _navigatorKey.currentContext!.read<AuthenticationBloc>();
+        final authState = authBloc.state;
+
         if (authState is AuthenticationSuccess) {
-          DebugLogger.log('Navigating to service post: $id', category: 'DEEPLINK');
+          isAuthenticated = true;
+          userId = authState.userId;
+          DebugLogger.log('User authenticated via BLoC: $userId', category: 'DEEPLINK');
+        }
+      } catch (e) {
+        DebugLogger.log('Error checking BLoC auth state: $e', category: 'DEEPLINK');
+      }
+
+      // If not authenticated via BLoC, check if pre-authenticated
+      if (!isAuthenticated && _isPreAuthenticated && _preAuthenticatedUserId != null) {
+        isAuthenticated = true;
+        userId = _preAuthenticatedUserId;
+        DebugLogger.log('User pre-authenticated: $userId', category: 'DEEPLINK');
+      }
+
+      // If still not authenticated, check SharedPreferences
+      if (!isAuthenticated) {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('auth_token');
+        final storedUserId = prefs.getInt('userId');
+
+        if (token != null && token.isNotEmpty && storedUserId != null) {
+          isAuthenticated = true;
+          userId = storedUserId;
+          DebugLogger.log('User authenticated via SharedPreferences: $userId', category: 'DEEPLINK');
+        }
+      }
+
+      // Handle navigation based on authentication
+      if (route == 'service-post') {
+        if (isAuthenticated && userId != null) {
+          DebugLogger.log('Navigating to service post: $id for user: $userId', category: 'DEEPLINK');
 
           // Navigate with proper context
           _navigatorKey.currentState?.pushNamed(
@@ -177,7 +255,11 @@ class DeepLinkService {
               arguments: {'postId': id}
           );
         } else {
-          DebugLogger.log('User not authenticated, redirecting to login', category: 'DEEPLINK');
+          DebugLogger.log('User not authenticated, redirecting to login and storing deep link',
+              category: 'DEEPLINK');
+          // Store the deep link for after login
+          await storePendingDeepLink(route, id);
+
           _navigatorKey.currentState?.pushReplacementNamed(Routes.login);
         }
       } else {
@@ -213,11 +295,10 @@ class DeepLinkService {
     DebugLogger.log('Cleared pending deep links', category: 'DEEPLINK');
   }
 
-  // Process any pending deep links - SIMPLIFIED
+  // Process any pending deep links
   Future<void> _processPendingDeepLinks() async {
-    // Don't process if app not ready or another navigation in progress
-    if (!_isAppReady || _isNavigating) {
-      DebugLogger.log('App not ready or navigation in progress - deferring deep link processing',
+    if (_isNavigating) {
+      DebugLogger.log('Navigation in progress - deferring deep link processing',
           category: 'DEEPLINK');
       return;
     }
@@ -246,10 +327,10 @@ class DeepLinkService {
 
   // Public method to check for pending links - used by external components
   Future<void> checkPendingDeepLinks() async {
-    if (_isAppReady && !_isNavigating) {
+    if (!_isNavigating) {
       await _processPendingDeepLinks();
     } else {
-      DebugLogger.log('App not ready or navigation in progress - skipping manual check',
+      DebugLogger.log('Navigation in progress - skipping manual check',
           category: 'DEEPLINK');
     }
   }

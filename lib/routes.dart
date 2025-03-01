@@ -91,7 +91,6 @@ class Routes {
 
         case register:
           return _buildRoute((context) => RegisterScreenNew(
-            authenticationBloc: BlocProvider.of<AuthenticationBloc>(context),
           ));
 
         case home:
@@ -381,7 +380,7 @@ class Routes {
   }
 
   static void navigateToRegister(BuildContext context) {
-    Navigator.pushNamed(context, register);
+    Navigator.pushReplacementNamed(context, register);
   }
 
   static void navigateToLanguage(BuildContext context) {

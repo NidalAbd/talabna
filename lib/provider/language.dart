@@ -38,6 +38,61 @@ class Language extends ChangeNotifier {
         return '';
     }
   }
+  String tConfirmLogoutText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تأكيد تسجيل الخروج';
+      case 'en':
+        return 'Confirm Logout';
+      case 'Español':
+        return 'Confirmar Cierre de Sesión';
+      case '中文':
+        return '确认登出';
+      case 'हिन्दी':
+        return 'लॉगआउट की पुष्टि करें';
+      case 'Português':
+        return 'Confirmar Saída';
+      case 'Русский':
+        return 'Подтвердить выход';
+      case '日本語':
+        return 'ログアウトの確認';
+      case 'Français':
+        return 'Confirmer la Déconnexion';
+      case 'Deutsch':
+        return 'Abmeldung Bestätigen';
+      default:
+        return 'Confirm Logout';
+    }
+  }
+
+  String tConfirmLogoutDescText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+      case 'en':
+        return 'Are you sure you want to logout?';
+      case 'Español':
+        return '¿Estás seguro de que quieres cerrar sesión?';
+      case '中文':
+        return '您确定要登出吗？';
+      case 'हिन्दी':
+        return 'क्या आप वाकई लॉगआउट करना चाहते हैं?';
+      case 'Português':
+        return 'Tem certeza que deseja sair?';
+      case 'Русский':
+        return 'Вы уверены, что хотите выйти?';
+      case '日本語':
+        return 'ログアウトしてもよろしいですか？';
+      case 'Français':
+        return 'Êtes-vous sûr de vouloir vous déconnecter?';
+      case 'Deutsch':
+        return 'Sind Sie sicher, dass Sie sich abmelden möchten?';
+      default:
+        return 'Are you sure you want to logout?';
+    }
+  }
   String chooseLanguageText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -185,7 +240,257 @@ class Language extends ChangeNotifier {
     }
   }
   // Add these methods to your Language class
+  String tWelcomeText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'مرحباً بك';
+      case 'en':
+        return 'Welcome';
+      case 'Español':
+        return 'Bienvenido';
+      case '中文':
+        return '欢迎';
+      case 'हिन्दी':
+        return 'स्वागत है';
+      case 'Português':
+        return 'Bem-vindo';
+      case 'Русский':
+        return 'Добро пожаловать';
+      case '日本語':
+        return 'ようこそ';
+      case 'Français':
+        return 'Bienvenue';
+      case 'Deutsch':
+        return 'Willkommen';
+      default:
+        return 'Welcome';
+    }
+  }
 
+  String tWelcomeDescText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'مرحباً بك في تطبيقنا، حيث يمكنك استكشاف عالم من الفرص والخدمات المميزة';
+      case 'en':
+        return 'Welcome to our app, where you can explore a world of opportunities and premium services';
+      case 'Español':
+        return 'Bienvenido a nuestra aplicación, donde puedes explorar un mundo de oportunidades y servicios premium';
+      case '中文':
+        return '欢迎使用我们的应用程序，您可以在这里探索机会和优质服务的世界';
+      case 'हिन्दी':
+        return 'हमारे ऐप में आपका स्वागत है, जहां आप अवसरों और प्रीमियम सेवाओं की दुनिया का पता लगा सकते हैं';
+      case 'Português':
+        return 'Bem-vindo ao nosso aplicativo, onde você pode explorar um mundo de oportunidades e serviços premium';
+      case 'Русский':
+        return 'Добро пожаловать в наше приложение, где вы можете исследовать мир возможностей и премиальных услуг';
+      case '日本語':
+        return '私たちのアプリへようこそ。ここでは、機会とプレミアムサービスの世界を探索することができます';
+      case 'Français':
+        return 'Bienvenue dans notre application, où vous pouvez explorer un monde d\'opportunités et de services premium';
+      case 'Deutsch':
+        return 'Willkommen in unserer App, in der Sie eine Welt voller Möglichkeiten und Premium-Dienste entdecken können';
+      default:
+        return 'Welcome to our app, where you can explore a world of opportunities and premium services';
+    }
+  }
+
+  String tDiscoverText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'اكتشف';
+      case 'en':
+        return 'Discover';
+      case 'Español':
+        return 'Descubrir';
+      case '中文':
+        return '发现';
+      case 'हिन्दी':
+        return 'खोजें';
+      case 'Português':
+        return 'Descobrir';
+      case 'Русский':
+        return 'Откройте для себя';
+      case '日本語':
+        return '発見する';
+      case 'Français':
+        return 'Découvrir';
+      case 'Deutsch':
+        return 'Entdecken';
+      default:
+        return 'Discover';
+    }
+  }
+
+  String tDiscoverDescText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'اكتشف مجموعة واسعة من الخدمات المصممة خصيصًا لتلبية احتياجاتك';
+      case 'en':
+        return 'Discover a wide range of services tailored to meet your specific needs';
+      case 'Español':
+        return 'Descubre una amplia gama de servicios adaptados para satisfacer tus necesidades específicas';
+      case '中文':
+        return '发现各种为满足您特定需求而量身定制的服务';
+      case 'हिन्दी':
+        return 'अपनी विशिष्ट जरूरतों को पूरा करने के लिए तैयार सेवाओं की एक विस्तृत श्रृंखला खोजें';
+      case 'Português':
+        return 'Descubra uma ampla gama de serviços adaptados para atender às suas necessidades específicas';
+      case 'Русский':
+        return 'Откройте для себя широкий спектр услуг, разработанных с учетом ваших конкретных потребностей';
+      case '日本語':
+        return 'あなたの特定のニーズを満たすために調整されたさまざまなサービスを発見してください';
+      case 'Français':
+        return 'Découvrez une large gamme de services adaptés pour répondre à vos besoins spécifiques';
+      case 'Deutsch':
+        return 'Entdecken Sie eine breite Palette von Dienstleistungen, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind';
+      default:
+        return 'Discover a wide range of services tailored to meet your specific needs';
+    }
+  }
+
+  String tConnectText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تواصل';
+      case 'en':
+        return 'Connect';
+      case 'Español':
+        return 'Conectar';
+      case '中文':
+        return '连接';
+      case 'हिन्दी':
+        return 'जुड़ें';
+      case 'Português':
+        return 'Conectar';
+      case 'Русский':
+        return 'Связаться';
+      case '日本語':
+        return 'つながる';
+      case 'Français':
+        return 'Connecter';
+      case 'Deutsch':
+        return 'Verbinden';
+      default:
+        return 'Connect';
+    }
+  }
+
+  String tConnectDescText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تواصل مع مزودي الخدمة ذوي الخبرة وابدأ رحلتك نحو تجربة أفضل';
+      case 'en':
+        return 'Connect with experienced service providers and start your journey toward a better experience';
+      case 'Español':
+        return 'Conéctate con proveedores de servicios experimentados y comienza tu viaje hacia una mejor experiencia';
+      case '中文':
+        return '与经验丰富的服务提供商联系，开始您通向更好体验的旅程';
+      case 'हिन्दी':
+        return 'अनुभवी सेवा प्रदाताओं से जुड़ें और बेहतर अनुभव की दिशा में अपनी यात्रा शुरू करें';
+      case 'Português':
+        return 'Conecte-se com prestadores de serviços experientes e comece sua jornada rumo a uma experiência melhor';
+      case 'Русский':
+        return 'Свяжитесь с опытными поставщиками услуг и начните свой путь к лучшему опыту';
+      case '日本語':
+        return '経験豊富なサービスプロバイダーとつながり、より良い体験に向けての旅を始めましょう';
+      case 'Français':
+        return 'Connectez-vous avec des prestataires de services expérimentés et commencez votre voyage vers une meilleure expérience';
+      case 'Deutsch':
+        return 'Verbinden Sie sich mit erfahrenen Dienstleistern und beginnen Sie Ihre Reise zu einem besseren Erlebnis';
+      default:
+        return 'Connect with experienced service providers and start your journey toward a better experience';
+    }
+  }
+
+  String tSkipText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تخطي';
+      case 'en':
+        return 'Skip';
+      case 'Español':
+        return 'Omitir';
+      case '中文':
+        return '跳过';
+      case 'हिन्दी':
+        return 'छोड़ें';
+      case 'Português':
+        return 'Pular';
+      case 'Русский':
+        return 'Пропустить';
+      case '日本語':
+        return 'スキップ';
+      case 'Français':
+        return 'Passer';
+      case 'Deutsch':
+        return 'Überspringen';
+      default:
+        return 'Skip';
+    }
+  }
+
+  String tNextText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'التالي';
+      case 'en':
+        return 'Next';
+      case 'Español':
+        return 'Siguiente';
+      case '中文':
+        return '下一步';
+      case 'हिन्दी':
+        return 'अगला';
+      case 'Português':
+        return 'Próximo';
+      case 'Русский':
+        return 'Далее';
+      case '日本語':
+        return '次へ';
+      case 'Français':
+        return 'Suivant';
+      case 'Deutsch':
+        return 'Weiter';
+      default:
+        return 'Next';
+    }
+  }
+
+  String tGetStartedText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'ابدأ الآن';
+      case 'en':
+        return 'Get Started';
+      case 'Español':
+        return 'Comenzar';
+      case '中文':
+        return '开始使用';
+      case 'हिन्दी':
+        return 'शुरू करें';
+      case 'Português':
+        return 'Começar';
+      case 'Русский':
+        return 'Начать';
+      case '日本語':
+        return '始める';
+      case 'Français':
+        return 'Commencer';
+      case 'Deutsch':
+        return 'Loslegen';
+      default:
+        return 'Get Started';
+    }
+  }
   String tPreferencesText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -1983,33 +2288,6 @@ class Language extends ChangeNotifier {
         return 'This field is required';
     }
   }
-  String tNextText() {
-    final currentLanguage = getLanguage();
-    switch (currentLanguage) {
-      case 'ar':
-        return 'التالي';
-      case 'en':
-        return 'Next';
-      case 'Es':
-        return 'Siguiente';
-      case '中文':
-        return '下一步';
-      case 'हिन्दी':
-        return 'अगला';
-      case 'Português':
-        return 'Próximo';
-      case 'Русский':
-        return 'Далее';
-      case '日本語':
-        return '次へ';
-      case 'Français':
-        return 'Suivant';
-      case 'Deutsch':
-        return 'Weiter';
-      default:
-        return 'Next';
-    }
-  }
   String tPreviousText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -2226,33 +2504,6 @@ class Language extends ChangeNotifier {
         return '';
     }
   }
-  String tCarsTextHome() {
-    final currentLanguage = getLanguage();
-    switch (currentLanguage) {
-      case 'ar':
-        return 'سيارات';
-      case 'en':
-        return 'cars';
-      case 'Es':
-        return 'coches';
-      case '中文':
-        return '汽车';
-      case 'हिन्दी':
-        return 'कारें';
-      case 'Português':
-        return 'carros';
-      case 'Русский':
-        return 'машины';
-      case '日本語':
-        return '車';
-      case 'Français':
-        return 'voitures';
-      case 'Deutsch':
-        return 'Autos';
-      default:
-        return '';
-    }
-  }
   String tServicesTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -2332,6 +2583,168 @@ class Language extends ChangeNotifier {
         return 'Profil';
       default:
         return '';
+    }
+  }
+  String tLoginText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تسجيل الدخول';
+      case 'en':
+        return 'Login';
+      case 'Español':
+        return 'Iniciar Sesión';
+      case '中文':
+        return '登录';
+      case 'हिन्दी':
+        return 'लॉगिन';
+      case 'Português':
+        return 'Entrar';
+      case 'Русский':
+        return 'Войти';
+      case '日本語':
+        return 'ログイン';
+      case 'Français':
+        return 'Connexion';
+      case 'Deutsch':
+        return 'Anmelden';
+      default:
+        return 'Login';
+    }
+  }
+  String loginSubheaderText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'أدخل بيانات اعتماد حسابك للمتابعة';
+      case 'en':
+        return 'Enter your credentials to continue';
+      case 'Español':
+        return 'Ingresa tus credenciales para continuar';
+      case '中文':
+        return '输入您的凭据以继续';
+      case 'हिन्दी':
+        return 'जारी रखने के लिए अपने क्रेडेंशियल दर्ज करें';
+      case 'Português':
+        return 'Digite suas credenciais para continuar';
+      case 'Русский':
+        return 'Введите свои учетные данные, чтобы продолжить';
+      case '日本語':
+        return '続行するには資格情報を入力してください';
+      case 'Français':
+        return 'Entrez vos identifiants pour continuer';
+      case 'Deutsch':
+        return 'Geben Sie Ihre Anmeldedaten ein, um fortzufahren';
+      default:
+        return 'Enter your credentials to continue';
+    }
+  }
+  String orText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'أو';
+      case 'en':
+        return 'OR';
+      case 'Español':
+        return 'O';
+      case '中文':
+        return '或者';
+      case 'हिन्दी':
+        return 'या';
+      case 'Português':
+        return 'OU';
+      case 'Русский':
+        return 'ИЛИ';
+      case '日本語':
+        return 'または';
+      case 'Français':
+        return 'OU';
+      case 'Deutsch':
+        return 'ODER';
+      default:
+        return 'OR';
+    }
+  }
+  String dontHaveAccountText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'ليس لديك حساب؟';
+      case 'en':
+        return 'Don\'t have an account?';
+      case 'Español':
+        return '¿No tienes una cuenta?';
+      case '中文':
+        return '没有账户？';
+      case 'हिन्दी':
+        return 'खाता नहीं है?';
+      case 'Português':
+        return 'Não tem uma conta?';
+      case 'Русский':
+        return 'Нет учетной записи?';
+      case '日本語':
+        return 'アカウントをお持ちでないですか？';
+      case 'Français':
+        return 'Vous n\'avez pas de compte?';
+      case 'Deutsch':
+        return 'Haben Sie kein Konto?';
+      default:
+        return 'Don\'t have an account?';
+    }
+  }
+  String forgotPasswordText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'نسيت كلمة المرور؟';
+      case 'en':
+        return 'Forgot Password?';
+      case 'Español':
+        return '¿Olvidaste tu contraseña?';
+      case '中文':
+        return '忘记密码？';
+      case 'हिन्दी':
+        return 'पासवर्ड भूल गए?';
+      case 'Português':
+        return 'Esqueceu a senha?';
+      case 'Русский':
+        return 'Забыли пароль?';
+      case '日本語':
+        return 'パスワードをお忘れですか？';
+      case 'Français':
+        return 'Mot de passe oublié?';
+      case 'Deutsch':
+        return 'Passwort vergessen?';
+      default:
+        return 'Forgot Password?';
+    }
+  }
+  String tRegisterText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إنشاء حساب';
+      case 'en':
+        return 'Register';
+      case 'Español':
+        return 'Registrarse';
+      case '中文':
+        return '注册';
+      case 'हिन्दी':
+        return 'पंजीकरण';
+      case 'Português':
+        return 'Cadastrar';
+      case 'Русский':
+        return 'Регистрация';
+      case '日本語':
+        return '登録';
+      case 'Français':
+        return 'S\'inscrire';
+      case 'Deutsch':
+        return 'Registrieren';
+      default:
+        return 'Register';
     }
   }
   String tFavoriteText() {

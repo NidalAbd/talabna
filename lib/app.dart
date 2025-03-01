@@ -22,12 +22,14 @@ class MyApp extends StatefulWidget {
   final AuthenticationRepository authenticationRepository;
   final bool isDarkTheme;
   final GlobalKey<NavigatorState> navigatorKey;
+  final bool autoAuthenticated;  // New parameter to track if we've auto-authenticated
 
   const MyApp({
     super.key,
     required this.authenticationRepository,
     required this.isDarkTheme,
     required this.navigatorKey,
+    this.autoAuthenticated = false,
   });
 
   @override
@@ -39,12 +41,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DeepLinkService _deepLinkService = DeepLinkService();
   bool _isInitialized = false;
   bool _appReadyNotified = false;
+  bool _hasCheckedDeepLinksAfterAuth = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeApp();
+
+    // If we're already auto-authenticated, notify app ready sooner
+    if (widget.autoAuthenticated) {
+      DebugLogger.log('Auto-authenticated, will check deep links soon', category: 'APP');
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        _notifyAppReady();
+      });
+    }
   }
 
   @override
@@ -87,10 +98,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     DebugLogger.log('Notifying DeepLinkService that app is ready', category: 'APP');
 
     // Signal to the DeepLinkService that the app is ready to handle deep links
-    // Use a longer delay to ensure home screen is fully loaded and stable
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      DeepLinkService().setAppReady();
-    });
+    DeepLinkService().setAppReady();
+
+    // Check for pending deep links
+    DeepLinkService().checkPendingDeepLinks();
   }
 
   Widget _buildScreenForState(AuthenticationState state, SharedPreferences prefs) {
@@ -98,18 +109,32 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     final String? token = prefs.getString('auth_token');
     final int? userId = prefs.getInt('userId');
-    final isFirstTime = prefs.getBool('is_first_time') ?? true;
+    final bool isFirstTime = prefs.getBool('is_first_time') ?? true;
 
+    // If it's the first time, check if we have language selected
+    if (isFirstTime) {
+      final hasLanguage = prefs.getString('language') != null;
+      if (!hasLanguage) {
+        // If no language selected, show language selection
+        return const LanguageSelectionScreen();
+      }
+    }
+
+    // Handle successful authentication
     if (state is AuthenticationSuccess) {
-      // Notify the deep link service that authentication is complete after a small delay
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _notifyAppReady();
-      });
+      // Check if we need to process deep links after authentication
+      if (!_hasCheckedDeepLinksAfterAuth) {
+        _hasCheckedDeepLinksAfterAuth = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            _notifyAppReady();
+          });
+        });
+      }
       return HomeScreen(userId: state.userId!);
     }
 
-    if (isFirstTime) return const WelcomeScreen();
-
+    // If has token, verify it and use it
     if (token != null && token.isNotEmpty && userId != null) {
       return FutureBuilder<bool>(
         future: widget.authenticationRepository.checkTokenValidity(token),
@@ -120,16 +145,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             if (state is! AuthenticationSuccess) {
               BlocProvider.of<AuthenticationBloc>(context)
                   .add(LoggedIn(token: token));
+
+              // If token is valid, notify the deep link service
+              _deepLinkService.setPreAuthenticated(userId);
             }
             return const SplashScreen();
           }
 
-          return const LoginScreenNew();
+          // Token is invalid, show welcome screen
+          return const WelcomeScreen();
         },
       );
     }
 
-    return const LoginScreenNew();
+    // No authentication, show welcome screen instead of login
+    return const WelcomeScreen();
   }
 
   @override
@@ -151,8 +181,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 if (!snapshot.hasData) return const SplashScreen();
 
                 final prefs = snapshot.data!;
-                final isFirstTime = prefs.getBool('is_first_time') ?? true;
-
                 return BlocConsumer<AuthenticationBloc, AuthenticationState>(
                   listenWhen: (previous, current) => current is AuthenticationSuccess,
                   listener: (context, state) {
@@ -163,18 +191,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             'Successfully authenticated',
                             type: SnackBarType.success
                         );
-                        Routes.navigateToHome(context, state.userId!);
 
-                        // Allow some time for navigation to complete, then notify app is ready
-                        Future.delayed(const Duration(milliseconds: 800), () {
-                          _notifyAppReady();
+                        // Check for pending deep links BEFORE navigating to home
+                        _deepLinkService.checkPendingDeepLinks().then((_) {
+                          // Only navigate to home if not already handling a deep link
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (Navigator.of(context).canPop()) {
+                              // If we can pop, we're already on a screen (probably from deep link)
+                              // so don't navigate to home
+                              DebugLogger.log('Already on a screen, not navigating to home', category: 'APP');
+                              _notifyAppReady();
+                            } else {
+                              // Otherwise go to home screen
+                              Routes.navigateToHome(context, state.userId!);
+
+                              // After navigation, mark app as ready
+                              Future.delayed(const Duration(milliseconds: 800), () {
+                                _notifyAppReady();
+                              });
+                            }
+                          });
                         });
                       });
                     }
                   },
                   builder: (context, state) {
-                    if (isFirstTime) return const LanguageSelectionScreen();
-
                     return _buildScreenForState(state, prefs);
                   },
                 );

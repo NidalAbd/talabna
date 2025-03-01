@@ -2,17 +2,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/repositories/user_profile_repository.dart';
-class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
-  final UserProfileRepository _repository;
 
-  UserProfileBloc({required UserProfileRepository repository})
-      : _repository = repository,
-        super(UserProfileInitial()) {
+
+class UniqueConstraintException implements Exception {
+  final String message;
+  final String? field;
+
+  UniqueConstraintException({required this.message, this.field});
+
+  @override
+  String toString() => message;
+}
+
+class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
+  final UserProfileRepository repository;
+
+  UserProfileBloc({required this.repository})
+      : super(UserProfileInitial()) {
     print('UserProfileBloc created: ${this.hashCode}');
+
     on<UserProfileRequested>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
-        final userProfile = await _repository.getUserProfileById(event.id);
+        final userProfile = await repository.getUserProfileById(event.id);
         emit(UserProfileLoadSuccess(user: userProfile));
       } catch (e) {
         emit(UserProfileLoadFailure(error: e.toString()));
@@ -22,7 +34,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<UserProfileContactRequested>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
-        final userProfile = await _repository.getUserProfileById(event.id);
+        final userProfile = await repository.getUserProfileById(event.id);
         emit(UserProfileLoadContactSuccess(user: userProfile));
       } catch (e) {
         emit(UserProfileLoadFailure(error: e.toString()));
@@ -32,17 +44,26 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<UserProfileUpdated>((event, emit) async {
       emit(const UserProfileUpdateInProgress());
       try {
-        final user = await _repository.updateUserProfile(event.user);
+        // Pass context to the repository if available for localization
+        final user = await repository.updateUserProfile(event.user, event.context);
         emit(UserProfileUpdateSuccess(user: user));
       } catch (e) {
-        emit(UserProfileUpdateFailure(error: e.toString()));
+        // Check if this is a unique constraint violation
+        if (e is UniqueConstraintException) {
+          emit(UserProfileUniqueConstraintFailure(
+            error: e.message,
+            field: e.field,
+          ));
+        } else {
+          emit(UserProfileUpdateFailure(error: e.toString()));
+        }
       }
     });
 
     on<UpdateUserProfilePhoto>((event, emit) async {
       emit(const UserProfileUpdateInProgress());
       try {
-        await _repository.updateUserProfilePhoto(event.user, event.photo);
+        await repository.updateUserProfilePhoto(event.user, event.photo);
         emit(UserProfileUpdateSuccess(user: event.user));
       } catch (e) {
         emit(UserProfileUpdateFailure(error: e.toString()));
@@ -52,25 +73,23 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<UpdateUserPassword>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
-        await _repository.updateUserPassword(
+        await repository.updateUserPassword(
           event.user,
           event.oldPassword,
           event.newPassword,
         );
         emit(UserProfileUpdateSuccess(user: event.user));
         emit(UserProfileLoadSuccess(user: event.user));
-
       } catch (e) {
         emit(UserProfileUpdateFailure(error: e.toString()));
         emit(UserProfileLoadSuccess(user: event.user));
-
       }
     });
 
     on<UpdateUserEmail>((event, emit) async {
       emit(UserProfileLoadInProgress());
       try {
-        await _repository.updateUserEmail(event.user, event.newEmail , event.password);
+        await repository.updateUserEmail(event.user, event.newEmail, event.password);
         emit(UserProfileUpdateSuccess(user: event.user));
         emit(UserProfileLoadSuccess(user: event.user));
       } catch (e) {
@@ -79,5 +98,4 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       }
     });
   }
-
 }

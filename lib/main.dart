@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
+import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/services/deep_link_service.dart';
 import 'package:talbna/theme_cubit.dart';
 import 'package:talbna/utils/debug_logger.dart';
@@ -26,11 +27,14 @@ class AppInitializer {
     try {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Initialize core services
+      // Initialize core services first
       await _initializeFoundationServices();
 
       // Load app preferences
-      final prefs = await _loadAppPreferences();
+      final prefs = await SharedPreferences.getInstance();
+
+      // Pre-check authentication status for cold start
+      await _checkAuthForColdStart(prefs);
 
       // Configure system UI
       await _configureSystemUI(prefs.getBool('isDarkTheme') ?? true);
@@ -39,7 +43,8 @@ class AppInitializer {
       await _requestPermissions();
 
       // Run the application
-      _runApplication(prefs);
+      final repositories = AppRepositories.initialize();
+      _runApplication(prefs, repositories);
     } catch (e, stackTrace) {
       debugPrint('App Initialization Error: $e');
       debugPrint('Stack Trace: $stackTrace');
@@ -57,10 +62,37 @@ class AppInitializer {
     await FCMHandler().initializeFCM();
   }
 
-  static Future<SharedPreferences> _loadAppPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    language = prefs.getString('language') ?? 'ar';
-    return prefs;
+  // Check authentication for cold start with deep links
+  static Future<void> _checkAuthForColdStart(SharedPreferences prefs) async {
+    final String? token = prefs.getString('auth_token');
+    final int? userId = prefs.getInt('userId');
+
+    if (token != null && token.isNotEmpty && userId != null) {
+      DebugLogger.log('Found stored token for cold start: userId=$userId', category: 'INIT');
+
+      try {
+        // Initialize repositories to check token
+        final repositories = AppRepositories.initialize();
+        final authRepository = repositories.authenticationRepository;
+
+        // Validate token
+        final bool isValid = await authRepository.checkTokenValidity(token);
+
+        if (isValid) {
+          DebugLogger.log('Token is valid for cold start, pre-authenticating', category: 'INIT');
+          // Tell DeepLinkService we're pre-authenticated for deep link handling
+          deepLinkService.setPreAuthenticated(userId);
+        } else {
+          DebugLogger.log('Token is invalid, clearing stored credentials', category: 'INIT');
+          await prefs.remove('auth_token');
+          await prefs.remove('userId');
+        }
+      } catch (e) {
+        DebugLogger.log('Error validating token: $e', category: 'INIT');
+      }
+    } else {
+      DebugLogger.log('No stored token found for cold start', category: 'INIT');
+    }
   }
 
   static Future<void> _configureSystemUI(bool isDarkTheme) async {
@@ -104,7 +136,7 @@ class AppInitializer {
     }
   }
 
-  // Improved navigation guard with a shorter time window
+  // Navigation guard with a shorter time window
   static final Map<String, DateTime> _recentNavigations = {};
 
   static bool shouldAllowNavigation(String route) {
@@ -134,17 +166,35 @@ class AppInitializer {
     }
   }
 
-  static void _runApplication(SharedPreferences prefs) {
-    final repositories = AppRepositories.initialize();
+  static void _runApplication(SharedPreferences prefs, AppRepositories repositories) {
     final isDarkTheme = prefs.getBool('isDarkTheme') ?? true;
+
+    // Get the initial token for auto-login
+    final String? token = prefs.getString('auth_token');
+    final int? userId = prefs.getInt('userId');
+    final bool hasValidToken = token != null && token.isNotEmpty && userId != null;
+
+    final appBlocProviders = AppBlocProviders.getProviders(repositories);
 
     runApp(
       MultiBlocProvider(
-        providers: AppBlocProviders.getProviders(repositories),
-        child: MyApp(
-          authenticationRepository: repositories.authenticationRepository,
-          isDarkTheme: isDarkTheme,
-          navigatorKey: navigatorKey, // Pass the navigator key to MyApp
+        providers: appBlocProviders,
+        child: Builder(
+            builder: (context) {
+              // Auto-login if we have a valid token
+              if (hasValidToken) {
+                DebugLogger.log('Auto-logging in with token: $token', category: 'INIT');
+                // Dispatch login event to the authentication bloc
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedIn(token: token!));
+              }
+
+              return MyApp(
+                authenticationRepository: repositories.authenticationRepository,
+                isDarkTheme: isDarkTheme,
+                navigatorKey: navigatorKey,
+                autoAuthenticated: hasValidToken,
+              );
+            }
         ),
       ),
     );

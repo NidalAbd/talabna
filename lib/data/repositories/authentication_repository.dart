@@ -21,6 +21,7 @@ class AuthenticationRepository {
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
       }
+
       final response = await http.post(
           Uri.parse('$API_BASE_URL/$url'),
           headers: headers,
@@ -98,6 +99,7 @@ class AuthenticationRepository {
   Future<bool> isSignedIn() async {
     final authToken = await getAuthToken();
     return authToken != null;
+
   }
 
   Future<void> logout() async {

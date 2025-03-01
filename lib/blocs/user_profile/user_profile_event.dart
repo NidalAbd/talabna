@@ -17,6 +17,7 @@ class UserProfileRequested extends UserProfileEvent {
   @override
   List<Object> get props => [id];
 }
+
 class UserProfileContactRequested extends UserProfileEvent {
   final int id;
 
@@ -26,22 +27,26 @@ class UserProfileContactRequested extends UserProfileEvent {
   List<Object> get props => [id];
 }
 
-
 class UserProfileUpdated extends UserProfileEvent {
   final User user;
+  // Optional context to get locale for error messages
+  final dynamic context;
 
-  const UserProfileUpdated({required this.user});
+  const UserProfileUpdated({required this.user, this.context});
 
   @override
   List<Object> get props => [user];
 }
+
 class UpdateUserProfilePhoto extends UserProfileEvent {
   final User user;
   final File photo;
 
   const UpdateUserProfilePhoto({required this.user, required this.photo});
-}
 
+  @override
+  List<Object> get props => [user, photo];
+}
 
 class UpdateUserPassword extends UserProfileEvent {
   final User user;
@@ -53,6 +58,9 @@ class UpdateUserPassword extends UserProfileEvent {
     required this.oldPassword,
     required this.newPassword,
   });
+
+  @override
+  List<Object> get props => [user, oldPassword, newPassword];
 }
 
 class UpdateUserEmail extends UserProfileEvent {
@@ -60,5 +68,12 @@ class UpdateUserEmail extends UserProfileEvent {
   final String newEmail;
   final String password;
 
-  const UpdateUserEmail({required this.user, required this.newEmail, required this.password});
+  const UpdateUserEmail({
+    required this.user,
+    required this.newEmail,
+    required this.password
+  });
+
+  @override
+  List<Object> get props => [user, newEmail, password];
 }

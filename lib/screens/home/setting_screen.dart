@@ -9,7 +9,10 @@ import 'package:talbna/screens/profile/change_password_screen.dart';
 import 'package:talbna/utils/restart_helper.dart';
 import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
 import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../blocs/authentication/authentication_bloc.dart';
+import '../../blocs/authentication/authentication_event.dart';
 import '../../theme_cubit.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -317,6 +320,171 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
     );
   }
 
+  Future<void> toggleNotifications(BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool currentNotificationStatus = prefs.getBool('notifications_enabled') ?? true;
+
+      // Toggle the notification status
+      await prefs.setBool('notifications_enabled', !currentNotificationStatus);
+
+      // Show a snackbar to provide feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              !currentNotificationStatus
+                  ? 'Notifications Enabled'
+                  : 'Notifications Disabled'
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      // Handle any errors that might occur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating notifications: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Help Center Function
+  Future<void> openHelpCenter(BuildContext context) async {
+    // Replace with your actual help center URL
+    final Uri helpCenterUrl = Uri.parse('https://www.yourapp.com/help');
+
+    try {
+      if (await canLaunchUrl(helpCenterUrl)) {
+        await launchUrl(
+          helpCenterUrl,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        // Fallback if URL can't be launched
+        _showFallbackHelpDialog(context);
+      }
+    } catch (e) {
+      // Show error if launching fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open Help Center: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Privacy Policy Function
+  Future<void> openPrivacyPolicy(BuildContext context) async {
+    // Replace with your actual privacy policy URL
+    final Uri privacyPolicyUrl = Uri.parse('https://www.yourapp.com/privacy');
+
+    try {
+      if (await canLaunchUrl(privacyPolicyUrl)) {
+        await launchUrl(
+          privacyPolicyUrl,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        // Fallback if URL can't be launched
+        _showFallbackPrivacyPolicyDialog(context);
+      }
+    } catch (e) {
+      // Show error if launching fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open Privacy Policy: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // About App Function
+  void showAboutDialog(BuildContext context) {
+    // Replace with your app's actual details
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('About Our App'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('App Name: Your App Name'),
+                const Text('Version: 1.0.0'),
+                const Text('Description: A brief description of your app.'),
+                const SizedBox(height: 10),
+                const Text(
+                  'Developed with passion by Your Company Name',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fallback Help Dialog
+  void _showFallbackHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Help Center'),
+          content: const Text(
+            'We are unable to open the help center at the moment. '
+                'Please contact our support team at support@yourapp.com',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fallback Privacy Policy Dialog
+  void _showFallbackPrivacyPolicyDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Privacy Policy'),
+          content: const Text(
+            'We are unable to open the privacy policy at the moment. '
+                'Please contact our support team at support@yourapp.com for more information.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildThemeToggleButton() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
@@ -562,7 +730,62 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                   icon: Icons.logout,
                   title: _language.tLogoutText(),
                   onTap: () {
-                    // Show logout confirmation
+                    // Show logout confirmation dialog
+                    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+                    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: Text(
+                          _language.tConfirmLogoutText(),
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(_language.tConfirmLogoutDescText()),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(
+                              _language.tCancelText(),
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Dispatch LoggedOut event to the authentication bloc
+                              BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+
+                              // Close the dialog
+                              Navigator.of(context).pop();
+
+                              // Clear any stored credentials or tokens
+                              SharedPreferences.getInstance().then((prefs) {
+                                prefs.remove('token');
+                                prefs.remove('user_id');
+                                // Keep language preference but clear other settings
+                              });
+
+                              // Navigate to login screen and clear navigation stack
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                '/login', // Your login route
+                                    (route) => false,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(_language.tLogoutText()),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   iconColor: Colors.redAccent,
                 ),

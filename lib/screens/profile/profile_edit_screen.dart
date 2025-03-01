@@ -55,6 +55,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   DateTime? _selectedDate;
   double _locationLatitudes = 0.0;
   double _locationLongitudes = 0.0;
+  final _phoneFocusNode = FocusNode();
+  final _whatsAppFocusNode = FocusNode();
 
   // Flags and Utilities
   final _dateFormat = DateFormat('yyyy-MM-dd');
@@ -204,23 +206,15 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
         photos: widget.user.photos,
       );
 
-      context.read<UserProfileBloc>().add(UserProfileUpdated(user: updatedUser));
-      await updatedUser.saveToPreferences();
-
-      // Mark profile as completed
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('profileCompleted', true);
-
-      // Print completion status for debug
-      print('Profile completion status set to: ${prefs.getBool('profileCompleted')}');
-
+      // Pass context to the event for localization
+      context.read<UserProfileBloc>().add(UserProfileUpdated(
+        user: updatedUser,
+        context: context,
+      ));
     } catch (e) {
       if (mounted) {
         _showErrorSnackBar(_language.updateFailedText());
         print('Error updating profile: $e');
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -449,6 +443,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     if (!mounted) return Container();
 
@@ -472,12 +467,34 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
           if (state is UserProfileUpdateSuccess) {
             _userProfileBloc.add(UserProfileRequested(id: widget.userId));
             _showSuccessSnackBar(_language.profileUpdatedSuccessText());
-            setState(() => _hasChanges = false);
+            setState(() {
+              _isLoading = false;
+              _hasChanges = false;
+            });
 
             // After successful update, update the profile completion status
             _markProfileAsCompleted();
           } else if (state is UserProfileUpdateFailure) {
-            _showErrorSnackBar(_language.updateFailedText());
+            setState(() => _isLoading = false);
+            _showErrorSnackBar(state.error);
+          } else if (state is UserProfileUniqueConstraintFailure) {
+            setState(() => _isLoading = false);
+            _showErrorSnackBar(state.error);
+
+            // Focus on the field that caused the error
+            if (state.field == 'phones') {
+              FocusScope.of(context).requestFocus(_phoneFocusNode);
+              _phoneController.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: _phoneController.text.length,
+              );
+            } else if (state.field == 'WatsNumber') {
+              FocusScope.of(context).requestFocus(_whatsAppFocusNode);
+              _whatsAppController.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: _whatsAppController.text.length,
+              );
+            }
           }
         },
         builder: (context, state) {
@@ -485,7 +502,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
 
           if (state is UserProfileLoadSuccess) {
             return _buildForm(state.user);
-          } else if (state is UserProfileLoadInProgress) {
+          } else if (state is UserProfileLoadInProgress || state is UserProfileUpdateInProgress) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is UserProfileLoadFailure) {
             return Center(
@@ -733,6 +750,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     _whatsAppController.dispose();
     _dateOfBirthController.dispose();
     _countryCodeController.dispose();
+    _phoneFocusNode.dispose();
+    _whatsAppFocusNode.dispose();
     super.dispose();
   }
 }
