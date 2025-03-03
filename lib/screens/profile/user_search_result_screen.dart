@@ -9,14 +9,13 @@ import 'package:talbna/screens/profile/user_card.dart';
 
 class UserSearchResult extends StatefulWidget {
   UserSearchResult(
-      {Key? key,
+      {super.key,
       required this.currentPage,
       required this.searchQuery,
       required this.userHasReachedMax,
       required this.usersResult,
       required this.userActionBloc,
-      required this.userID, required this.user})
-      : super(key: key);
+      required this.userID, required this.user});
   final int userID;
   final User user;
   late List<User> usersResult = [];

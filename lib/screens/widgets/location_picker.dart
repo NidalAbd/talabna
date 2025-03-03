@@ -5,7 +5,7 @@ import 'package:location/location.dart';
 class LocationPicker extends StatefulWidget {
   final Function(LatLng) onLocationPicked;
 
-  const LocationPicker({Key? key, required this.onLocationPicked}) : super(key: key);
+  const LocationPicker({super.key, required this.onLocationPicked});
 
   @override
   _LocationPickerState createState() => _LocationPickerState();

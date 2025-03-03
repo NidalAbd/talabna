@@ -1,10 +1,7 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/notification/notifications_bloc.dart';
 import 'package:talbna/blocs/notification/notifications_event.dart';
 import 'package:talbna/blocs/notification/notifications_state.dart';
@@ -15,7 +12,7 @@ import '../../provider/language.dart';
 import '../widgets/shimmer_widgets.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({Key? key, required this.userID}) : super(key: key);
+  const NotificationsScreen({super.key, required this.userID});
   final int userID;
 
   @override
@@ -30,7 +27,7 @@ class NotificationsScreenState extends State<NotificationsScreen> with SingleTic
   bool _hasReachedMax = false;
   List<Notifications> _notification = [];
   // Track read status separately to avoid modifying the immutable Notifications objects
-  Set<int> _locallyMarkedAsRead = {};
+  final Set<int> _locallyMarkedAsRead = {};
   final Language _language = Language();
   bool _isLoading = true;
 
@@ -159,7 +156,7 @@ class NotificationsScreenState extends State<NotificationsScreen> with SingleTic
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        backgroundColor: theme.colorScheme.background,
+        backgroundColor: theme.colorScheme.surface,
         title: Text(
           _language.getNotificationText(),
           style: TextStyle(

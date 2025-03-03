@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/utils/constants.dart';
-import 'package:talbna/screens/widgets/comment_sheet.dart';
-import 'package:talbna/screens/widgets/contact_sheet.dart';
 
 class InteractionButtons extends StatelessWidget {
   final int favoritesCount;
@@ -13,7 +10,7 @@ class InteractionButtons extends StatelessWidget {
   final VoidCallback onSharePressed;
 
   const InteractionButtons({
-    Key? key,
+    super.key,
     required this.favoritesCount,
     required this.commentsCount,
     required this.isFavorite,
@@ -21,7 +18,7 @@ class InteractionButtons extends StatelessWidget {
     required this.onCommentPressed,
     required this.onContactPressed,
     required this.onSharePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,7 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 class UserPostScreen extends StatefulWidget {
-   const UserPostScreen({Key? key, required this.userID, required this.user}) : super(key: key);
+   const UserPostScreen({super.key, required this.userID, required this.user});
   final int userID;
   final User user;
   @override

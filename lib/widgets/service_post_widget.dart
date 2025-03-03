@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ServicePostWidget extends StatelessWidget {
   const ServicePostWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   @override
   Widget build(BuildContext context) {
     return Container(

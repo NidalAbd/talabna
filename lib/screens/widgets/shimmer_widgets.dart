@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:talbna/app_theme.dart';
 
 /// Shimmer widget for loading states
 class ShimmerWidget extends StatelessWidget {
@@ -9,26 +8,26 @@ class ShimmerWidget extends StatelessWidget {
   final ShapeBorder shapeBorder;
 
   const ShimmerWidget.rectangular({
-    Key? key,
+    super.key,
     this.width = double.infinity,
     required this.height,
-  }) : shapeBorder = const RoundedRectangleBorder(), super(key: key);
+  }) : shapeBorder = const RoundedRectangleBorder();
 
   const ShimmerWidget.circular({
-    Key? key,
+    super.key,
     required this.width,
     required this.height,
     this.shapeBorder = const CircleBorder(),
-  }) : super(key: key);
+  });
 
   const ShimmerWidget.rounded({
-    Key? key,
+    super.key,
     this.width = double.infinity,
     required this.height,
     this.shapeBorder = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     ),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,7 @@ class ShimmerWidget extends StatelessWidget {
 
 /// Shimmer for CategoryScreen loading state
 class CategoryScreenShimmer extends StatelessWidget {
-  const CategoryScreenShimmer({Key? key}) : super(key: key);
+  const CategoryScreenShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +119,7 @@ class CategoryScreenShimmer extends StatelessWidget {
 
 /// Shimmer for SubcategoryListView loading state
 class SubcategoryListViewShimmer extends StatelessWidget {
-  const SubcategoryListViewShimmer({Key? key}) : super(key: key);
+  const SubcategoryListViewShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +155,7 @@ class SubcategoryListViewShimmer extends StatelessWidget {
 
 /// Shimmer for ServicePostScreen loading state
 class ServicePostScreenShimmer extends StatelessWidget {
-  const ServicePostScreenShimmer({Key? key}) : super(key: key);
+  const ServicePostScreenShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +216,7 @@ class ServicePostScreenShimmer extends StatelessWidget {
 
 /// Notification Shimmer for loading states
 class NotificationShimmerItem extends StatelessWidget {
-  const NotificationShimmerItem({Key? key}) : super(key: key);
+  const NotificationShimmerItem({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +317,7 @@ class NotificationShimmerItem extends StatelessWidget {
 
 /// Full shimmer loading screen for notifications
 class NotificationShimmerList extends StatelessWidget {
-  const NotificationShimmerList({Key? key}) : super(key: key);
+  const NotificationShimmerList({super.key});
 
   @override
   Widget build(BuildContext context) {

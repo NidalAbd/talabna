@@ -96,7 +96,7 @@ class CircularTransitionOverlay extends StatefulWidget {
   final Offset tapPosition;
   final Color color;
 
-  CircularTransitionOverlay({super.key, required this.tapPosition, required this.color});
+  const CircularTransitionOverlay({super.key, required this.tapPosition, required this.color});
 
   @override
   _CircularTransitionOverlayState createState() => _CircularTransitionOverlayState();

@@ -18,7 +18,6 @@ import 'package:talbna/screens/service_post/service_post_view.dart';
 import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/services/deep_link_service.dart';
 
-import 'main.dart';
 
 class Routes {
   // Centralized route names
@@ -244,7 +243,7 @@ class Routes {
               final servicePost = _findServicePost(servicePostState.servicePosts, postId);
               final user = userProfileState.user;
 
-              if (servicePost != null && user != null) {
+              if (servicePost != null) {
                 DebugLogger.log('Successfully loaded service post ID: $postId', category: 'NAVIGATION');
                 return ServicePostCardView(
                   userProfileId: userId,

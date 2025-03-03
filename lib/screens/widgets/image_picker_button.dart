@@ -12,7 +12,7 @@ import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import '../../data/models/service_post.dart';
+import '../../data/models/photos.dart';
 import '../../provider/language.dart';
 import '../../utils/constants.dart';
 

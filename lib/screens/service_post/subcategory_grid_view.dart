@@ -22,13 +22,13 @@ class SubcategoryListView extends StatefulWidget {
   final UserProfileBloc userProfileBloc;
 
   const SubcategoryListView({
-    Key? key,
+    super.key,
     required this.categoryId,
     required this.userId,
     required this.servicePostBloc,
     required this.userProfileBloc,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   _SubcategoryListViewState createState() => _SubcategoryListViewState();

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
-import 'package:talbna/main.dart';
 import '../../provider/language.dart';
 
 class SubCategoriesDropdown extends StatefulWidget {

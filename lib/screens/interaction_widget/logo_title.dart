@@ -3,11 +3,11 @@ import 'package:talbna/app_theme.dart';
 
 class LogoTitle extends StatefulWidget {
   const LogoTitle({
-    Key? key,
+    super.key,
     required this.fontSize,
     required this.playAnimation,
     required this.logoSize,
-  }) : super(key: key);
+  });
 
   final double fontSize;
   final bool playAnimation;

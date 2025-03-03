@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LocationButtonWidget extends StatelessWidget {
   final double locationLatitudes;
   final double locationLongitudes;
   final double width;
-  const LocationButtonWidget({Key? key, required this.locationLatitudes, required this.locationLongitudes, required this.width, }) : super(key: key);
+  const LocationButtonWidget({super.key, required this.locationLatitudes, required this.locationLongitudes, required this.width, });
 
    Future<void> launchGoogleMap() async {
      final url =

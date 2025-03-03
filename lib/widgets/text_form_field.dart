@@ -11,15 +11,14 @@ class TextFromField extends StatelessWidget {
   final String hintText;
   final EdgeInsets padding;
   const TextFromField(
-      {Key? key,
+      {super.key,
       required this.controller,
       required this.obscureText,
       required this.validator,
       required this.prefixIcon,
       required this.hintText,
        this.suffixIcon,
-      required TextInputType keyboardType, required this.padding, required this.maxLength})
-      : super(key: key);
+      required TextInputType keyboardType, required this.padding, required this.maxLength});
 
   @override
   Widget build(BuildContext context) {

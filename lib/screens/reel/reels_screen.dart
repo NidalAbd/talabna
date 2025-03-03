@@ -20,6 +20,7 @@ import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../data/models/photos.dart';
 import 'like_button.dart';
 
 class ReelsHomeScreen extends StatefulWidget {

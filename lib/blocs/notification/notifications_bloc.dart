@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/data/models/notifications.dart';
 import 'package:talbna/data/repositories/notification_repository.dart';
 
 import 'notifications_event.dart';

@@ -19,7 +19,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
   UserProfileBloc({required this.repository})
       : super(UserProfileInitial()) {
-    print('UserProfileBloc created: ${this.hashCode}');
+    print('UserProfileBloc created: $hashCode');
 
     on<UserProfileRequested>((event, emit) async {
       emit(UserProfileLoadInProgress());

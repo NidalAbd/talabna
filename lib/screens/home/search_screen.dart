@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
@@ -10,7 +9,7 @@ import 'package:talbna/screens/profile/user_card.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key, required this.userID, required this.user}) : super(key: key);
+  const SearchScreen({super.key, required this.userID, required this.user});
   final int userID;
   final User user;
   @override

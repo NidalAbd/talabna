@@ -7,11 +7,11 @@ class UserDetailsBar extends StatelessWidget {
   final Color backgroundColor;
 
   const UserDetailsBar({
-    Key? key,
+    super.key,
     required this.userPhotoUrl,
     this.radius = 25,
     this.backgroundColor = const Color.fromARGB(238, 249, 230, 248),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

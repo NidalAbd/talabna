@@ -7,7 +7,7 @@ import 'package:talbna/blocs/user_follow/user_follow_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/user_card.dart';
 class UserFollowerScreen extends StatefulWidget {
-  const UserFollowerScreen({Key? key, required this.userID, required this.user}) : super(key: key);
+  const UserFollowerScreen({super.key, required this.userID, required this.user});
   final int userID;
   final User user;
   @override

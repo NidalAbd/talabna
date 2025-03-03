@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsAppButtonWidget extends StatelessWidget {
   final String? whatsAppNumber;
   final String username;
   final double width;
-  const WhatsAppButtonWidget({Key? key, this.whatsAppNumber, required this.username, required this.width}) : super(key: key);
+  const WhatsAppButtonWidget({super.key, this.whatsAppNumber, required this.username, required this.width});
 
   String formatWhatsAppNumber(String number) {
     // Remove leading '00'

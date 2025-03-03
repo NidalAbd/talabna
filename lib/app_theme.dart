@@ -131,11 +131,9 @@ class AppTheme {
     colorScheme: const ColorScheme.light(
       primary: lightPrimaryColor,
       secondary: lightSecondaryColor,
-      background: lightBackgroundColor,
       surface: Colors.white,
       onPrimary: Colors.white,
       onSecondary: lightTextColor,
-      onBackground: lightTextColor,
       onSurface: lightTextColor,
       onError: Colors.white,
       error: lightErrorColor,
@@ -184,12 +182,12 @@ class AppTheme {
       selectedBorderColor: lightPrimaryColor,
     ),
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) return lightPrimaryColor;
+      thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) return lightPrimaryColor;
         return Colors.grey.shade400;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) return lightPrimaryColor.withOpacity(0.5);
+      trackColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) return lightPrimaryColor.withOpacity(0.5);
         return Colors.grey.shade300;
       }),
     ),
@@ -289,11 +287,9 @@ class AppTheme {
     colorScheme: const ColorScheme.dark(
       primary: Colors.white,
       secondary: darkSecondaryColor,
-      background: darkBackgroundColor,
       surface: darkBackgroundColor,
       onPrimary: Colors.white,
       onSecondary: Colors.black,
-      onBackground: darkTextColor,
       onSurface: darkTextColor,
       onError: Colors.black,
       error: darkErrorColor,

@@ -17,10 +17,10 @@ class FavoritePostScreen extends StatefulWidget {
   final User user;
 
   const FavoritePostScreen({
-    Key? key,
+    super.key,
     required this.userID,
     required this.user
-  }) : super(key: key);
+  });
 
   @override
   _FavoritePostScreenState createState() => _FavoritePostScreenState();

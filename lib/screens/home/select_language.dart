@@ -106,12 +106,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(_language.cancelText()),
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(foregroundColor: Colors.grey),
+              child: Text(_language.cancelText()),
             ),
             ElevatedButton(
-              child: Text(_language.confirmText()),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _handleLanguageAndThemeChange();
@@ -122,6 +121,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
+              child: Text(_language.confirmText()),
             ),
           ],
         );

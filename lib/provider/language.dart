@@ -2720,6 +2720,226 @@ class Language extends ChangeNotifier {
         return 'Forgot Password?';
     }
   }
+  String tNotificationsEnabledText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تمكين الإشعارات';
+      case 'en':
+        return 'Notifications enabled';
+      case 'es':
+        return 'Notificaciones activadas';
+      case 'zh':
+        return '通知已启用';
+      case 'hi':
+        return 'सूचनाएँ सक्षम की गईं';
+      case 'pt':
+        return 'Notificações ativadas';
+      case 'ru':
+        return 'Уведомления включены';
+      case 'ja':
+        return '通知が有効になりました';
+      case 'fr':
+        return 'Notifications activées';
+      case 'de':
+        return 'Benachrichtigungen aktiviert';
+      default:
+        return 'Notifications enabled';
+    }
+  }
+
+  String tNotificationsDisabledText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تعطيل الإشعارات';
+      case 'en':
+        return 'Notifications disabled';
+      case 'es':
+        return 'Notificaciones desactivadas';
+      case 'zh':
+        return '通知已禁用';
+      case 'hi':
+        return 'सूचनाएँ अक्षम की गईं';
+      case 'pt':
+        return 'Notificações desativadas';
+      case 'ru':
+        return 'Уведомления отключены';
+      case 'ja':
+        return '通知が無効になりました';
+      case 'fr':
+        return 'Notifications désactivées';
+      case 'de':
+        return 'Benachrichtigungen deaktiviert';
+      default:
+        return 'Notifications disabled';
+    }
+  }
+
+  String tNotificationSettingsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إعدادات الإشعارات';
+      case 'en':
+        return 'Notification Settings';
+      case 'es':
+        return 'Configuración de notificaciones';
+      case 'zh':
+        return '通知设置';
+      case 'hi':
+        return 'सूचना सेटिंग्स';
+      case 'pt':
+        return 'Configurações de notificação';
+      case 'ru':
+        return 'Настройки уведомлений';
+      case 'ja':
+        return '通知設定';
+      case 'fr':
+        return 'Paramètres de notification';
+      case 'de':
+        return 'Benachrichtigungseinstellungen';
+      default:
+        return 'Notification Settings';
+    }
+  }
+
+  String tPushNotificationsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إشعارات الدفع';
+      case 'en':
+        return 'Push Notifications';
+      case 'es':
+        return 'Notificaciones push';
+      case 'zh':
+        return '推送通知';
+      case 'hi':
+        return 'पुश सूचनाएँ';
+      case 'pt':
+        return 'Notificações push';
+      case 'ru':
+        return 'Push-уведомления';
+      case 'ja':
+        return 'プッシュ通知';
+      case 'fr':
+        return 'Notifications push';
+      case 'de':
+        return 'Push-Benachrichtigungen';
+      default:
+        return 'Push Notifications';
+    }
+  }
+
+  String tEmailNotificationsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إشعارات البريد الإلكتروني';
+      case 'en':
+        return 'Email Notifications';
+      case 'es':
+        return 'Notificaciones por correo electrónico';
+      case 'zh':
+        return '电子邮件通知';
+      case 'hi':
+        return 'ईमेल सूचनाएँ';
+      case 'pt':
+        return 'Notificações por e-mail';
+      case 'ru':
+        return 'Уведомления по электронной почте';
+      case 'ja':
+        return 'メール通知';
+      case 'fr':
+        return 'Notifications par e-mail';
+      case 'de':
+        return 'E-Mail-Benachrichtigungen';
+      default:
+        return 'Email Notifications';
+    }
+  }
+// Add these methods to your Language class
+
+// Data Saver Mode text
+  String tDataSaverModeText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'وضع توفير البيانات';
+      case 'en':
+        return 'Data Saver Mode';
+      default:
+        return 'Data Saver Mode';
+    }
+  }
+
+// Data Saver Mode enabled text
+  String tDataSaverEnabledText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تفعيل وضع توفير البيانات';
+      case 'en':
+        return 'Data Saver Mode Enabled';
+      default:
+        return 'Data Saver Mode Enabled';
+    }
+  }
+
+// Data Saver Mode disabled text
+  String tDataSaverDisabledText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تعطيل وضع توفير البيانات';
+      case 'en':
+        return 'Data Saver Mode Disabled';
+      default:
+        return 'Data Saver Mode Disabled';
+    }
+  }
+
+// Data Saver Mode description text
+  String tDataSaverDescText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'توفير استهلاك البيانات بعدم تحميل الصور والوسائط';
+      case 'en':
+        return 'Reduce data usage by not loading images and media';
+      default:
+        return 'Reduce data usage by not loading images and media';
+    }
+  }
+  String tInAppNotificationsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إشعارات داخل التطبيق';
+      case 'en':
+        return 'In-App Notifications';
+      case 'es':
+        return 'Notificaciones en la aplicación';
+      case 'zh':
+        return '应用内通知';
+      case 'hi':
+        return 'ऐप के अंदर की सूचनाएँ';
+      case 'pt':
+        return 'Notificações no aplicativo';
+      case 'ru':
+        return 'Уведомления в приложении';
+      case 'ja':
+        return 'アプリ内通知';
+      case 'fr':
+        return 'Notifications intégrées à l’application';
+      case 'de':
+        return 'In-App-Benachrichtigungen';
+      default:
+        return 'In-App Notifications';
+    }
+  }
+
   String tRegisterText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {

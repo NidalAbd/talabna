@@ -13,6 +13,7 @@ import '../../blocs/other_users/user_profile_state.dart';
 import '../../data/models/user.dart';
 import '../../provider/language.dart';
 import '../../utils/constants.dart';
+import '../../utils/photo_image_helper.dart';
 import '../interaction_widget/report_tile.dart';
 import '../service_post/other_post_screen.dart';
 import '../widgets/error_widget.dart';
@@ -21,11 +22,11 @@ import 'add_point_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
-    Key? key,
+    super.key,
     required this.fromUser,
     required this.toUser,
     required this.user,
-  }) : super(key: key);
+  });
 
   final int fromUser;
   final int toUser;
@@ -83,12 +84,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  String _getProfileImageUrl(User user) {
-    if (user.photos != null && user.photos!.isNotEmpty) {
-      return '${Constants.apiBaseUrl}/storage/${user.photos!.first.src}';
-    }
-    return 'https://via.placeholder.com/150';
-  }
 
   @override
   void dispose() {
@@ -179,7 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Image.network(
-              _getProfileImageUrl(user),
+              ProfileImageHelper.getProfileImageUrl(user),
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.5),
               colorBlendMode: BlendMode.darken,
@@ -196,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: CircleAvatar(
                 radius: 60,
                 backgroundImage: CachedNetworkImageProvider(
-                  _getProfileImageUrl(user),
+                  ProfileImageHelper.getProfileImageUrl(user),
                 ),
               ),
             ),

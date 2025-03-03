@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:talbna/data/models/report.dart';
 
 abstract class ReportState extends Equatable {
   const ReportState();

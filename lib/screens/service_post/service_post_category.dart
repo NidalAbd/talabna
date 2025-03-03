@@ -3,12 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
-import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
-import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
-import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
 
 import '../widgets/shimmer_widgets.dart';
 
@@ -19,11 +16,11 @@ class ServicePostScreen extends StatefulWidget {
   final ServicePostBloc servicePostBloc;
   final User user;
   const ServicePostScreen({
-    Key? key,
+    super.key,
     required this.category,
     required this.userID,
     required this.servicePostBloc, required this.showSubcategoryGridView, required this.user,
-  }) : super(key: key);
+  });
 
   @override
   ServicePostScreenState createState() => ServicePostScreenState();

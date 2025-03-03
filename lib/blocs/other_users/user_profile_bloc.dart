@@ -9,7 +9,7 @@ class OtherUserProfileBloc extends Bloc<OtherUserProfileEvent, OtherUserProfileS
   OtherUserProfileBloc({required UserProfileRepository repository})
       : _repository = repository,
         super(OtherUserProfileInitial()) {
-    print('OtherUserProfileBloc created: ${this.hashCode}');
+    print('OtherUserProfileBloc created: $hashCode');
 
     on<OtherUserProfileRequested>((event, emit) async {
       emit(OtherUserProfileLoadInProgress());

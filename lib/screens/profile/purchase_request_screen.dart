@@ -13,7 +13,7 @@ import '../../provider/language.dart';
 class PurchaseRequestScreen extends StatefulWidget {
   final int userID;
 
-  const PurchaseRequestScreen({Key? key, required this.userID}) : super(key: key);
+  const PurchaseRequestScreen({super.key, required this.userID});
 
   @override
   PurchaseRequestScreenState createState() => PurchaseRequestScreenState();

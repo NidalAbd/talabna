@@ -12,7 +12,7 @@ import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../data/models/service_post.dart';
+import '../../data/models/photos.dart';
 
 class ImagePickerButton extends StatefulWidget {
   final Function(List<Photo>?) onImagesPicked;
@@ -21,12 +21,12 @@ class ImagePickerButton extends StatefulWidget {
   final bool deleteApi;
 
   const ImagePickerButton({
-    Key? key,
+    super.key,
     required this.onImagesPicked,
     required this.initialPhotosNotifier,
     required this.maxImages,
     required this.deleteApi,
-  }) : super(key: key);
+  });
 
   @override
   ImagePickerButtonState createState() => ImagePickerButtonState();
@@ -35,7 +35,7 @@ class ImagePickerButton extends StatefulWidget {
 class ImagePickerButtonState extends State<ImagePickerButton> {
   List<Photo> _pickedImages = [];
   List<String?> _localImages = [];
-  Set<String> _processingImages = Set<String>();
+  final Set<String> _processingImages = <String>{};
   bool _processing = false;
 
   @override
@@ -395,7 +395,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
 class ThumbnailImage extends StatelessWidget {
   final String videoPath;
 
-  const ThumbnailImage({Key? key, required this.videoPath}) : super(key: key);
+  const ThumbnailImage({super.key, required this.videoPath});
 
   @override
   Widget build(BuildContext context) {

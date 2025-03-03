@@ -11,9 +11,9 @@ import 'package:talbna/widgets/text_form_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({
-    Key? key,
+    super.key,
     required this.authenticationBloc,
-  }) : super(key: key);
+  });
   final AuthenticationBloc authenticationBloc;
 
   @override

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
@@ -24,14 +23,14 @@ import '../../provider/language.dart';
 import '../../utils/debug_logger.dart';
 
 class ServicePostCardView extends StatefulWidget {
-  ServicePostCardView({
-    Key? key,
+  const ServicePostCardView({
+    super.key,
     required this.userProfileId,
     required this.onPostDeleted,  // Make this optional again to match existing code
     required this.servicePost,
     required this.canViewProfile,
     required this.user,
-  }) : super(key: key);  // Use named parameter for the super constructor
+  });  // Use named parameter for the super constructor
 
   final Function onPostDeleted;
   final int userProfileId;
@@ -49,7 +48,7 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
   late UserContactBloc _userContactBloc;
   late EdgeInsets padding;
   final Language _language = Language();
-  bool _viewIncremented = false;
+  final bool _viewIncremented = false;
   static final Set<int> _incrementedPostIds = {};
 
   @override

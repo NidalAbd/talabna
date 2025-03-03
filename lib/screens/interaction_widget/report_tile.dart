@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/report/report_bloc.dart';
 import 'package:talbna/blocs/report/report_event.dart';
 import 'package:talbna/blocs/report/report_state.dart';
 import 'package:talbna/screens/widgets/loading_widget.dart';
 
-import '../../main.dart';
 import '../../provider/language.dart';
 
 class ReportTile extends StatefulWidget {
   const ReportTile({
-    Key? key,
+    super.key,
     required this.type,
     required this.userId
-  }) : super(key: key);
+  });
 
   final String type;
   final int userId;

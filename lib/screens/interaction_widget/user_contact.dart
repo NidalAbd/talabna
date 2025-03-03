@@ -10,7 +10,7 @@ class UserContact extends StatelessWidget {
   final String? phone;
   final String? email;
 
-  const UserContact({Key? key, required this.username, this.whatsApp, this.phone, this.email}) : super(key: key);
+  const UserContact({super.key, required this.username, this.whatsApp, this.phone, this.email});
 
   String formatWhatsAppNumber(String number) {
     number = number.replaceFirst(RegExp(r'^00'), '');

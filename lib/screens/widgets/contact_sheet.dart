@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
-import 'package:talbna/blocs/user_profile/user_profile_state.dart';
-import 'package:talbna/data/models/comment.dart';
 import 'package:talbna/data/models/service_post.dart';
-import 'package:talbna/data/models/user.dart';
-import 'package:talbna/screens/interaction_widget/email_button.dart';
 import 'package:talbna/screens/interaction_widget/email_icon_button.dart';
 import 'package:talbna/screens/interaction_widget/location_Icon_button.dart';
 import 'package:talbna/screens/interaction_widget/phone_Icon_button.dart';
 import 'package:talbna/screens/interaction_widget/report_tile.dart';
 import 'package:talbna/screens/interaction_widget/watsapp_icon_button.dart';
-import 'package:talbna/screens/widgets/user_avatar_profile.dart';
-import 'package:talbna/utils/constants.dart';
 
 class ContactModalBottomSheet extends StatefulWidget {
   final double iconSize;

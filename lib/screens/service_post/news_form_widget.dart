@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NewsPostForm extends StatefulWidget {
-  const NewsPostForm({Key? key, required this.onPostSubmitted}) : super(key: key);
+  const NewsPostForm({super.key, required this.onPostSubmitted});
   final Function(String text, String? mediaType) onPostSubmitted;
 
   @override

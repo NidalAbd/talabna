@@ -12,9 +12,10 @@ import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../data/models/photos.dart';
+
 class ReelsHomeScreen extends StatefulWidget {
-  const ReelsHomeScreen({Key? key, required this.userId, this.servicePost})
-      : super(key: key);
+  const ReelsHomeScreen({super.key, required this.userId, this.servicePost});
   final int userId;
   final ServicePost? servicePost;
 

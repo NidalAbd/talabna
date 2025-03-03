@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
-import 'package:talbna/blocs/authentication/authentication_bloc.dart';
-import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/routes.dart';
 import 'package:talbna/theme_cubit.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -119,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     final backgroundColor = isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor;
     final textColor = isDarkMode ? AppTheme.darkTextColor : AppTheme.lightTextColor;
 
-    final List<String> _languages = [
+    final List<String> languages = [
       'ar',
       'en',
       'Español',
@@ -169,10 +167,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    itemCount: _languages.length,
+                    itemCount: languages.length,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
-                      final language = _languages[index];
+                      final language = languages[index];
                       final isSelected = selectedLanguage == language;
 
                       return Container(

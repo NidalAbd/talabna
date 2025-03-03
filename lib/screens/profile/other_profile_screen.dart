@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
-import 'dart:convert';
 
 import '../../app_theme.dart';
 import '../../blocs/other_users/user_profile_bloc.dart';
@@ -25,12 +24,12 @@ import '../widgets/error_widget.dart';
 
 class OtherProfileScreen extends StatefulWidget {
   const OtherProfileScreen({
-    Key? key,
+    super.key,
     required this.fromUser,
     required this.toUser,
     required this.user,
     required this.isOtherProfile,
-  }) : super(key: key);
+  });
 
   final bool isOtherProfile;
   final int fromUser;

@@ -16,10 +16,9 @@ import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/main_post_menu.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
 import '../../utils/debug_logger.dart';
-import '../profile/profile_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, required this.userId}) : super(key: key);
+  const HomeScreen({super.key, required this.userId});
   final int userId;
 
   @override
@@ -40,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   bool isLoading = true;
   String currentLanguage = 'en';
   bool _justUpdated = false;
-  bool _isDialogShowing = false;
   bool _profileCompleted = false;
 
   // Animation controllers
@@ -51,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _checkProfileCompletion();
     _initializeScreen();
     DebugLogger.printAllLogs();
 
@@ -74,20 +71,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       systemNavigationBarColor: barColor,
       systemNavigationBarIconBrightness: brightness,
     ));
-  }
-
-  // Check if profile is complete from SharedPreferences
-  Future<void> _checkProfileCompletion() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isProfileCompleted = prefs.getBool('profileCompleted') ?? false;
-
-    print('Loading profile completion status: $isProfileCompleted');
-
-    if (mounted) {
-      setState(() {
-        _profileCompleted = isProfileCompleted;
-      });
-    }
   }
 
   Future<void> _initializeScreen() async {
@@ -261,70 +244,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     }
   }
 
-  Future<void> _saveUserData(User user) async {
-    if (!mounted) return;
-
-    // Only save user data if profile is not already marked as completed
-    if (!_profileCompleted) {
-      final prefs = await SharedPreferences.getInstance();
-      if (user.userName != null) await prefs.setString('userName', user.userName!);
-      if (user.phones != null) await prefs.setString('phones', user.phones!);
-      if (user.watsNumber != null) await prefs.setString('watsNumber', user.watsNumber!);
-      if (user.gender != null) await prefs.setString('gender', user.gender!);
-      if (user.dateOfBirth != null) await prefs.setString('dob', user.dateOfBirth.toString());
-    }
-  }
-
-  void _showProfileIncompleteDialog(User user) {
-    if (!mounted || _isDialogShowing) return;
-
-    _isDialogShowing = true;
-
-    Future.delayed(Duration.zero, () {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProfileIncompleteDialog(
-            user: user,
-            userId: widget.userId,
-          );
-        },
-      ).then((wasUpdated) {
-        // If profile was updated, refresh the completion status
-        if (wasUpdated == true) {
-          setState(() {
-            _profileCompleted = true;
-          });
-        }
-
-        if (mounted) {
-          _isDialogShowing = false;
-        }
-      });
-    });
-  }
-
-  bool _shouldShowUserDataIncomplete(User user) {
-    // If profile is already marked as completed, don't show the incomplete info message
-    if (_profileCompleted) return false;
-
-    // Check if essential data is missing
-    final bool hasIncompleteLocation = (user.locationLatitudes == null ||
-        user.locationLongitudes == null) &&
-        user.city == null;
-
-    final bool hasIncompleteContacts = (user.phones == null ||
-        user.phones!.isEmpty) &&
-        (user.watsNumber == null ||
-            user.watsNumber!.isEmpty);
-
-    final bool hasIncompleteProfile = user.gender == null ||
-        user.dateOfBirth == null;
-
-    return hasIncompleteLocation || hasIncompleteContacts || hasIncompleteProfile;
-  }
-
   @override
   void dispose() {
     _disposed = true;
@@ -352,16 +271,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         if (state is UserProfileUpdateSuccess && mounted) {
           _handleProfileUpdate();
         }
-
-        // Check for profile completion status when user profile loads
-        if (state is UserProfileLoadSuccess && mounted) {
-          final user = state.user;
-
-          // Check if profile is incomplete and show dialog if needed
-          if (_shouldShowUserDataIncomplete(user)) {
-            _showProfileIncompleteDialog(user);
-          }
-        }
       },
       builder: (context, state) {
         if (!mounted) return Container();
@@ -376,9 +285,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         if (state is UserProfileLoadSuccess) {
           final user = state.user;
-          if (_shouldShowUserDataIncomplete(user)) {
-            _saveUserData(user);
-          }
           return _buildMainScreen(user, backgroundColor, primaryColor, textColor, iconColor);
         }
 

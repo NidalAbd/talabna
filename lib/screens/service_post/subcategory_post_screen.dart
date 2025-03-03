@@ -14,7 +14,7 @@ import '../../blocs/user_profile/user_profile_bloc.dart';
 
 class SubCategoryPostScreen extends StatefulWidget {
   const SubCategoryPostScreen({
-    Key? key,
+    super.key,
     required this.userID,
     required this.categoryId,
     required this.subcategoryId,
@@ -22,7 +22,7 @@ class SubCategoryPostScreen extends StatefulWidget {
     required this.userProfileBloc,
     required this.user,
     required this.titleSubcategory,
-  }) : super(key: key);
+  });
 
   final int userID;
   final User user;
@@ -488,14 +488,6 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to create post screen
-          // Add your navigation code here
-        },
-        backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

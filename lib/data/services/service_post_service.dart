@@ -1,6 +1,5 @@
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/repositories/service_post_repository.dart';
-import 'package:http/http.dart' as http;
 
 class ServicePostService {
   final ServicePostRepository _repository = ServicePostRepository();

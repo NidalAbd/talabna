@@ -4,7 +4,6 @@ import '../../data/models/countries.dart';
 import '../../data/repositories/countries_repository.dart';
 import '../../main.dart';
 import '../../provider/language.dart';
-import '../../app_theme.dart';
 
 class CountryCityDropdown extends StatefulWidget {
   final Country? initialCountry;
@@ -18,7 +17,7 @@ class CountryCityDropdown extends StatefulWidget {
   final Function(String) onWhatsAppNumberChanged;
 
   const CountryCityDropdown({
-    Key? key,
+    super.key,
     this.initialCountry,
     this.initialCity,
     required this.onCountryChanged,
@@ -28,7 +27,7 @@ class CountryCityDropdown extends StatefulWidget {
     this.initialWhatsappNumber,
     required this.onPhoneNumberChanged,
     required this.onWhatsAppNumberChanged,
-  }) : super(key: key);
+  });
 
   @override
   _CountryCityDropdownState createState() => _CountryCityDropdownState();

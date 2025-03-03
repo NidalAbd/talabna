@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_event.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
 import 'package:talbna/data/models/user.dart';
-import 'package:talbna/screens/interaction_widget/phone_Icon_button.dart';
-import 'package:talbna/screens/interaction_widget/phone_button.dart';
-import 'package:talbna/screens/interaction_widget/watsapp_button.dart';
 import 'package:talbna/screens/interaction_widget/watsapp_icon_button.dart';
-import 'package:talbna/screens/profile/user_card.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:talbna/provider/language.dart'; // Added Language import
 
 class UserSellerScreen extends StatefulWidget {
-  const UserSellerScreen({Key? key, required this.userID}) : super(key: key);
+  const UserSellerScreen({super.key, required this.userID});
   final int userID;
   @override
   UserSellerScreenState createState() => UserSellerScreenState();

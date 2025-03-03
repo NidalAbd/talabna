@@ -7,8 +7,9 @@ import 'package:talbna/utils/constants.dart';
 import 'package:talbna/widgets/text_form_field.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({Key? key}) : super(key: key);
+  const ResetPasswordScreen({super.key});
 
+  @override
   _ResetPasswordScreenState createState() => _ResetPasswordScreenState();
 }
 

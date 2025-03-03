@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import 'package:talbna/blocs/internet/internet_bloc.dart';
-import 'package:talbna/blocs/internet/internet_event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // create an instance of SharedPreferences

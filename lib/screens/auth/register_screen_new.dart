@@ -5,13 +5,13 @@ import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/blocs/authentication/authentication_state.dart';
 import 'package:talbna/provider/language.dart';
-import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
 import 'package:talbna/routes.dart';
 import '../check_auth.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class RegisterScreenNew extends StatefulWidget {
-  const RegisterScreenNew({Key? key}) : super(key: key);
+  const RegisterScreenNew({super.key});
 
   @override
   _RegisterScreenNewState createState() => _RegisterScreenNewState();
@@ -29,6 +29,7 @@ class _RegisterScreenNewState extends State<RegisterScreenNew> {
   bool _agreeToTerms = false;
   final Language language = Language();
   late bool _hasNavigatedToHome = false;
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -436,6 +437,10 @@ class _RegisterScreenNewState extends State<RegisterScreenNew> {
                                     ),
                                   ),
                                 ),
+                              ),
+                              const SizedBox(height: 24),
+                              GoogleSignInButton(
+                                isLoading: _isGoogleLoading,
                               ),
                               const SizedBox(height: 24),
 

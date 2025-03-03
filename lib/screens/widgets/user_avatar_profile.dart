@@ -4,7 +4,6 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/other_profile_screen.dart';
-import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/utils/constants.dart';
 
 class UserAvatarProfile extends StatefulWidget {
@@ -14,8 +13,7 @@ class UserAvatarProfile extends StatefulWidget {
   final double? radius;
   final int fromUser;
   final User user;
-  const UserAvatarProfile({Key? key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser, required this.user})
-      : super(key: key);
+  const UserAvatarProfile({super.key, this.imageUrl,  this.radius,  required this.toUser, required this.canViewProfile, required this.fromUser, required this.user});
 
   @override
   _UserAvatarProfileState createState() => _UserAvatarProfileState();

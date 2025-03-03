@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ImageGallery extends StatefulWidget {
   final List<String> imageUrls;
 
-  const ImageGallery({Key? key, required this.imageUrls}) : super(key: key);
+  const ImageGallery({super.key, required this.imageUrls});
 
   @override
   // ignore: library_private_types_in_public_api

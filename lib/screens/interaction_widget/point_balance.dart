@@ -6,7 +6,7 @@ import 'package:talbna/blocs/purchase_request/purchase_request_state.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 
 class PointBalance extends StatefulWidget {
-  const PointBalance({Key? key, required this.userId, required this.showBalance, required this.canClick,}) : super(key: key);
+  const PointBalance({super.key, required this.userId, required this.showBalance, required this.canClick,});
   final int userId;
   final bool showBalance;
   final bool canClick;

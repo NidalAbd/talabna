@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
@@ -15,12 +14,12 @@ class UserCard extends StatefulWidget {
   final UserActionBloc userActionBloc;
 
   const UserCard({
-    Key? key,
+    super.key,
     required this.follower,
     required this.userActionBloc,
     required this.userId,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   State<UserCard> createState() => _UserCardState();

@@ -8,14 +8,12 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/services/deep_link_service.dart';
-import 'package:talbna/theme_cubit.dart';
 import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/utils/fcm_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'app.dart';
 import 'core/app_bloc_providers.dart';
 import 'core/app_repositories.dart';
-import 'routes.dart';
 
 String language = 'ar';
 
@@ -185,7 +183,7 @@ class AppInitializer {
               if (hasValidToken) {
                 DebugLogger.log('Auto-logging in with token: $token', category: 'INIT');
                 // Dispatch login event to the authentication bloc
-                BlocProvider.of<AuthenticationBloc>(context).add(LoggedIn(token: token!));
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedIn(token: token));
               }
 
               return MyApp(

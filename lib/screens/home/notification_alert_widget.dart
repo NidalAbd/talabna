@@ -7,7 +7,7 @@ import 'package:talbna/blocs/notification/notifications_state.dart';
 import 'notification_screen.dart';
 
 class NotificationsAlert extends StatefulWidget {
-  const NotificationsAlert({Key? key, required this.userID}) : super(key: key);
+  const NotificationsAlert({super.key, required this.userID});
   final int userID;
 
   @override

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:video_player/video_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../app_theme.dart';
 import '../../utils/constants.dart';
 
 class ImageGrid extends StatefulWidget {
@@ -202,10 +200,10 @@ class ImageContainer extends StatelessWidget {
   final double maxHeight;
 
   const ImageContainer({
-    Key? key,
+    super.key,
     required this.url,
     required this.maxHeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,18 +1,13 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
-import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
-import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
-import 'package:http/http.dart' as http;
 
 import '../../provider/language.dart';
 

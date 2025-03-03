@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -24,10 +23,10 @@ class UpdateUserProfile extends StatefulWidget {
   final User user;
 
   const UpdateUserProfile({
-    Key? key,
+    super.key,
     required this.userId,
     required this.user
-  }) : super(key: key);
+  });
 
   @override
   State<UpdateUserProfile> createState() => _UpdateUserProfileState();
@@ -203,7 +202,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
         followersCount: widget.user.followersCount,
         servicePostsCount: widget.user.servicePostsCount,
         pointsBalance: widget.user.pointsBalance,
-        photos: widget.user.photos,
+        photos: widget.user.photos, dataSaverEnabled: widget.user.dataSaverEnabled, authType: widget.user.authType, googleId: widget.user.googleId
       );
 
       // Pass context to the event for localization
@@ -443,7 +442,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     if (!mounted) return Container();
 
@@ -467,13 +465,18 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
           if (state is UserProfileUpdateSuccess) {
             _userProfileBloc.add(UserProfileRequested(id: widget.userId));
             _showSuccessSnackBar(_language.profileUpdatedSuccessText());
+
+            // Mark profile as completed
+            _markProfileAsCompleted();
+
             setState(() {
               _isLoading = false;
               _hasChanges = false;
             });
-
-            // After successful update, update the profile completion status
-            _markProfileAsCompleted();
+          } else if (state is UserProfilePhotoUpdateSuccess) {
+            _userProfileBloc.add(UserProfileRequested(id: widget.userId));
+            _showSuccessSnackBar(_language.profileUpdatedSuccessText());
+            setState(() => _isLoading = false);
           } else if (state is UserProfileUpdateFailure) {
             setState(() => _isLoading = false);
             _showErrorSnackBar(state.error);
@@ -500,16 +503,41 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
         builder: (context, state) {
           if (!mounted) return Container();
 
+          // First handle loading states
+          if (state is UserProfileLoadInProgress) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Handle success state - this is the normal case
           if (state is UserProfileLoadSuccess) {
             return _buildForm(state.user);
-          } else if (state is UserProfileLoadInProgress || state is UserProfileUpdateInProgress) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is UserProfileLoadFailure) {
+          }
+
+          // Handle update in progress - show loading overlay but keep form visible
+          if (state is UserProfileUpdateInProgress) {
+            return Stack(
+              children: [
+                // Keep the current form visible underneath
+                _buildForm(widget.user),
+                // Show a semi-transparent loading overlay
+                Container(
+                  color: Colors.black.withOpacity(0.3),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          // Handle load failure
+          if (state is UserProfileLoadFailure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(_language.loadFailedText()),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => _userProfileBloc.add(
                       UserProfileRequested(id: widget.userId),
@@ -520,16 +548,44 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
               ),
             );
           }
-          return const Center(child: CircularProgressIndicator());
+
+          // For all other states, show the form with the current user data
+          // so user can retry or fix the issue
+          return _buildForm(widget.user);
         },
       ),
     );
   }
 
+  Future<bool> _validateProfileForCompletion() async {
+    // Check each required field individually
+    final bool hasPhones = _phoneController.text.isNotEmpty;
+    final bool hasWhatsApp = _whatsAppController.text.isNotEmpty;
+    final bool hasGender = _gender.isNotEmpty;
+    final bool hasDate = _selectedDate != null;
+    final bool hasCountry = (_newCountrySelected ?? _selectedCountry) != null;
+    final bool hasCity = (_newCitySelected ?? _selectedCity) != null;
+
+    // Check if all required fields are complete
+    final bool isComplete = hasPhones && hasWhatsApp && hasGender &&
+        hasDate && hasCountry && hasCity;
+
+    return isComplete;
+  }
+
   Future<void> _markProfileAsCompleted() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('profileCompleted', true);
-    print('Profile marked as completed');
+    // First validate if all required fields are actually complete
+    final bool isComplete = await _validateProfileForCompletion();
+
+    if (isComplete) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('profileCompleted', true);
+      print('Profile marked as completed in UpdateUserProfile');
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('profileCompleted', false);
+      print('Profile still incomplete in UpdateUserProfile');
+    }
   }
 
   Widget _buildForm(User user) {
@@ -753,51 +809,5 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     _phoneFocusNode.dispose();
     _whatsAppFocusNode.dispose();
     super.dispose();
-  }
-}
-
-// Add these extension methods for better code organization
-extension DateTimeFormatting on DateTime {
-  String toFormattedString() {
-    return DateFormat('yyyy-MM-dd').format(this);
-  }
-}
-
-extension UserPreferences on User {
-  Future<void> saveToPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Save user data
-    await prefs.setString('userName', userName ?? '');
-    await prefs.setString('phones', phones ?? '');
-    await prefs.setString('watsNumber', watsNumber ?? '');
-    await prefs.setString('gender', gender ?? '');
-    await prefs.setString('dateOfBirth', dateOfBirth?.toFormattedString() ?? '');
-
-    // Set profile completion flag to true
-    await prefs.setBool('profileCompleted', true);
-
-    // Print for debugging
-    print('Saved userName: ${prefs.getString('userName')}');
-    print('Saved phones: ${prefs.getString('phones')}');
-    print('Saved watsNumber: ${prefs.getString('watsNumber')}');
-    print('Saved gender: ${prefs.getString('gender')}');
-    print('Saved dateOfBirth: ${prefs.getString('dateOfBirth')}');
-    print('Profile completion status: ${prefs.getBool('profileCompleted')}');
-
-
-  }
-
-  // Helper method to get all saved preferences
-  static Future<Map<String, dynamic>> getAllSavedPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    return {
-      'userName': prefs.getString('userName'),
-      'phones': prefs.getString('phones'),
-      'watsNumber': prefs.getString('watsNumber'),
-      'gender': prefs.getString('gender'),
-      'dateOfBirth': prefs.getString('dateOfBirth'),
-      'profileCompleted': prefs.getBool('profileCompleted') ?? false,
-    };
   }
 }

@@ -8,7 +8,7 @@ import '../../provider/language.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   final int userId;
-  const ChangePasswordScreen({Key? key, required this.userId}) : super(key: key);
+  const ChangePasswordScreen({super.key, required this.userId});
 
   @override
   _ChangePasswordScreenState createState() => _ChangePasswordScreenState();

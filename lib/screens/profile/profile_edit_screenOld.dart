@@ -7,7 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
@@ -18,14 +17,13 @@ import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/location_picker.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/screens/widgets/user_avatar_profile.dart';
-import 'package:talbna/utils/constants.dart';
 import 'package:talbna/utils/fcm_handler.dart';
 
 class UpdateUserProfile extends StatefulWidget {
   final int userId;
   final User user;
 
-  const UpdateUserProfile({Key? key, required this.userId, required this.user}) : super(key: key);
+  const UpdateUserProfile({super.key, required this.userId, required this.user});
 
   @override
   State<UpdateUserProfile> createState() => _UpdateUserProfileState();
@@ -129,7 +127,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     });
   }
 
-
   Future<void> _saveDataToSharedPreferences(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('userName', user.userName!);
@@ -147,12 +144,12 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   void _setValues(User user) {
     if (user.phones != null && user.phones!.length >= 5) {
       _phoneController.text = user.phones!.substring(5);
-    }else {
+    } else {
       _phoneController.text = '';
     }
     if (user.watsNumber != null && user.watsNumber!.length >= 5) {
       _whatsAppController.text = user.watsNumber!.substring(5);
-    }else {
+    } else {
       _whatsAppController.text = '';
     }
     _selectedCity = user.city;
@@ -160,8 +157,10 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     countryCode.text = _selectedCountry!.countryCode;
     _gender = _gender.isEmpty ? user.gender! : _gender;
     _dateOfBirthNotifier.value = user.dateOfBirth ?? DateTime.now();
-    _selectedDateNotifier = ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now().subtract(const Duration(days: 365 * 20)));
-    _dateOfBirthNotifier = ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now());
+    _selectedDateNotifier = ValueNotifier<DateTime>(user.dateOfBirth ??
+        DateTime.now().subtract(const Duration(days: 365 * 20)));
+    _dateOfBirthNotifier =
+        ValueNotifier<DateTime>(user.dateOfBirth ?? DateTime.now());
   }
 
   void updatePhoneNumber(String newPhoneNumber) {
@@ -175,7 +174,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       _whatsAppController.text = newWhatsAppNumber;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -223,12 +221,12 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       Stack(
                         children: [
                           UserAvatarProfile(
-                            imageUrl:
-                                '${user.photos?.first.src}',
+                            imageUrl: '${user.photos?.first.src}',
                             radius: 100,
                             toUser: user.id,
                             canViewProfile: false,
-                            fromUser: user.id, user: widget.user,
+                            fromUser: user.id,
+                            user: widget.user,
                           ),
                           Positioned(
                             bottom: 0,
@@ -284,11 +282,12 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                         onCountryChanged: _onCountrySelected,
                         onCityChanged: _onCitySelected,
                         updateCountryCode: updateCountryCode,
-                        onPhoneNumberChanged: (newPhoneValue) => updatePhoneNumber(newPhoneValue),
-                        onWhatsAppNumberChanged: (newWhatsAppValue) => updateWhatsAppNumber(newWhatsAppValue),
+                        onPhoneNumberChanged: (newPhoneValue) =>
+                            updatePhoneNumber(newPhoneValue),
+                        onWhatsAppNumberChanged: (newWhatsAppValue) =>
+                            updateWhatsAppNumber(newWhatsAppValue),
                       ),
                       Card(
-
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: DropdownButtonFormField<String?>(
@@ -323,7 +322,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                             _updateDateOfBirthController(value);
                           });
                           return Card(
-
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 12.0),
@@ -426,35 +424,42 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                                 }
                               }
                               if (kDebugMode) {
-                                print('full phone number ${countryCode.text + _phoneController.text}');
-                                print('full whats number ${countryCode.text + _whatsAppController.text}');
+                                print(
+                                    'full phone number ${countryCode.text + _phoneController.text}');
+                                print(
+                                    'full whats number ${countryCode.text + _whatsAppController.text}');
                                 print('country $_selectedCountry');
                                 print('city $_selectedCity');
                               }
                               User updatedUser = User(
-                                id: user.id,
-                                userName: user.userName,
-                                name: user.name,
-                                gender: user.gender,
-                                country: _selectedCountry,
-                                city: _selectedCity,
-                                deviceToken: deviceToken,
-                                dateOfBirth: parsedDateOfBirth,
-                                locationLatitudes: _locationLatitudes,
-                                locationLongitudes: _locationLongitudes,
-                                phones: countryCode.text + _phoneController.text,
-                                watsNumber:  countryCode.text + _whatsAppController.text,
-                                email: user.email,
-                                emailVerifiedAt: user.emailVerifiedAt,
-                                isActive: user.isActive,
-                                createdAt: user.createdAt,
-                                updatedAt: user.updatedAt,
-                                followingCount: user.followingCount,
-                                followersCount: user.followersCount,
-                                servicePostsCount: user.servicePostsCount,
-                                pointsBalance: user.pointsBalance,
-                                photos: user.photos,
-                              );
+                                  id: user.id,
+                                  userName: user.userName,
+                                  name: user.name,
+                                  gender: user.gender,
+                                  country: _selectedCountry,
+                                  city: _selectedCity,
+                                  deviceToken: deviceToken,
+                                  dateOfBirth: parsedDateOfBirth,
+                                  locationLatitudes: _locationLatitudes,
+                                  locationLongitudes: _locationLongitudes,
+                                  phones:
+                                      countryCode.text + _phoneController.text,
+                                  watsNumber: countryCode.text +
+                                      _whatsAppController.text,
+                                  email: user.email,
+                                  emailVerifiedAt: user.emailVerifiedAt,
+                                  isActive: user.isActive,
+                                  createdAt: user.createdAt,
+                                  updatedAt: user.updatedAt,
+                                  followingCount: user.followingCount,
+                                  followersCount: user.followersCount,
+                                  servicePostsCount: user.servicePostsCount,
+                                  pointsBalance: user.pointsBalance,
+                                  photos: user.photos,
+                                  dataSaverEnabled:
+                                      widget.user.dataSaverEnabled,
+                                  authType: widget.user.authType,
+                                  googleId: widget.user.googleId);
                               _updateUserProfile(context, updatedUser);
                             }
                           },

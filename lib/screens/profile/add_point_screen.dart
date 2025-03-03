@@ -6,7 +6,6 @@ import 'package:talbna/blocs/purchase_request/purchase_request_event.dart';
 import 'package:talbna/blocs/purchase_request/purchase_request_state.dart';
 import 'package:talbna/data/models/purchase_request.dart';
 import 'package:talbna/screens/interaction_widget/point_balance.dart';
-import 'package:intl/intl.dart';
 import '../../provider/language.dart';
 
 class AddPointScreen extends StatefulWidget {

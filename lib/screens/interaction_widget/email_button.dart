@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EmailButton extends StatelessWidget {
   final String email;
   final double width;
 
-  const EmailButton({Key? key, required this.email, required this.width}) : super(key: key);
+  const EmailButton({super.key, required this.email, required this.width});
 
   void _launchEmailApp() async {
     final Uri emailLaunchUri = Uri(

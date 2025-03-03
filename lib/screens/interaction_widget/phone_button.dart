@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneButtonWidget extends StatelessWidget {
   final String? phone;
   final double width;
 
-  const PhoneButtonWidget({Key? key, this.phone, required this.width}) : super(key: key);
+  const PhoneButtonWidget({super.key, this.phone, required this.width});
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class PhoneWidget extends StatelessWidget {
   final String? phone;
-  const PhoneWidget({Key? key, this.phone}) : super(key: key);
+  const PhoneWidget({super.key, this.phone});
 
   @override
   Widget build(BuildContext context) {

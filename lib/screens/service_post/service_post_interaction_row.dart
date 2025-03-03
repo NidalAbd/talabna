@@ -15,7 +15,7 @@ import 'package:talbna/utils/constants.dart';
 
 class ServicePostInteractionRow extends StatefulWidget {
   const ServicePostInteractionRow({
-    Key? key,
+    super.key,
     required this.servicePostUserId,
     this.userProfileId,
     this.servicePostId,
@@ -24,7 +24,7 @@ class ServicePostInteractionRow extends StatefulWidget {
     required this.servicePostBloc,
     required this.isFav,
     required this.userProfileBloc, required this.servicePost, required this.user,
-  }) : super(key: key);
+  });
   final ServicePostBloc servicePostBloc;
   final OtherUserProfileBloc userProfileBloc;
   final int? servicePostUserId;

@@ -7,11 +7,11 @@ class WhatsAppIconButtonWidget extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   const WhatsAppIconButtonWidget({
-    Key? key,
+    super.key,
     this.whatsAppNumber,
     required this.width,
     this.onDismiss
-  }) : super(key: key);
+  });
 
   String formatWhatsAppNumber(String number) {
     // Remove leading '00'

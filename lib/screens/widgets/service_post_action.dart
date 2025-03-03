@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -14,13 +13,13 @@ import 'package:talbna/screens/service_post/update_service_post_form.dart';
 
 class ServicePostAction extends StatefulWidget {
   const ServicePostAction({
-    Key? key,
+    super.key,
     required this.servicePostUserId,
     this.userProfileId,
     this.servicePostId,
     required this.onPostDeleted,
     required this.servicePost,
-  }) : super(key: key);
+  });
   final ServicePost servicePost;
   final int? servicePostUserId;
   final int? servicePostId;

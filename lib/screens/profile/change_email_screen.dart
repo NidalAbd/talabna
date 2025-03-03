@@ -5,13 +5,12 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_event.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/user.dart';
-import 'package:talbna/screens/widgets/error_widget.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import '../../provider/language.dart';
 
 class ChangeEmailScreen extends StatefulWidget {
   final int userId;
-  const ChangeEmailScreen({Key? key, required this.userId}) : super(key: key);
+  const ChangeEmailScreen({super.key, required this.userId});
 
   @override
   _ChangeEmailScreenState createState() => _ChangeEmailScreenState();

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:talbna/data/models/point_balance.dart';
 import 'package:talbna/data/models/user.dart';
 
 abstract class OtherUserProfileState extends Equatable {

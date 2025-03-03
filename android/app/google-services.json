@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "808302489355",
+    "project_id": "pal-service-378303",
+    "storage_bucket": "pal-service-378303.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808302489355:android:c4021799723c4af9837c0e",
+        "android_client_info": {
+          "package_name": "com.talabna.talabna"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "808302489355-5tq29bft2cbrml83q6v8ape5s8uu7arv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.talabna.talabna",
+            "certificate_hash": "f2703cb2de98404f3e172a1d2e049b019685cf4f"
+          }
+        },
+        {
+          "client_id": "808302489355-7deggibf1151amkjq1r057jdib4ijl4u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.talabna.talabna",
+            "certificate_hash": "adb93167ec61e17b660fa6c2416aabe0ac33b20d"
+          }
+        },
+        {
+          "client_id": "808302489355-bt6psckg69v05i368sh8tu74hg80n2u2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.talabna.talabna",
+            "certificate_hash": "6ecceb41c07f6b5ceaf41071a654806caacc675f"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfHtr_Wt7TAo0QUBLXSfUX5zLaSlgQ6I0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

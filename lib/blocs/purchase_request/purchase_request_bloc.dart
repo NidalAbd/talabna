@@ -7,7 +7,7 @@ class PurchaseRequestBloc extends Bloc<PurchaseRequestEvent, PurchaseRequestStat
   final PurchaseRequestRepository repository;
 
   PurchaseRequestBloc({required this.repository}) : super(PurchaseRequestInitial()) {
-    print('PurchaseRequestBloc created: ${this.hashCode}');
+    print('PurchaseRequestBloc created: $hashCode');
 
     on<FetchPurchaseRequests>((event, emit) async {
       emit(PurchaseRequestLoading());

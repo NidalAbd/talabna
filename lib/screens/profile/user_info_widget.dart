@@ -13,10 +13,10 @@ class UserInfoWidget extends StatefulWidget {
   final User user;
 
   const UserInfoWidget({
-    Key? key,
+    super.key,
     required this.userId,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   State<UserInfoWidget> createState() => _UserInfoWidgetState();

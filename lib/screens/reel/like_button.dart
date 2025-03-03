@@ -8,12 +8,12 @@ class LikeButton extends StatefulWidget {
   final Function(int) onFavoritesCountChanged;
 
   const LikeButton({
-    Key? key,
+    super.key,
     required this.isFavorite,
     required this.favoritesCount,
     required this.onPressed,
     required this.onFavoritesCountChanged,
-  }) : super(key: key);
+  });
 
   @override
   LikeButtonState createState() => LikeButtonState();

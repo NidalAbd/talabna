@@ -6,8 +6,7 @@ class WhatsAppWidget extends StatelessWidget {
   final String? whatsAppNumber;
   final String username;
 
-  const WhatsAppWidget({Key? key, this.whatsAppNumber, required this.username})
-      : super(key: key);
+  const WhatsAppWidget({super.key, this.whatsAppNumber, required this.username});
 
   String formatWhatsAppNumber(String number) {
     number = number.replaceFirst(RegExp(r'^00'), '');

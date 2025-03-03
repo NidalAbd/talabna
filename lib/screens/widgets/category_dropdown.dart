@@ -107,8 +107,8 @@ class _CategoriesDropdownState extends State<CategoriesDropdown> {
             Text(_error!, style: TextStyle(color: AppTheme.lightErrorColor)),
             TextButton(
               onPressed: _fetchCategories,
-              child: const Text('Retry'),
               style: TextButton.styleFrom(foregroundColor: primaryColor),
+              child: const Text('Retry'),
             ),
           ],
         ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
-import '../../data/models/service_post.dart';
+import '../../data/models/photos.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
   final List<Photo> images;
@@ -64,7 +64,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
           },
           itemCount: widget.images.length,
           loadingBuilder: (context, progress) => Center(
-            child: Container(
+            child: SizedBox(
               width: 20.0,
               height: 20.0,
               child: CircularProgressIndicator(value: progress == null ? null : progress.cumulativeBytesLoaded / progress.expectedTotalBytes!),

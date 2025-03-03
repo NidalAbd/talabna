@@ -5,13 +5,13 @@ import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/blocs/authentication/authentication_state.dart';
 import 'package:talbna/provider/language.dart';
-import 'package:talbna/screens/interaction_widget/logo_title.dart';
 import 'package:talbna/theme_cubit.dart';
 import 'package:talbna/routes.dart';
 import '../check_auth.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class LoginScreenNew extends StatefulWidget {
-  const LoginScreenNew({Key? key}) : super(key: key);
+  const LoginScreenNew({super.key});
 
   @override
   _LoginScreenNewState createState() => _LoginScreenNewState();
@@ -24,6 +24,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
   late bool _obscurePassword = true;
   bool _isLoading = false;
   final Language language = Language();
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -93,6 +94,8 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
         } else if (state is AuthenticationSuccess) {
           setState(() {
             _isLoading = false;
+            _isGoogleLoading = false;
+
           });
           Routes.navigateToHome(context, state.userId!);
         }
@@ -344,6 +347,13 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                           ),
                         ),
                         const SizedBox(height: 24),
+
+                        // Google Sign-In Button
+                        GoogleSignInButton(
+                          isLoading: _isGoogleLoading,
+                        ),
+                        const SizedBox(height: 24),
+
 
                         // Register option
                         Wrap(

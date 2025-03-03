@@ -5,8 +5,8 @@ import 'package:talbna/data/models/service_post.dart';
 import 'package:http/http.dart' as http;
 import 'package:talbna/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../utils/debug_logger.dart';
+import '../models/photos.dart';
 
 class ServicePostRepository {
   static const String _baseUrl = Constants.apiBaseUrl;

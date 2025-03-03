@@ -13,14 +13,14 @@ class ReelCardWidget extends StatelessWidget {
   final VoidCallback onSharePressed;
 
   const ReelCardWidget({
-    Key? key,
+    super.key,
     required this.servicePost,
     required this.isFavorite,
     required this.onLikePressed,
     required this.onCommentPressed,
     required this.onContactPressed,
     required this.onSharePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

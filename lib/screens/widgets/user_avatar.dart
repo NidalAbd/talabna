@@ -4,7 +4,6 @@ import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_state.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/profile/other_profile_screen.dart';
-import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/utils/constants.dart';
 
 class UserAvatar extends StatefulWidget {

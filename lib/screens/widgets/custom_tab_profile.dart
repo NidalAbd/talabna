@@ -4,9 +4,8 @@ class CustomTab extends StatelessWidget {
   final String title;
   final int count;
 
-  const CustomTab({Key? key, required this.title, int? count})
-      : this.count = count ?? 0,
-        super(key: key);
+  const CustomTab({super.key, required this.title, int? count})
+      : count = count ?? 0;
 
   @override
   Widget build(BuildContext context) {

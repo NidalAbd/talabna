@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LocationIconButtonWidget extends StatelessWidget {
@@ -9,12 +8,12 @@ class LocationIconButtonWidget extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   const LocationIconButtonWidget({
-    Key? key,
+    super.key,
     required this.locationLatitudes,
     required this.locationLongitudes,
     required this.width,
     this.onDismiss,
-  }) : super(key: key);
+  });
 
   Future<void> launchGoogleMap(BuildContext context) async {
     // Call dismiss callback if provided

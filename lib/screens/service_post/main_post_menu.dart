@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
 import 'package:talbna/data/models/user.dart';
-import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_category.dart';
 import 'package:talbna/screens/service_post/subcategory_grid_view.dart';
 
@@ -15,11 +14,11 @@ class MainMenuPostScreen extends StatefulWidget {
   final ServicePostBloc servicePostBloc;
 
   const MainMenuPostScreen({
-    Key? key,
+    super.key,
     required this.category,
     required this.userID,
     required this.servicePostBloc, required this.showSubcategoryGridView, required this.user,
-  }) : super(key: key);
+  });
 
   @override
   MainMenuPostScreenState createState() => MainMenuPostScreenState();

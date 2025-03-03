@@ -161,7 +161,7 @@ class ServicePostViewWidget extends StatelessWidget {
                           children: [
                             ElevatedButton.icon(
                               style: ButtonStyle(
-                                fixedSize: MaterialStateProperty.all(
+                                fixedSize: WidgetStateProperty.all(
                                     Size.fromWidth(
                                         MediaQuery.of(context).size.width /
                                             1.17)),

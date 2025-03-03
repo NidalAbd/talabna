@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/data/models/service_post.dart';
@@ -13,13 +12,13 @@ import '../widgets/image_grid.dart';
 
 class ServicePostCard extends StatefulWidget {
   const ServicePostCard({
-    Key? key,
+    super.key,
     this.onPostDeleted,
     required this.servicePost,
     required this.canViewProfile,
     required this.userProfileId,
     required this.user,
-  }) : super(key: key);
+  });
 
   final ServicePost servicePost;
   final Function? onPostDeleted;

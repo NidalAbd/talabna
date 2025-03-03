@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/routes.dart';
-import 'package:talbna/screens/auth/login_screen_new.dart';
 import 'package:talbna/screens/auth/welcome_screen.dart';
 import 'package:talbna/screens/home/home_screen.dart';
 import 'package:talbna/screens/home/select_language.dart';

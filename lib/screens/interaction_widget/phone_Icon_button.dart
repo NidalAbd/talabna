@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneIconButtonWidget extends StatelessWidget {
@@ -8,11 +7,11 @@ class PhoneIconButtonWidget extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   const PhoneIconButtonWidget({
-    Key? key,
+    super.key,
     this.phone,
     required this.width,
     this.onDismiss
-  }) : super(key: key);
+  });
 
   String _formatPhoneNumber(String number) {
     // Remove any non-digit characters

@@ -4,12 +4,11 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
 import 'package:talbna/blocs/authentication/authentication_state.dart';
-import 'package:talbna/screens/google_face_login.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:talbna/widgets/text_form_field.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   // ignore: library_private_types_in_public_api

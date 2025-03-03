@@ -3,24 +3,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/provider/language.dart';
-import 'package:talbna/screens/home/search_screen.dart';
 import 'package:talbna/screens/home/setting_screen.dart';
 import 'package:talbna/screens/profile/profile_screen.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/service_post/create_service_post_form.dart';
 import 'package:talbna/screens/service_post/favorite_post_screen.dart';
 import '../../utils/constants.dart';
+import '../../utils/photo_image_helper.dart';
 import '../profile/profile_edit_screen.dart';
 import 'notification_alert_widget.dart';
 
-class VertIconAppBar extends StatelessWidget {
+class VertIconAppBar extends StatefulWidget {
   const VertIconAppBar({
-    Key? key,
+    super.key,
     required this.userId,
     required this.user,
     required this.showSubcategoryGridView,
     required this.toggleSubcategoryGridView,
-  }) : super(key: key);
+  });
 
   final int userId;
   final User user;
@@ -28,35 +28,106 @@ class VertIconAppBar extends StatelessWidget {
   final Future<void> Function({required bool canToggle}) toggleSubcategoryGridView;
 
   @override
+  State<VertIconAppBar> createState() => _VertIconAppBarState();
+}
+
+class _VertIconAppBarState extends State<VertIconAppBar> {
+  bool _isProfileComplete = false;
+  bool _isLoading = true;
+  final language = Language();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkProfileCompletion();
+  }
+
+  Future<void> _checkProfileCompletion() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check if profile is explicitly marked as completed
+    final isProfileCompleted = prefs.getBool('profileCompleted') ?? false;
+
+    if (mounted) {
+      setState(() {
+        _isProfileComplete = isProfileCompleted;
+        _isLoading = false;
+      });
+    }
+  }
+  String _getProfileImageUrl(User user) {
+    print('is External ${user.photos!.first.isExternal}');
+    if (user.photos != null && user.photos!.isNotEmpty) {
+      final photo = user.photos!.first;
+
+      if (photo.isExternal == true) {
+        return photo.src ?? 'https://via.placeholder.com/150';
+      }else {
+        return '${Constants.apiBaseUrl}/storage/${photo.src}';
+      }
+    }
+
+    return 'https://via.placeholder.com/150';
+  }
+  @override
   Widget build(BuildContext context) {
-    final language = Language();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
     final iconColor = isDarkMode ? AppTheme.darkIconColor : AppTheme.lightIconColor;
+    final disabledColor = isDarkMode ? Colors.grey[700] : Colors.grey[400];
+
+    if (_isLoading) {
+      return Row(
+        children: [
+          SizedBox(width: 32), // Placeholder for add button
+          SizedBox(width: 32), // Placeholder for notifications
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+            child: CircleAvatar(
+              radius: 15,
+              backgroundColor: Colors.grey[300],
+              child: SizedBox(),
+            ),
+          ),
+          SizedBox(width: 32), // Placeholder for menu
+        ],
+      );
+    }
 
     return Row(
       children: [
         _buildIconButton(
           context: context,
           icon: Icons.add_circle_outline_rounded,
-          color: primaryColor,
-          onPressed: () => _handleAddPost(context, language),
-          tooltip: language.tAddPostText(),
+          color: _isProfileComplete ? primaryColor : disabledColor!,
+          onPressed: _isProfileComplete ? () => _handleAddPost(context) : () => _navigateToUpdateProfile(context),
+          tooltip: _isProfileComplete ? language.tAddPostText() : language.tUpdateInfoText(),
         ),
-        NotificationsAlert(userID: userId),
+        _isProfileComplete
+            ? NotificationsAlert(userID: widget.userId)
+            : Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            Icons.notifications,
+            color: disabledColor,
+            size: 24,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
           child: GestureDetector(
-            onTap: () => _navigateToProfile(context),
+            onTap: () => _isProfileComplete ? _navigateToProfile(context) : _navigateToUpdateProfile(context),
             child: Hero(
-              tag: 'profileAvatar${user.id}',
+              tag: 'profileAvatar${widget.user.id}',
               child: CircleAvatar(
                 radius: 15,
                 backgroundColor: Colors.grey[300],
-                backgroundImage: (user.photos?.isNotEmpty ?? false)
-                    ? NetworkImage('${Constants.apiBaseUrl}/storage/${user.photos?.first.src}')
+                backgroundImage: (widget.user.photos?.isNotEmpty ?? false)
+                    ? NetworkImage(ProfileImageHelper.getProfileImageUrl(widget.user),)
                     : null,
-                child: (user.photos?.isEmpty ?? true)
+                child: (widget.user.photos?.isEmpty ?? true)
                     ? Icon(Icons.person, size: 18, color: Colors.grey[700])
                     : null,
               ),
@@ -66,9 +137,9 @@ class VertIconAppBar extends StatelessWidget {
         _buildIconButton(
           context: context,
           icon: Icons.more_vert_rounded,
-          color: iconColor,
-          onPressed: () => _showMoreOptions(context, language),
-          tooltip: language.tMoreOptionsText(),
+          color: _isProfileComplete ? iconColor : disabledColor!,
+          onPressed: _isProfileComplete ? () => _showMoreOptions(context) : () => _navigateToUpdateProfile(context),
+          tooltip: _isProfileComplete ? language.tMoreOptionsText() : language.tUpdateInfoText(),
         ),
       ],
     );
@@ -101,46 +172,30 @@ class VertIconAppBar extends StatelessWidget {
     );
   }
 
-  Future<void> _handleAddPost(BuildContext context, Language language) async {
-    final isComplete = await _checkProfileCompletion();
-
-    if (isComplete) {
-      _navigateToServicePost(context);
-    } else {
-      _showIncompleteProfileDialog(context, language);
-    }
+  Future<void> _handleAddPost(BuildContext context) async {
+    _navigateToServicePost(context);
   }
 
   void _navigateToServicePost(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ServicePostFormScreen(userId: userId),
+        builder: (context) => ServicePostFormScreen(userId: widget.userId),
       ),
     );
   }
 
-  Future<void> _showMoreOptions(
-      BuildContext context,
-      Language language,
-      ) async {
+  Future<void> _showMoreOptions(BuildContext context) async {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor;
     final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
     final textColor = isDarkMode ? AppTheme.darkTextColor : AppTheme.lightTextColor;
 
-    final isComplete = await _checkProfileCompletion();
-
-    if (isComplete) {
-      _showOptionsBottomSheet(context, language, backgroundColor, primaryColor, textColor);
-    } else {
-      _showIncompleteProfileDialog(context, language);
-    }
+    _showOptionsBottomSheet(context, backgroundColor, primaryColor, textColor);
   }
 
   void _showOptionsBottomSheet(
       BuildContext context,
-      Language language,
       Color backgroundColor,
       Color primaryColor,
       Color textColor,
@@ -196,11 +251,11 @@ class VertIconAppBar extends StatelessWidget {
                   ),
                   _buildOptionTile(
                     context: context,
-                    icon: showSubcategoryGridView ? Icons.list_rounded : Icons.grid_view_rounded,
+                    icon: widget.showSubcategoryGridView ? Icons.list_rounded : Icons.grid_view_rounded,
                     title: language.tSwitchSubcategoryList(),
                     onTap: () async {
                       Navigator.pop(context);
-                      await toggleSubcategoryGridView(canToggle: true);
+                      await widget.toggleSubcategoryGridView(canToggle: true);
                     },
                     isToggle: true,
                   ),
@@ -251,10 +306,10 @@ class VertIconAppBar extends StatelessWidget {
         ),
         trailing: isToggle
             ? Switch(
-          value: showSubcategoryGridView,
+          value: widget.showSubcategoryGridView,
           onChanged: (value) async {
             Navigator.pop(context);
-            await toggleSubcategoryGridView(canToggle: true);
+            await widget.toggleSubcategoryGridView(canToggle: true);
           },
           activeColor: primaryColor,
         )
@@ -274,86 +329,14 @@ class VertIconAppBar extends StatelessWidget {
     );
   }
 
-  void _showIncompleteProfileDialog(BuildContext context, Language language) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-    final textColor = isDarkMode ? AppTheme.darkTextColor : AppTheme.lightTextColor;
-    final backgroundColor = isDarkMode ? Colors.grey[850] : Colors.white;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          language.incompleteInformationText(),
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              language.completeProfilePromptText(),
-              style: TextStyle(color: textColor),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.info_outline, color: primaryColor, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    language.completeInformationText(),
-                    style: TextStyle(
-                      color: textColor,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(language.tLaterText()),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _navigateToUpdateProfile(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(language.tUpdateNowText()),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _navigateToProfile(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProfileScreen(
-          fromUser: userId,
-          toUser: userId,
-          user: user
+            fromUser: widget.userId,
+            toUser: widget.userId,
+            user: widget.user
         ),
       ),
     );
@@ -364,8 +347,8 @@ class VertIconAppBar extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => FavoritePostScreen(
-          userID: user.id,
-          user: user,
+          userID: widget.user.id,
+          user: widget.user,
         ),
       ),
     );
@@ -376,11 +359,14 @@ class VertIconAppBar extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => UpdateUserProfile(
-          userId: user.id,
-          user: user,
+          userId: widget.user.id,
+          user: widget.user,
         ),
       ),
-    );
+    ).then((_) {
+      // Re-check profile completion when returning from profile update screen
+      _checkProfileCompletion();
+    });
   }
 
   void _navigateToPurchase(BuildContext context) {
@@ -388,7 +374,7 @@ class VertIconAppBar extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => PurchaseRequestScreen(
-          userID: user.id,
+          userID: widget.user.id,
         ),
       ),
     );
@@ -399,37 +385,10 @@ class VertIconAppBar extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => SettingScreen(
-          userId: userId,
-          user: user,
+          userId: widget.userId,
+          user: widget.user,
         ),
       ),
     );
-  }
-
-  Future<bool> _checkProfileCompletion() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // First check if profile is explicitly marked as completed
-    final isProfileCompleted = prefs.getBool('profileCompleted') ?? false;
-    if (isProfileCompleted) return true;
-
-    // Otherwise check each required field individually
-    final hasUserName = prefs.getString('userName') != null && prefs.getString('userName')!.isNotEmpty;
-    final hasPhones = prefs.getString('phones') != null && prefs.getString('phones')!.isNotEmpty;
-    final hasWhatsApp = prefs.getString('watsNumber') != null && prefs.getString('watsNumber')!.isNotEmpty;
-    final hasGender = prefs.getString('gender') != null && prefs.getString('gender')!.isNotEmpty;
-
-    // Check both date formats since we have inconsistent naming
-    final hasDob = prefs.getString('dob') != null || prefs.getString('dateOfBirth') != null;
-
-    final isComplete = hasUserName && hasPhones && hasWhatsApp && hasGender && hasDob;
-
-    // If all fields are complete, set the profile as completed for future checks
-    if (isComplete) {
-      await prefs.setBool('profileCompleted', true);
-      print('Profile marked as complete based on field check');
-    }
-
-    return isComplete;
   }
 }

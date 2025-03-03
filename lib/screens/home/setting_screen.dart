@@ -4,16 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/provider/language.dart';
+import 'package:talbna/screens/home/privacy_policy_screen.dart';
 import 'package:talbna/screens/profile/change_email_screen.dart';
 import 'package:talbna/screens/profile/change_password_screen.dart';
 import 'package:talbna/utils/restart_helper.dart';
-import 'package:talbna/screens/interaction_widget/logout_list_tile.dart';
-import 'package:talbna/screens/interaction_widget/theme_toggle.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../blocs/authentication/authentication_bloc.dart';
 import '../../blocs/authentication/authentication_event.dart';
 import '../../theme_cubit.dart';
+import 'about_screen.dart';
+import 'help_center_screen.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key, required this.userId, required this.user});
@@ -28,8 +27,10 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
   final Language _language = Language();
   String selectedLanguage = 'en'; // Default to English to avoid null issues
   bool _isLoading = true;
+  bool _notificationsEnabled = true;
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
+  bool _dataSaverEnabled = false;
 
   final List<String> _languages = [
     'ar',
@@ -61,8 +62,8 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
       ),
     );
 
-    // Initialize language asynchronously
-    _initializeLanguage();
+    // Initialize language and notification settings asynchronously
+    _initializeSettings();
   }
 
   @override
@@ -71,12 +72,22 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  Future<void> _initializeLanguage() async {
+  Future<void> _initializeSettings() async {
     try {
+      // Get language setting
       final lang = await _language.getLanguage();
+
+      // Get notification setting
+      final notificationStatus = await NotificationService.getNotificationStatus();
+
+      // Get data saver setting
+      final dataSaverStatus = await DataSaverService.getDataSaverStatus();
+
       if (mounted) {
         setState(() {
           selectedLanguage = lang;
+          _notificationsEnabled = notificationStatus;
+          _dataSaverEnabled = dataSaverStatus;
           _isLoading = false;
         });
         _animationController.forward();
@@ -88,6 +99,74 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
         });
         _animationController.forward();
       }
+    }
+  }
+
+  Future<void> _toggleDataSaver() async {
+    try {
+      // Toggle data saver status
+      final newStatus = await DataSaverService.toggleDataSaver();
+
+      setState(() {
+        _dataSaverEnabled = newStatus;
+      });
+
+      // Show a snackbar to provide feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              newStatus
+                  ? _language.getLanguage() == 'ar'
+                  ? 'تم تفعيل وضع توفير البيانات'
+                  : 'Data Saver Mode Enabled'
+                  : _language.getLanguage() == 'ar'
+                  ? 'تم تعطيل وضع توفير البيانات'
+                  : 'Data Saver Mode Disabled'
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      // Handle any errors that might occur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_language.getLanguage() == 'ar'
+              ? 'خطأ في تحديث وضع توفير البيانات: $e'
+              : 'Error updating data saver mode: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _toggleNotifications() async {
+    try {
+      // Toggle notification status
+      final newStatus = await NotificationService.toggleNotifications();
+
+      setState(() {
+        _notificationsEnabled = newStatus;
+      });
+
+      // Show a snackbar to provide feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              newStatus
+                  ? _language.tNotificationsEnabledText()
+                  : _language.tNotificationsDisabledText()
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      // Handle any errors that might occur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating notifications: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -320,192 +399,6 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
     );
   }
 
-  Future<void> toggleNotifications(BuildContext context) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool currentNotificationStatus = prefs.getBool('notifications_enabled') ?? true;
-
-      // Toggle the notification status
-      await prefs.setBool('notifications_enabled', !currentNotificationStatus);
-
-      // Show a snackbar to provide feedback
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              !currentNotificationStatus
-                  ? 'Notifications Enabled'
-                  : 'Notifications Disabled'
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (e) {
-      // Handle any errors that might occur
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating notifications: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Help Center Function
-  Future<void> openHelpCenter(BuildContext context) async {
-    // Replace with your actual help center URL
-    final Uri helpCenterUrl = Uri.parse('https://www.yourapp.com/help');
-
-    try {
-      if (await canLaunchUrl(helpCenterUrl)) {
-        await launchUrl(
-          helpCenterUrl,
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        // Fallback if URL can't be launched
-        _showFallbackHelpDialog(context);
-      }
-    } catch (e) {
-      // Show error if launching fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not open Help Center: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Privacy Policy Function
-  Future<void> openPrivacyPolicy(BuildContext context) async {
-    // Replace with your actual privacy policy URL
-    final Uri privacyPolicyUrl = Uri.parse('https://www.yourapp.com/privacy');
-
-    try {
-      if (await canLaunchUrl(privacyPolicyUrl)) {
-        await launchUrl(
-          privacyPolicyUrl,
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        // Fallback if URL can't be launched
-        _showFallbackPrivacyPolicyDialog(context);
-      }
-    } catch (e) {
-      // Show error if launching fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not open Privacy Policy: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // About App Function
-  void showAboutDialog(BuildContext context) {
-    // Replace with your app's actual details
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('About Our App'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                const Text('App Name: Your App Name'),
-                const Text('Version: 1.0.0'),
-                const Text('Description: A brief description of your app.'),
-                const SizedBox(height: 10),
-                const Text(
-                  'Developed with passion by Your Company Name',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Fallback Help Dialog
-  void _showFallbackHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Help Center'),
-          content: const Text(
-            'We are unable to open the help center at the moment. '
-                'Please contact our support team at support@yourapp.com',
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Fallback Privacy Policy Dialog
-  void _showFallbackPrivacyPolicyDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Privacy Policy'),
-          content: const Text(
-            'We are unable to open the privacy policy at the moment. '
-                'Please contact our support team at support@yourapp.com for more information.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildThemeToggleButton() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-
-    return Container(
-      height: 30,
-      width: 60,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: primaryColor.withOpacity(0.1),
-      ),
-      child: Center(
-        child: Icon(
-          isDarkMode ? Icons.light_mode : Icons.dark_mode,
-          color: primaryColor,
-          size: 20,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -645,7 +538,6 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                   title: _language.tAppearanceText(),
                   onTap: () {
                     BlocProvider.of<ThemeCubit>(context).toggleTheme();
-
                   },
                   trailing: IconButton(
                     icon: Icon(
@@ -653,7 +545,7 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                       color: primaryColor,
                     ),
                     onPressed: () {
-                      // Implement theme toggle logic here
+                      BlocProvider.of<ThemeCubit>(context).toggleTheme();
                     },
                   ),
                 ),
@@ -686,13 +578,27 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                 _buildSettingCard(
                   icon: Icons.notifications_outlined,
                   title: _language.tNotificationsText(),
-                  onTap: () {
-                    // Navigate to notifications settings
-                  },
+                  onTap: () => _toggleNotifications(),
                   trailing: Switch(
-                    value: true,
+                    value: _notificationsEnabled,
                     onChanged: (value) {
-                      // Handle notification toggle
+                      _toggleNotifications();
+                    },
+                    activeColor: primaryColor,
+                    activeTrackColor: primaryColor.withOpacity(0.5),
+                    inactiveThumbColor: Colors.grey[400],
+                    inactiveTrackColor: Colors.grey[300],
+                  ),
+                ),
+
+                _buildSettingCard(
+                  icon: Icons.data_saver_on_outlined,
+                  title: _language.getLanguage() == 'ar' ? 'وضع توفير البيانات' : 'Data Saver Mode',
+                  onTap: () => _toggleDataSaver(),
+                  trailing: Switch(
+                    value: _dataSaverEnabled,
+                    onChanged: (value) {
+                      _toggleDataSaver();
                     },
                     activeColor: primaryColor,
                   ),
@@ -704,7 +610,11 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                   icon: Icons.help_outline,
                   title: _language.tHelpCenterText(),
                   onTap: () {
-                    // Navigate to help center
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const HelpCenterScreen(),
+                      ),
+                    );
                   },
                 ),
 
@@ -712,7 +622,11 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                   icon: Icons.privacy_tip_outlined,
                   title: _language.tPrivacyPolicyText(),
                   onTap: () {
-                    // Navigate to privacy policy
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyScreen(),
+                      ),
+                    );
                   },
                 ),
 
@@ -720,7 +634,11 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                   icon: Icons.info_outline,
                   title: _language.tAboutText(),
                   onTap: () {
-                    // Navigate to about page
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AboutScreen(),
+                      ),
+                    );
                   },
                 ),
 
@@ -797,5 +715,53 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
         ),
       ),
     );
+  }
+}
+
+
+class NotificationService {
+  static const String _notificationsKey = 'notifications_enabled';
+
+  // Get current notification status
+  static Future<bool> getNotificationStatus() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Default to true if not set
+    return prefs.getBool(_notificationsKey) ?? true;
+  }
+
+  // Set notification status
+  static Future<bool> setNotificationStatus(bool isEnabled) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setBool(_notificationsKey, isEnabled);
+  }
+
+  // Toggle notification status
+  static Future<bool> toggleNotifications() async {
+    final currentStatus = await getNotificationStatus();
+    return await setNotificationStatus(!currentStatus);
+  }
+}
+
+// Add this method to your NotificationService class
+class DataSaverService {
+  static const String _dataSaverKey = 'data_saver_enabled';
+
+  // Get current data saver status
+  static Future<bool> getDataSaverStatus() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Default to false if not set
+    return prefs.getBool(_dataSaverKey) ?? false;
+  }
+
+  // Set data saver status
+  static Future<bool> setDataSaverStatus(bool isEnabled) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setBool(_dataSaverKey, isEnabled);
+  }
+
+  // Toggle data saver status
+  static Future<bool> toggleDataSaver() async {
+    final currentStatus = await getDataSaverStatus();
+    return await setDataSaverStatus(!currentStatus);
   }
 }

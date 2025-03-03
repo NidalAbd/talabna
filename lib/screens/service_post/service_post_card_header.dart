@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -6,7 +5,7 @@ class ServicePostHeaderContainer extends StatefulWidget {
   final String haveBadge;
   final Widget child;
 
-  ServicePostHeaderContainer({required this.haveBadge, required this.child});
+  const ServicePostHeaderContainer({super.key, required this.haveBadge, required this.child});
 
   @override
   _ServicePostHeaderContainerState createState() =>

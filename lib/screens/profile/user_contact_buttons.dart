@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talbna/blocs/other_users/user_profile_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/user_contact/user_contact_bloc.dart';
 import 'package:talbna/blocs/user_contact/user_contact_state.dart';
 import 'package:talbna/screens/interaction_widget/email_button.dart';
 import 'package:talbna/screens/interaction_widget/phone_button.dart';
 import 'package:talbna/screens/interaction_widget/watsapp_button.dart';
-import 'package:talbna/screens/widgets/loading_widget.dart';
 
 class UserContactButtons extends StatefulWidget {
   final int userId;
   final ServicePostBloc servicePostBloc;
   final UserContactBloc userContactBloc;
-  const UserContactButtons({Key? key, required this.userId, required this.servicePostBloc, required this.userContactBloc}) : super(key: key);
+  const UserContactButtons({super.key, required this.userId, required this.servicePostBloc, required this.userContactBloc});
   @override
   State<UserContactButtons> createState() => _UserContactButtonsState();
 }

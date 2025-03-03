@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
-import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:talbna/blocs/service_post/service_post_state.dart';
@@ -16,14 +14,14 @@ import 'package:talbna/screens/interaction_widget/point_balance.dart';
 import 'package:talbna/screens/profile/purchase_request_screen.dart';
 import 'package:talbna/screens/widgets/category_dropdown.dart';
 import 'package:talbna/screens/widgets/image_picker_button.dart';
-import 'package:talbna/screens/widgets/loading_widget.dart';
 import 'package:talbna/screens/widgets/subcategory_dropdown.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/utils/functions.dart';
+import '../../data/models/photos.dart';
 import '../../provider/language.dart';
 
 class ServicePostFormScreen extends StatefulWidget {
-  const ServicePostFormScreen({Key? key, required this.userId}) : super(key: key);
+  const ServicePostFormScreen({super.key, required this.userId});
   final int userId;
 
   @override
