@@ -16,11 +16,11 @@ import 'package:talbna/screens/service_post/service_post_interaction_row.dart';
 import 'package:talbna/screens/widgets/image_grid.dart';
 import 'package:talbna/screens/widgets/service_post_action.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
-import 'package:talbna/utils/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../provider/language.dart';
 import '../../utils/debug_logger.dart';
+import '../../utils/photo_image_helper.dart';
 
 class ServicePostCardView extends StatefulWidget {
   const ServicePostCardView({
@@ -180,8 +180,9 @@ class _ServicePostCardViewState extends State<ServicePostCardView> {
                           child: Row(
                             children: [
                               UserAvatar(
-                                imageUrl:
-                                '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+                                imageUrl:ProfileImageHelper.getProfileImageUrl(
+                                  widget.servicePost.userPhoto,
+                                ),
                                 radius: 16,
                                 fromUser: widget.userProfileId,
                                 toUser: widget.servicePost.userId!,

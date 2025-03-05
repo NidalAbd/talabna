@@ -29,7 +29,7 @@ class _RegisterScreenNewState extends State<RegisterScreenNew> {
   bool _agreeToTerms = false;
   final Language language = Language();
   late bool _hasNavigatedToHome = false;
-  bool _isGoogleLoading = false;
+  final bool _isGoogleLoading = false;
 
   @override
   void initState() {

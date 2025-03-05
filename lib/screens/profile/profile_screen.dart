@@ -12,13 +12,36 @@ import '../../blocs/other_users/user_profile_event.dart';
 import '../../blocs/other_users/user_profile_state.dart';
 import '../../data/models/user.dart';
 import '../../provider/language.dart';
-import '../../utils/constants.dart';
 import '../../utils/photo_image_helper.dart';
 import '../interaction_widget/report_tile.dart';
 import '../service_post/other_post_screen.dart';
 import '../widgets/error_widget.dart';
 import 'add_point_screen.dart';
 
+// Add this safeguard function to safely show SnackBars
+void safeShowSnackBar(BuildContext context, String message) {
+  if (context == null || !Navigator.canPop(context)) {
+    print('Warning: Invalid context for SnackBar');
+    return;
+  }
+
+  try {
+    // Clear any existing SnackBars first
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    // Build the SnackBar first to avoid null issues during build
+    final snackBar = SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+    );
+
+    // Show the SnackBar
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  } catch (e) {
+    print('Error showing SnackBar: $e');
+  }
+}
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -48,18 +71,19 @@ class _ProfileScreenState extends State<ProfileScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _userProfileBloc = context.read<OtherUserProfileBloc>();
 
-    // Move the event dispatch to the first frame to ensure context is fully initialized
+    // Defer bloc operations until after initial build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _userProfileBloc.add(OtherUserProfileRequested(id: widget.toUser));
+      if (mounted) {
+        _userProfileBloc = BlocProvider.of<OtherUserProfileBloc>(context);
+        _userProfileBloc.add(OtherUserProfileRequested(id: widget.toUser));
+      }
     });
 
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
-    // Adjust this value based on your design
     if (_scrollController.offset > 200 && !_isTitleVisible) {
       setState(() {
         _isTitleVisible = true;
@@ -71,19 +95,28 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
+  // Modified safe clipboard function
   void _setClipboardData(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
-    // Using a safer way to show SnackBar
+
+    // Use a simple tooltip or dialog instead of SnackBar
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+      // Use a dialog which is less likely to cause null issues
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (dialogContext) => AlertDialog(
           content: Text('ID copied to clipboard'),
-          duration: const Duration(seconds: 2),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text('OK'),
+            ),
+          ],
         ),
       );
     }
   }
-
 
   @override
   void dispose() {
@@ -95,6 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Make sure we have a Scaffold as the direct parent of the BlocBuilder
     return Scaffold(
       body: BlocBuilder<OtherUserProfileBloc, OtherUserProfileState>(
         builder: (BuildContext context, OtherUserProfileState state) {
@@ -123,10 +157,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                     bottom: TabBar(
                       controller: _tabController,
-                      labelColor: Colors.white, // Selected tab text color
-                      unselectedLabelColor: Colors.white70, // Unselected tab text color with better visibility
-                      indicatorColor: Colors.white, // Indicator line color
-                      indicatorWeight: 3, // Thicker indicator for better visibility
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white70,
+                      indicatorColor: Colors.white,
+                      indicatorWeight: 3,
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -156,9 +190,35 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
             );
           } else if (state is OtherUserProfileLoadFailure) {
-            return ErrorCustomWidget.show(context, message: state.error);
+            // Use a simple error widget instead of potentially problematic one
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    'Error: ${state.error}',
+                    style: TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (mounted) {
+                        _userProfileBloc.add(OtherUserProfileRequested(id: widget.toUser));
+                      }
+                    },
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           } else {
-            return ErrorCustomWidget.show(context, message: 'No user profile data found.');
+            // Use a simple placeholder widget
+            return Center(
+              child: Text('No user profile data found.'),
+            );
           }
         },
       ),
@@ -174,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Image.network(
-              ProfileImageHelper.getProfileImageUrl(user),
+              ProfileImageHelper.getProfileImageUrl(user.photos?.first),
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.5),
               colorBlendMode: BlendMode.darken,
@@ -191,7 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: CircleAvatar(
                 radius: 60,
                 backgroundImage: CachedNetworkImageProvider(
-                  ProfileImageHelper.getProfileImageUrl(user),
+                  ProfileImageHelper.getProfileImageUrl(user.photos?.first),
                 ),
               ),
             ),
@@ -206,8 +266,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                 fontWeight: FontWeight.bold,
               ),
             ),
-
-            // Bio or additional info (if available)
 
             // Stats
             Padding(

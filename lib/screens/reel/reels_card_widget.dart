@@ -39,7 +39,7 @@ class ReelCardWidget extends StatelessWidget {
           onFavoritePressed: () {  },
         ),
         UserDetailsBar(
-          userPhotoUrl: servicePost.userPhoto!,
+          userPhotoUrl: servicePost.userPhoto!.src!,
         ),
       ],
     );

@@ -1,14 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:talbna/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../main.dart' as app_main;
 
 class Language extends ChangeNotifier {
-  String _lang = language;
+  // Initialize with a default value, we'll update it in constructor
+  String _lang = 'ar';
 
-  getLanguage(){
+  Language() {
+    // Initialize from the global variable on creation
+    _lang = app_main.language;
+    print("Language class initialized with: $_lang");
+  }
+
+  String getLanguage() {
+    // Check if our internal state matches the global state
+    if (_lang != app_main.language) {
+      print("Warning: Language inconsistency detected - internal: $_lang, global: ${app_main.language}");
+      _lang = app_main.language; // Sync with global variable
+    }
     return _lang;
   }
-  setLanguage(String lang){
+
+  Future<void> setLanguage(String lang) async {
+    // 1. Update internal state
     _lang = lang;
+
+    // 2. Update global variable
+    app_main.language = lang;
+
+    // 3. Save to SharedPreferences
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('language', lang);
+      print("Language saved to SharedPreferences: $lang");
+    } catch (e) {
+      print("Error saving language to SharedPreferences: $e");
+    }
+
+    // 4. Notify listeners for UI updates
     notifyListeners();
   }
   String tJobTextHome() {
@@ -908,6 +937,41 @@ class Language extends ChangeNotifier {
         return 'User';
     }
   }
+  String tNoFollowersFoundText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'لا يوجد متابعين';
+      case 'en':
+        return 'No followers found';
+      default:
+        return 'No followers found';
+    }
+  }
+
+  String tNoFollowingFoundText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'لا يوجد متابَعين';
+      case 'en':
+        return 'No following found';
+      default:
+        return 'No following found';
+    }
+  }
+
+  String tPullToRefreshText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'اسحب لأسفل للتحديث';
+      case 'en':
+        return 'Pull down to refresh';
+      default:
+        return 'Pull down to refresh';
+    }
+  }
   String tReportSuccess() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -944,6 +1008,17 @@ class Language extends ChangeNotifier {
         return 'Choose Theme';
       default:
         return 'Choose Theme';
+    }
+  }
+  String changeThemeText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تغيير المظهر';
+      case 'en':
+        return 'change Theme';
+      default:
+        return 'change Theme';
     }
   }
   String lightModeText() {

@@ -4,8 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/routes.dart';
 import 'package:talbna/screens/auth/welcome_screen.dart';
 import 'package:talbna/screens/home/home_screen.dart';
-import 'package:talbna/screens/home/select_language.dart';
-import 'package:talbna/screens/splash.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/services/deep_link_service.dart';
 import 'package:talbna/theme_cubit.dart';
@@ -16,12 +14,13 @@ import 'blocs/authentication/authentication_bloc.dart';
 import 'blocs/authentication/authentication_event.dart';
 import 'blocs/authentication/authentication_state.dart';
 import 'data/repositories/authentication_repository.dart';
+import 'widgets/splash_transition.dart'; // Import the new transition widget
 
 class MyApp extends StatefulWidget {
   final AuthenticationRepository authenticationRepository;
   final bool isDarkTheme;
   final GlobalKey<NavigatorState> navigatorKey;
-  final bool autoAuthenticated;  // New parameter to track if we've auto-authenticated
+  final bool autoAuthenticated;
 
   const MyApp({
     super.key,
@@ -51,7 +50,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // If we're already auto-authenticated, notify app ready sooner
     if (widget.autoAuthenticated) {
       DebugLogger.log('Auto-authenticated, will check deep links soon', category: 'APP');
-      Future.delayed(const Duration(milliseconds: 1500), () {
+      Future.delayed(const Duration(milliseconds: 1000), () {
         _notifyAppReady();
       });
     }
@@ -78,8 +77,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeApp() async {
-    await _fcmHandler.initializeFCM();
-    await Future.delayed(const Duration(milliseconds: 1500));
+    // Shorter delay as the native splash screen is already showing
+    await Future.delayed(const Duration(milliseconds: 200));
 
     if (mounted) {
       setState(() => _isInitialized = true);
@@ -103,21 +102,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     DeepLinkService().checkPendingDeepLinks();
   }
 
-  Widget _buildScreenForState(AuthenticationState state, SharedPreferences prefs) {
-    if (!_isInitialized) return const SplashScreen();
-
+  Widget _buildScreenForState(BuildContext context, AuthenticationState state, SharedPreferences prefs) {
     final String? token = prefs.getString('auth_token');
     final int? userId = prefs.getInt('userId');
     final bool isFirstTime = prefs.getBool('is_first_time') ?? true;
-
-    // If it's the first time, check if we have language selected
-    if (isFirstTime) {
-      final hasLanguage = prefs.getString('language') != null;
-      if (!hasLanguage) {
-        // If no language selected, show language selection
-        return const LanguageSelectionScreen();
-      }
-    }
 
     // Handle successful authentication
     if (state is AuthenticationSuccess) {
@@ -130,7 +118,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           });
         });
       }
-      return HomeScreen(userId: state.userId!);
+
+      // Use transition for HomeScreen
+      return AppLoadingTransition(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        child: HomeScreen(userId: state.userId!),
+      );
     }
 
     // If has token, verify it and use it
@@ -138,7 +131,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       return FutureBuilder<bool>(
         future: widget.authenticationRepository.checkTokenValidity(token),
         builder: (context, validitySnapshot) {
-          if (!validitySnapshot.hasData) return const SplashScreen();
+          if (!validitySnapshot.hasData) {
+            // Show nothing during this check, maintaining splash screen look
+            return Container(color: Theme.of(context).scaffoldBackgroundColor);
+          }
 
           if (validitySnapshot.data!) {
             if (state is! AuthenticationSuccess) {
@@ -148,17 +144,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               // If token is valid, notify the deep link service
               _deepLinkService.setPreAuthenticated(userId);
             }
-            return const SplashScreen();
+
+            // Show nothing during authentication, maintaining splash screen look
+            return Container(color: Theme.of(context).scaffoldBackgroundColor);
           }
 
-          // Token is invalid, show welcome screen
-          return const WelcomeScreen();
+          // Token is invalid, show welcome screen with transition
+          return AppLoadingTransition(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            child: const WelcomeScreen(),
+          );
         },
       );
     }
 
-    // No authentication, show welcome screen instead of login
-    return const WelcomeScreen();
+    // No authentication, show welcome screen with transition
+    return AppLoadingTransition(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      child: const WelcomeScreen(),
+    );
   }
 
   @override
@@ -174,10 +178,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             navigatorKey: widget.navigatorKey,
             onGenerateRoute: Routes.generateRoute,
             initialRoute: Routes.initial,
-            home: FutureBuilder<SharedPreferences>(
+            home: !_isInitialized
+            // Show nothing during initialization, preserving splash screen
+                ? Container(color: theme.scaffoldBackgroundColor)
+                : FutureBuilder<SharedPreferences>(
               future: SharedPreferences.getInstance(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const SplashScreen();
+                if (!snapshot.hasData) {
+                  // Show nothing during prefs loading, preserving splash screen
+                  return Container(color: theme.scaffoldBackgroundColor);
+                }
 
                 final prefs = snapshot.data!;
                 return BlocConsumer<AuthenticationBloc, AuthenticationState>(
@@ -215,7 +225,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     }
                   },
                   builder: (context, state) {
-                    return _buildScreenForState(state, prefs);
+                    return _buildScreenForState(context, state, prefs);
                   },
                 );
               },

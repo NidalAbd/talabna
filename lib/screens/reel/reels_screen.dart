@@ -21,6 +21,7 @@ import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../data/models/photos.dart';
+import '../../utils/photo_image_helper.dart';
 import 'like_button.dart';
 
 class ReelsHomeScreen extends StatefulWidget {
@@ -364,18 +365,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
                                 radius: 25,
                                 child: CircleAvatar(
                                   radius: 23,
-                                  backgroundImage: Image.network(
-                                    '${Constants.apiBaseUrl}/storage/${post.userPhoto!}',
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return const CircleAvatar(
-                                        radius: 22,
-                                        backgroundImage:
-                                        AssetImage('assets/avatar.png'),
-                                      );
-                                    },
-                                  ).image,
+                                  backgroundImage: Image.network(ProfileImageHelper.getProfileImageUrl(post.userPhoto),).image,
                                 ),
                               ),
                             ],

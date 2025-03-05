@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_event.dart';
 import 'package:talbna/blocs/user_follow/user_follow_state.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/profile/user_card.dart';
+
+import '../widgets/shimmer_widgets.dart';
+
 class UserFollowingScreen extends StatefulWidget {
   const UserFollowingScreen({super.key, required this.userID, required this.user});
   final int userID;
@@ -13,56 +18,81 @@ class UserFollowingScreen extends StatefulWidget {
   @override
   UserFollowingScreenState createState() => UserFollowingScreenState();
 }
-class UserFollowingScreenState extends State<UserFollowingScreen> {
+
+class UserFollowingScreenState extends State<UserFollowingScreen> with AutomaticKeepAliveClientMixin {
+  final Language _language = Language();
   final ScrollController _scrollController = ScrollController();
   late UserFollowBloc _userFollowBloc;
   late UserActionBloc _userActionBloc;
+
   int _currentPage = 1;
-  late bool _hasReachedMax = false;
+  bool _hasReachedMax = false;
   List<User> _following = [];
+  bool _isInitialized = false;
+  bool _isLoading = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _userFollowBloc = context.read<UserFollowBloc>();
     _userActionBloc = context.read<UserActionBloc>();
+    _fetchFollowing();
+  }
+
+  void _fetchFollowing() {
+    setState(() {
+      _isLoading = true;
+    });
     _userFollowBloc.add(UserFollowingRequested(user: widget.userID, page: _currentPage));
   }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _following.clear();
     super.dispose();
   }
+
   void _onScroll() {
-    if (!_hasReachedMax &&
+    if (!_isLoading &&
+        !_hasReachedMax &&
+        _scrollController.hasClients &&
         _scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+            _scrollController.position.maxScrollExtent - 200 &&
         !_scrollController.position.outOfRange) {
       _handleLoadMore();
     }
   }
+
   void _handleLoadMore() {
+    setState(() {
+      _isLoading = true;
+    });
     _currentPage++;
-    _userFollowBloc
-        .add(UserFollowingRequested(user: widget.userID, page: _currentPage));
+    _userFollowBloc.add(UserFollowingRequested(user: widget.userID, page: _currentPage));
   }
+
   Future<void> _handleRefresh() async {
     _currentPage = 1;
     _hasReachedMax = false;
     _following.clear();
-    _userFollowBloc.add(UserFollowingRequested(user: widget.userID, page: _currentPage));
+    _fetchFollowing();
+    return Future.value();
   }
+
   Future<bool> _onWillPop() async {
-    if (_scrollController.offset > 0) {
+    if (_scrollController.hasClients && _scrollController.position.pixels > 0) {
       _scrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInToLinear,
       );
-      // Wait for the duration of the scrolling animation before refreshing
-      await Future.delayed(const Duration(milliseconds: 1000));
-      // Trigger a refresh after reaching the top
+      await Future.delayed(const Duration(milliseconds: 300));
       _handleRefresh();
       return false;
     } else {
@@ -72,6 +102,9 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    final theme = Theme.of(context);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: BlocListener<UserFollowBloc, UserFollowState>(
@@ -81,46 +114,162 @@ class UserFollowingScreenState extends State<UserFollowingScreen> {
             setState(() {
               _following = List.from(_following)..addAll(state.users);
               _hasReachedMax = state.hasReachedMax;
+              _isInitialized = true;
+              _isLoading = false;
+            });
+          } else if (state is UserFollowLoadFailure) {
+            setState(() {
+              _isInitialized = true;
+              _isLoading = false;
             });
           }
         },
         child: BlocBuilder<UserFollowBloc, UserFollowState>(
           bloc: _userFollowBloc,
           builder: (context, state) {
-            if (state is UserFollowLoadInProgress && _following.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+            if (state is UserFollowLoadInProgress && !_isInitialized) {
+              return const UserFollowerScreenShimmer();
+
             } else if (_following.isNotEmpty) {
               return RefreshIndicator(
                 onRefresh: _handleRefresh,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSecondaryColor
+                    : AppTheme.lightPrimaryColor,
                 child: ListView.builder(
                   controller: _scrollController,
+                  padding: const EdgeInsets.only(top: 8, bottom: 16),
+                  physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: _hasReachedMax ? _following.length : _following.length + 1,
                   itemBuilder: (context, index) {
                     if (index >= _following.length) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppTheme.darkSecondaryColor
+                                : AppTheme.lightPrimaryColor,
+                            strokeWidth: 3,
+                          ),
+                        ),
+                      );
                     }
                     if (index >= 0 && index < _following.length) {
                       final follower = _following[index];
                       return AnimatedOpacity(
-                          opacity: 1.0,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,child:
-                      UserCard(
-                        key: UniqueKey(),
-                        follower: follower,
-                        userActionBloc: _userActionBloc,
-                        userId: widget.userID, user: widget.user,
-                      ));
+                        opacity: 1.0,
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeIn,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: UserCard(
+                            key: ValueKey(follower.id),
+                            follower: follower,
+                            userActionBloc: _userActionBloc,
+                            userId: widget.userID,
+                            user: widget.user,
+                          ),
+                        ),
+                      );
                     } else {
-                      return const Center(child: Text('Invalid index'));
+                      return const SizedBox.shrink();
                     }
                   },
                 ),
               );
-            } else if (state is UserFollowLoadFailure) {
-              return Center(child: Text(state.error));
             } else {
-              return const Center(child: Text('No following found.'));
+              return RefreshIndicator(
+                onRefresh: _handleRefresh,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkSecondaryColor
+                    : AppTheme.lightPrimaryColor,
+                child: ListView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height / 4),
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).disabledColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.diversity_3_outlined,
+                              size: 48,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? AppTheme.darkSecondaryColor
+                                  : AppTheme.lightPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            state is UserFollowLoadFailure
+                                ? state.error
+                                : _language.tNoFollowingFoundText(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).disabledColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.refresh,
+                                  size: 16,
+                                  color: Theme.of(context).textTheme.bodySmall?.color,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _language.tPullToRefreshText(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
           },
         ),

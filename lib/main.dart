@@ -3,11 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/authentication/authentication_bloc.dart';
 import 'package:talbna/blocs/authentication/authentication_event.dart';
+import 'package:talbna/provider/language_change_notifier.dart';
 import 'package:talbna/services/deep_link_service.dart';
+import 'package:talbna/theme_cubit.dart';
 import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/utils/fcm_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,15 +24,33 @@ class AppInitializer {
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static final DeepLinkService deepLinkService = DeepLinkService();
 
+  static Future<void> _loadLanguageSettings(SharedPreferences prefs) async {
+    try {
+      // Get saved language or use 'ar' as default
+      final savedLanguage = prefs.getString('language');
+      language = savedLanguage ?? 'ar';
+
+      // Debug log
+      DebugLogger.log('App initialized with language: $language', category: 'LANGUAGE');
+    } catch (e) {
+      DebugLogger.log('Error loading language settings: $e', category: 'LANGUAGE');
+      // Fallback to default language
+      language = 'ar';
+    }
+  }
+
   static Future<void> initialize() async {
     try {
-      WidgetsFlutterBinding.ensureInitialized();
+      // This needs to be called first to preserve the native splash screen
+      final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+      FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
       // Initialize core services first
       await _initializeFoundationServices();
 
       // Load app preferences
       final prefs = await SharedPreferences.getInstance();
+      await _loadLanguageSettings(prefs);
 
       // Pre-check authentication status for cold start
       await _checkAuthForColdStart(prefs);
@@ -43,10 +64,16 @@ class AppInitializer {
       // Run the application
       final repositories = AppRepositories.initialize();
       _runApplication(prefs, repositories);
+
+      // Now that the app UI is initialized, we can remove the splash screen
+      FlutterNativeSplash.remove();
     } catch (e, stackTrace) {
       debugPrint('App Initialization Error: $e');
       debugPrint('Stack Trace: $stackTrace');
       DebugLogger.log('App Initialization Error: $e\n$stackTrace', category: 'INIT');
+
+      // Make sure to remove the splash screen in case of errors too
+      FlutterNativeSplash.remove();
     }
   }
 
@@ -201,4 +228,23 @@ class AppInitializer {
 
 Future<void> main() async {
   await AppInitializer.initialize();
+}
+
+class AppWrapper extends StatelessWidget {
+  final Widget child;
+
+  const AppWrapper({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ThemeCubit(),
+      child: LanguageChangeBuilder(
+        builder: (context) => child,
+      ),
+    );
+  }
 }

@@ -92,6 +92,7 @@ dependencies:
   shimmer: ^3.0.0
   uni_links: ^0.5.1
   package_info_plus: ^8.3.0
+  flutter_native_splash: ^2.4.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -143,3 +144,49 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_native_splash:
+  # Background color
+  color: "#FFFFFF"
+  # Background color for dark mode
+  color_dark: "#121212"
+
+  # Image source
+  image: assets/images/splash_logo.png
+  # Image for dark mode (optional)
+  image_dark: assets/images/splash_logo_dark.png
+
+  # For branding position
+  branding: assets/images/branding.png
+  # Branding for dark mode
+  branding_dark: assets/images/branding_dark.png
+
+  # Android 12+ specific settings
+  android_12:
+    # Image source for Android 12 splash screen
+    image: assets/images/logo.png
+    # Image for dark mode
+    image_dark: assets/images/logo.png
+    # Icon background color
+    icon_background_color: "#FFFFFF"
+    # Icon background color for dark mode
+    icon_background_color_dark: "#121212"
+    # Branding
+    branding: assets/images/branding.png
+    # Branding for dark mode
+    branding_dark: assets/images/branding_dark.png
+
+  # Disable the iOS status bar
+  fullscreen: true
+
+  # Web splash (for PWA)
+  web: false
+
+  # Add splash to all platforms
+  android: true
+  ios: true
+
+  # Disable splash for desktop
+  windows: false
+  macos: false
+  linux: false

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:convert';
 
 class Category {
   final int id;

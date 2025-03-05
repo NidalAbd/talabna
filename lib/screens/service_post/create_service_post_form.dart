@@ -534,7 +534,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -618,7 +617,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                 ? _language.tNextText()
                 : _language.tCreateText()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

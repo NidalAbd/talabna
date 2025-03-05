@@ -10,7 +10,7 @@ import 'package:talbna/screens/profile/change_password_screen.dart';
 import 'package:talbna/utils/restart_helper.dart';
 import '../../blocs/authentication/authentication_bloc.dart';
 import '../../blocs/authentication/authentication_event.dart';
-import '../../theme_cubit.dart';
+import '../../provider/language_theme_selector.dart';
 import 'about_screen.dart';
 import 'help_center_screen.dart';
 
@@ -25,25 +25,11 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> with SingleTickerProviderStateMixin {
   final Language _language = Language();
-  String selectedLanguage = 'en'; // Default to English to avoid null issues
   bool _isLoading = true;
   bool _notificationsEnabled = true;
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   bool _dataSaverEnabled = false;
-
-  final List<String> _languages = [
-    'ar',
-    'en',
-    'Español',
-    '中文',
-    'हिन्दी',
-    'Português',
-    'Русский',
-    '日本語',
-    'Français',
-    'Deutsch',
-  ];
 
   @override
   void initState() {
@@ -62,7 +48,7 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
       ),
     );
 
-    // Initialize language and notification settings asynchronously
+    // Initialize notification settings asynchronously
     _initializeSettings();
   }
 
@@ -74,9 +60,6 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
 
   Future<void> _initializeSettings() async {
     try {
-      // Get language setting
-      final lang = await _language.getLanguage();
-
       // Get notification setting
       final notificationStatus = await NotificationService.getNotificationStatus();
 
@@ -85,7 +68,6 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
 
       if (mounted) {
         setState(() {
-          selectedLanguage = lang;
           _notificationsEnabled = notificationStatus;
           _dataSaverEnabled = dataSaverStatus;
           _isLoading = false;
@@ -100,6 +82,31 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
         _animationController.forward();
       }
     }
+  }
+
+  // Handle language change callback
+  void _onLanguageChanged() {
+    // Force a rebuild of the screen with the new language
+    setState(() {
+      // No need to clear _welcomeContent as it doesn't exist in this class
+    });
+
+    // Restart animation if needed
+    _animationController.reset();
+    _animationController.forward();
+
+    // Show a confirmation toast/snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            _language.getLanguage() == 'ar'
+                ? 'تم تغيير اللغة بنجاح'
+                : 'Language changed successfully'
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+    );
   }
 
   Future<void> _toggleDataSaver() async {
@@ -168,149 +175,6 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
         ),
       );
     }
-  }
-
-  Future<void> _showLanguageChangeConfirmationDialog() async {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            _language.tConfirmChangeText(),
-            style: TextStyle(
-              color: primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            _language.tLanguageChangeDescText(),
-            style: const TextStyle(fontSize: 16),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                _language.tCancelText(),
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => RestartHelper.restartApp(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(_language.tConfirmText()),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showLanguageBottomSheet(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-    final backgroundColor = isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor;
-    final textColor = isDarkMode ? AppTheme.darkTextColor : AppTheme.lightTextColor;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: backgroundColor,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Text(
-                  _language.tSelectLanguageText(),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: _languages.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemBuilder: (context, index) {
-                      final language = _languages[index];
-                      final isSelected = selectedLanguage == language;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? primaryColor : Colors.grey.withOpacity(0.2),
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: ListTile(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          title: Text(
-                            language,
-                            style: TextStyle(
-                              color: isSelected ? primaryColor : textColor,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(Icons.check_circle, color: primaryColor)
-                              : Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey.withOpacity(0.5),
-                          ),
-                          onTap: () async {
-                            SharedPreferences pref = await SharedPreferences.getInstance();
-                            await pref.setString('language', language);
-                            setState(() {
-                              selectedLanguage = language;
-                            });
-                            Navigator.pop(context);
-                            _showLanguageChangeConfirmationDialog();
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 
   Widget _buildSettingCard({
@@ -512,43 +376,17 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
 
                 _buildSectionTitle(_language.tPreferencesText()),
 
-                _buildSettingCard(
-                  icon: Icons.language,
-                  title: _language.tChangeLanguageText(),
-                  onTap: () => _showLanguageBottomSheet(context),
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      selectedLanguage,
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                // Using the new LanguageThemeSelector widget
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: LanguageThemeSelector(
+                    compactMode: false,
+                    showThemeToggle: true,
+                    showConfirmationDialog: true, // Show confirmation before changing
+                    onLanguageChanged: _onLanguageChanged,
                   ),
                 ),
 
-                // For appearance/theme toggle, use a custom implementation
-                _buildSettingCard(
-                  icon: isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                  title: _language.tAppearanceText(),
-                  onTap: () {
-                    BlocProvider.of<ThemeCubit>(context).toggleTheme();
-                  },
-                  trailing: IconButton(
-                    icon: Icon(
-                      isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                      color: primaryColor,
-                    ),
-                    onPressed: () {
-                      BlocProvider.of<ThemeCubit>(context).toggleTheme();
-                    },
-                  ),
-                ),
                 _buildSectionTitle(_language.tAccountText()),
 
                 _buildSettingCard(

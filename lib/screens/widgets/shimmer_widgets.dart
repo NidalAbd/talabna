@@ -48,6 +48,88 @@ class ShimmerWidget extends StatelessWidget {
   }
 }
 
+
+class UserFollowerScreenShimmer extends StatelessWidget {
+  const UserFollowerScreenShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Base and highlight colors for shimmer effect
+    final baseColor = isDarkMode ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDarkMode ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      itemCount: 8, // Number of shimmer items to display
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              leading: Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+              trailing: Container(
+                width: 80,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// Shimmer for CategoryScreen loading state
 class CategoryScreenShimmer extends StatelessWidget {
   const CategoryScreenShimmer({super.key});
@@ -159,60 +241,69 @@ class ServicePostScreenShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 6,
-      padding: const EdgeInsets.all(16),
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User info section
-              Row(
-                children: [
-                  ShimmerWidget.circular(width: 40, height: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SizedBox(
+          height: constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : MediaQuery.of(context).size.height * 0.8,
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 6,
+            padding: const EdgeInsets.all(16),
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // User info section
+                    Row(
                       children: [
-                        ShimmerWidget.rectangular(height: 14),
-                        const SizedBox(height: 6),
-                        ShimmerWidget.rectangular(height: 10, width: 100),
+                        ShimmerWidget.circular(width: 40, height: 40),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerWidget.rectangular(height: 14),
+                              const SizedBox(height: 6),
+                              ShimmerWidget.rectangular(height: 10, width: 100),
+                            ],
+                          ),
+                        ),
+                        ShimmerWidget.rectangular(height: 20, width: 20),
                       ],
                     ),
-                  ),
-                  ShimmerWidget.rectangular(height: 20, width: 20),
-                ],
-              ),
 
-              // Post content
-              const SizedBox(height: 16),
-              ShimmerWidget.rectangular(height: 16),
-              const SizedBox(height: 8),
-              ShimmerWidget.rectangular(height: 16, width: MediaQuery.of(context).size.width * 0.7),
-              const SizedBox(height: 8),
-              ShimmerWidget.rectangular(height: 180),
+                    // Post content
+                    const SizedBox(height: 16),
+                    ShimmerWidget.rectangular(height: 16),
+                    const SizedBox(height: 8),
+                    ShimmerWidget.rectangular(height: 16, width: MediaQuery.of(context).size.width * 0.7),
+                    const SizedBox(height: 8),
+                    ShimmerWidget.rectangular(height: 180),
 
-              // Post actions
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ShimmerWidget.rectangular(height: 24, width: 80),
-                  ShimmerWidget.rectangular(height: 24, width: 80),
-                  ShimmerWidget.rectangular(height: 24, width: 80),
-                ],
-              ),
-            ],
+                    // Post actions
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ShimmerWidget.rectangular(height: 24, width: 80),
+                        ShimmerWidget.rectangular(height: 24, width: 80),
+                        ShimmerWidget.rectangular(height: 24, width: 80),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },
     );
   }
 }
-
 
 /// Notification Shimmer for loading states
 class NotificationShimmerItem extends StatelessWidget {

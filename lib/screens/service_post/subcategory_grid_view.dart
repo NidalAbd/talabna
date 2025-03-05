@@ -45,19 +45,33 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
   }
 
   void _navigateToSubcategory(SubCategoryMenu subcategory) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SubCategoryPostScreen(
-          userID: widget.userId,
-          categoryId: subcategory.categoriesId,
-          subcategoryId: subcategory.id,
-          servicePostBloc: widget.servicePostBloc,
-          userProfileBloc: widget.userProfileBloc,
-          user: widget.user,
-          titleSubcategory: subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown',
+    // Check if subcategory is suspended before navigating
+    if (!subcategory.isSuspended) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SubCategoryPostScreen(
+            userID: widget.userId,
+            categoryId: subcategory.categoriesId,
+            subcategoryId: subcategory.id,
+            servicePostBloc: widget.servicePostBloc,
+            userProfileBloc: widget.userProfileBloc,
+            user: widget.user,
+            titleSubcategory: subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown',
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Show a dialog or snackbar indicating the subcategory is suspended
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'This subcategory is currently suspended',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -70,7 +84,6 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
     return BlocBuilder<SubcategoryBloc, SubcategoryState>(
       builder: (context, state) {
         if (state is SubcategoryLoading) {
-          // Replace CircularProgressIndicator with Shimmer
           return const SubcategoryListViewShimmer();
         } else if (state is SubcategoryLoaded) {
           if (state.subcategories.isEmpty) {
@@ -201,79 +214,104 @@ class _SubcategoryListViewState extends State<SubcategoryListView> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Hero(
-                    tag: 'subcategory_${subcategory.id}',
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: primaryColor.withOpacity(0.1),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: subcategory.photos.isNotEmpty
-                            ? Image.network(
-                          '${Constants.apiBaseUrl}/${subcategory.photos[0].src}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.image_not_supported_outlined,
-                              color: primaryColor.withOpacity(0.5),
-                            );
-                          },
-                        )
-                            : Icon(
-                          Icons.category_outlined,
-                          color: primaryColor.withOpacity(0.5),
-                          size: 30,
+              child: Opacity(
+                opacity: subcategory.isSuspended ? 0.5 : 1.0,
+                child: Row(
+                  children: [
+                    Hero(
+                      tag: 'subcategory_${subcategory.id}',
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: primaryColor.withOpacity(0.1),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: subcategory.photos.isNotEmpty
+                              ? Image.network(
+                            '${Constants.apiBaseUrl}/${subcategory.photos[0].src}',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.image_not_supported_outlined,
+                                color: primaryColor.withOpacity(0.5),
+                              );
+                            },
+                          )
+                              : Icon(
+                            Icons.category_outlined,
+                            color: primaryColor.withOpacity(0.5),
+                            size: 30,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: textColor,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Total: ${formatNumber(subcategory.servicePostsCount)}',
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            subcategory.name[language] ?? subcategory.name['en'] ?? 'Unknown',
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: primaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Total: ${formatNumber(subcategory.servicePostsCount)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                              if (subcategory.isSuspended) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Suspended',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: primaryColor.withOpacity(0.5),
-                    size: 20,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: primaryColor.withOpacity(subcategory.isSuspended ? 0.2 : 0.5),
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

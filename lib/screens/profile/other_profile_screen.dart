@@ -13,7 +13,7 @@ import '../../blocs/user_action/user_action_event.dart';
 import '../../blocs/user_action/user_action_state.dart';
 import '../../data/models/user.dart';
 import '../../provider/language.dart';
-import '../../utils/constants.dart';
+import '../../utils/photo_image_helper.dart';
 import '../interaction_widget/report_tile.dart';
 import '../profile/add_point_screen.dart';
 import '../profile/user_followers_screen.dart';
@@ -109,12 +109,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
     }
   }
 
-  String _getProfileImageUrl(User user) {
-    if (user.photos != null && user.photos!.isNotEmpty) {
-      return '${Constants.apiBaseUrl}/storage/${user.photos!.first.src}';
-    }
-    return 'https://via.placeholder.com/150';
-  }
+
 
   String _getLocationText(User user) {
     // Use the app's current locale or default to English
@@ -252,16 +247,33 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
           ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: CachedNetworkImage(
-              imageUrl: _getProfileImageUrl(user),
+              imageUrl: ProfileImageHelper.getProfileImageUrl(user.photos!.first),
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.5),
               colorBlendMode: BlendMode.darken,
               placeholder: (context, url) => Container(
                 color: Colors.grey[800],
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                ),
               ),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[900],
-                child: const Icon(Icons.error, color: Colors.white),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, color: Colors.white, size: 40),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Failed to load image',
+                        style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           )
@@ -285,7 +297,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
                   child: CircleAvatar(
                     radius: 45, // Further reduced from 50
                     backgroundImage: CachedNetworkImageProvider(
-                      _getProfileImageUrl(user),
+                      ProfileImageHelper.getProfileImageUrl(user.photos!.first),
                     ),
                     onBackgroundImageError: (exception, stackTrace) =>
                     const AssetImage('assets/images/placeholder.png'),

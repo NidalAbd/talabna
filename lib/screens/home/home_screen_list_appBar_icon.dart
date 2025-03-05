@@ -125,7 +125,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
                 radius: 15,
                 backgroundColor: Colors.grey[300],
                 backgroundImage: (widget.user.photos?.isNotEmpty ?? false)
-                    ? NetworkImage(ProfileImageHelper.getProfileImageUrl(widget.user),)
+                    ? NetworkImage(ProfileImageHelper.getProfileImageUrl(widget.user.photos?.first),)
                     : null,
                 child: (widget.user.photos?.isEmpty ?? true)
                     ? Icon(Icons.person, size: 18, color: Colors.grey[700])
@@ -333,7 +333,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfileScreen(
+        builder: (context) => ProfileScreen(  // Changed from ProfileScreen to ProfileScreenWrapper
             fromUser: widget.userId,
             toUser: widget.userId,
             user: widget.user

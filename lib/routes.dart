@@ -18,7 +18,6 @@ import 'package:talbna/screens/service_post/service_post_view.dart';
 import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/services/deep_link_service.dart';
 
-
 class Routes {
   // Centralized route names
   static const String initial = '/';
@@ -32,6 +31,21 @@ class Routes {
   // Global navigation tracking to prevent duplicate service post loads
   static final Map<String, DateTime> _navigationHistory = {};
   static bool _isCurrentlyLoadingServicePost = false;
+
+  // Custom page route builder
+  static PageRoute _createFadeRoute(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionDuration: const Duration(milliseconds: 200),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+    );
+  }
 
   // Route generation method with enhanced logging and error handling
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -73,12 +87,8 @@ class Routes {
         // Navigation guard to prevent rapid duplicate navigations
         if (!_shouldAllowNavigation(settings.name!)) {
           DebugLogger.log('Blocking duplicate navigation to: ${settings.name}', category: 'NAVIGATION');
-          return MaterialPageRoute(
-            builder: (context) => const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-            settings: settings,
-          );
+          // Instead of showing a CircularProgressIndicator, return an empty route
+          return _createEmptyRoute(settings);
         }
       }
 
@@ -86,20 +96,19 @@ class Routes {
       switch (settings.name) {
         case initial:
         case login:
-          return _buildRoute((context) => const LoginScreenNew());
+          return _createFadeRoute(const LoginScreenNew(), settings);
 
         case register:
-          return _buildRoute((context) => RegisterScreenNew(
-          ));
+          return _createFadeRoute(RegisterScreenNew(), settings);
 
         case home:
           return _handleHomeRoute(args);
 
         case language:
-          return _buildRoute((context) => const LanguageSelectionScreen());
+          return _createFadeRoute(const LanguageSelectionScreen(), settings);
 
         case resetPassword:
-          return _buildRoute((context) => const ResetPasswordScreen());
+          return _createFadeRoute(const ResetPasswordScreen(), settings);
 
         case servicePost:
           return _handleServicePostRoute(args);
@@ -111,6 +120,16 @@ class Routes {
       DebugLogger.log('Route generation error: $e', category: 'NAVIGATION');
       return _errorRoute('Error processing route: ${settings.name}');
     }
+  }
+
+  // Empty route for blocking duplicate navigations
+  static Route<dynamic> _createEmptyRoute(RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionDuration: const Duration(milliseconds: 0),
+      maintainState: true,
+    );
   }
 
   // Navigation guard to prevent rapid navigation to the same route
@@ -147,11 +166,13 @@ class Routes {
     _isCurrentlyLoadingServicePost = false;
     _navigationHistory.clear();
 
-    return _buildRoute((context) {
+    final page = Builder(builder: (context) {
       // Clear any pending deep links when explicitly going to home
       DeepLinkService().clearPendingDeepLinks();
       return HomeScreen(userId: userId);
     });
+
+    return _createFadeRoute(page, RouteSettings(name: home, arguments: args));
   }
 
   // Simplified service post route handler
@@ -169,22 +190,14 @@ class Routes {
       final lastNavigation = _navigationHistory[routeKey]!;
       if (now.difference(lastNavigation).inMilliseconds < 1500) {
         DebugLogger.log('Debouncing service post navigation for ID: $postId', category: 'NAVIGATION');
-        return MaterialPageRoute(
-          builder: (context) => const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-        );
+        return _createEmptyRoute(RouteSettings(name: routeKey));
       }
     }
 
-    // If already loading a service post, show loading
+    // If already loading a service post, don't show loading indicator
     if (_isCurrentlyLoadingServicePost) {
-      DebugLogger.log('Another service post is already loading, showing loader', category: 'NAVIGATION');
-      return MaterialPageRoute(
-        builder: (context) => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      );
+      DebugLogger.log('Another service post is already loading, blocking navigation', category: 'NAVIGATION');
+      return _createEmptyRoute(RouteSettings(name: routeKey));
     }
 
     _navigationHistory[routeKey] = now;
@@ -192,8 +205,9 @@ class Routes {
 
     DebugLogger.log('Creating route for service post ID: $postId', category: 'NAVIGATION');
 
-    return MaterialPageRoute(
-      builder: (context) {
+    return PageRouteBuilder(
+      settings: RouteSettings(name: servicePost, arguments: args),
+      pageBuilder: (context, animation, secondaryAnimation) {
         // First check authentication
         final authState = BlocProvider.of<AuthenticationBloc>(context).state;
         if (authState is! AuthenticationSuccess) {
@@ -217,7 +231,7 @@ class Routes {
         context.read<UserProfileBloc>().add(UserProfileRequested(id: userId));
         context.read<ServicePostBloc>().add(GetServicePostByIdEvent(id: int.parse(postId)));
 
-        // Return the service post view with loading state
+        // Return the service post view with a better loading state
         return BlocListener<ServicePostBloc, ServicePostState>(
           listener: (context, state) {
             if (state is ServicePostLoadSuccess || state is ServicePostLoadFailure) {
@@ -228,10 +242,17 @@ class Routes {
           child: _buildServicePostView(context, userId, int.parse(postId)),
         );
       },
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
     );
   }
 
-  // Simplified service post view builder
+  // Improved service post view builder
   static Widget _buildServicePostView(BuildContext context, int userId, int postId) {
     return BlocBuilder<ServicePostBloc, ServicePostState>(
       builder: (context, servicePostState) {
@@ -276,7 +297,7 @@ class Routes {
     }
   }
 
-  // Builds loading or error state widget
+  // Builds loading or error state widget without showing a loading indicator
   static Widget _buildLoadingOrErrorState(
       ServicePostState servicePostState,
       UserProfileState userProfileState
@@ -291,9 +312,15 @@ class Routes {
       return _buildErrorScaffold(userProfileState.error);
     }
 
-    // Default to loading state
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    // Default to a clean loading state without a spinner
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('جاري التحميل'),
+        elevation: 0,
+      ),
+      body: Container(
+        color: Colors.white,
+      ),
     );
   }
 
@@ -314,17 +341,12 @@ class Routes {
     );
   }
 
-  // Centralized route builder with error handling
-  static Route<dynamic> _buildRoute(WidgetBuilder builder) {
-    return MaterialPageRoute(builder: builder);
-  }
-
   // Error route with logging and debug information
   static Route<dynamic> _errorRoute(String message) {
     DebugLogger.log('Route Error: $message', category: 'NAVIGATION');
 
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
+    return _createFadeRoute(
+      Scaffold(
         appBar: AppBar(title: const Text('خطأ')),
         body: Center(
           child: Column(
@@ -349,6 +371,7 @@ class Routes {
           ),
         ),
       ),
+      RouteSettings(name: 'error'),
     );
   }
 

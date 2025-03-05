@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:talbna/theme_cubit.dart';
+import '../../provider/language_theme_selector.dart';
+import '../../main.dart' as main;
+import 'package:talbna/provider/language_change_notifier.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -20,7 +23,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   late Animation<Offset> _slideAnimation;
   int _currentPage = 0;
   final PageController _pageController = PageController();
-  String selectedLanguage = 'en'; // Default language
+  bool _isLanguageSelected = false;
 
   // Welcome screen content with icons
   final List<Map<String, dynamic>> _welcomeContent = [];
@@ -28,10 +31,24 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _loadLanguage();
-    _initializeWelcomeContent();
+    _checkLanguageSelection();
+    _initializeAnimations();
+  }
 
-    // Initialize animations
+  Future<void> _checkLanguageSelection() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasLanguage = prefs.getString('language') != null;
+
+    setState(() {
+      _isLanguageSelected = hasLanguage;
+    });
+
+    if (hasLanguage) {
+      _initializeWelcomeContent();
+    }
+  }
+
+  void _initializeAnimations() {
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -54,19 +71,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     _animationController.forward();
   }
 
-  Future<void> _loadLanguage() async {
-    try {
-      final lang = await _language.getLanguage();
-      if (mounted) {
-        setState(() {
-          selectedLanguage = lang;
-        });
-      }
-    } catch (e) {
-      // Handle error
-    }
-  }
-
   void _initializeWelcomeContent() {
     _welcomeContent.clear();
     _welcomeContent.addAll([
@@ -87,7 +91,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       },
     ]);
   }
+  void _onLanguageChanged() {
+    // Clear and rebuild welcome content with new language
+    setState(() {
+      _welcomeContent.clear();
+      _initializeWelcomeContent();
+    });
 
+    // Reset animation to show the new content with animation
+    _animationController.reset();
+    _animationController.forward();
+  }
   @override
   void dispose() {
     _pageController.dispose();
@@ -111,113 +125,90 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     }
   }
 
-  void _showLanguageBottomSheet(BuildContext context) {
+  Future<void> _handleThemeChange() async {
+    final prefs = await SharedPreferences.getInstance();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-    final backgroundColor = isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.lightBackgroundColor;
-    final textColor = isDarkMode ? AppTheme.darkTextColor : AppTheme.lightTextColor;
+    final newMode = !isDarkMode;
 
-    final List<String> languages = [
-      'ar',
-      'en',
-      'Español',
-      '中文',
-      'हिन्दी',
-      'Português',
-      'Русский',
-      '日本語',
-      'Français',
-      'Deutsch',
-    ];
+    await prefs.setBool('isDarkTheme', newMode);
+    await prefs.setInt('selected_theme', newMode ? 1 : 0);
 
-    showModalBottomSheet(
+    if (context.mounted) {
+      if (newMode) {
+        context.read<ThemeCubit>().emit(AppTheme.darkTheme);
+        AppTheme.setSystemBarColors(Brightness.dark, AppTheme.darkPrimaryColor, AppTheme.darkPrimaryColor);
+      } else {
+        context.read<ThemeCubit>().emit(AppTheme.lightTheme);
+        AppTheme.setSystemBarColors(Brightness.light, AppTheme.lightPrimaryColor, AppTheme.lightPrimaryColor);
+      }
+    }
+  }
+
+  Future<void> _updateLanguage(String language) async {
+    // Show loading dialog
+    _showLoadingDialog();
+
+    // Wait a brief moment to ensure dialog is visible
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // Update global language variable
+    main.language = language;
+
+    await prefs.setString('language', language);
+    await _language.setLanguage(language);
+
+    // Force rebuild by updating state
+    setState(() {
+      _isLanguageSelected = true;
+      _initializeWelcomeContent();
+    });
+
+    // Notify all listeners that language has changed to rebuild the UI
+    LanguageChangeNotifier().notifyLanguageChanged();
+
+    // Close loading dialog
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    // Start page animation
+    _animationController.reset();
+    _animationController.forward();
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
       context: context,
-      backgroundColor: backgroundColor,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(
+                    _language.getLanguage() == 'ar'
+                        ? 'جاري تغيير اللغة...'
+                        : 'Changing language...',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                Text(
-                  _language.tSelectLanguageText(),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: languages.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemBuilder: (context, index) {
-                      final language = languages[index];
-                      final isSelected = selectedLanguage == language;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryColor.withOpacity(0.1) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? primaryColor : Colors.grey.withOpacity(0.2),
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: ListTile(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          title: Text(
-                            language,
-                            style: TextStyle(
-                              color: isSelected ? primaryColor : textColor,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(Icons.check_circle, color: primaryColor)
-                              : Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey.withOpacity(0.5),
-                          ),
-                          onTap: () async {
-                            SharedPreferences pref = await SharedPreferences.getInstance();
-                            await pref.setString('language', language);
-                            setState(() {
-                              selectedLanguage = language;
-                              _initializeWelcomeContent(); // Refresh content with new language
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -240,125 +231,233 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top toolbar with language and theme toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Language selector
-                  InkWell(
-                    onTap: () => _showLanguageBottomSheet(context),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
+        child: !_isLanguageSelected
+            ? _buildLanguageSelectionScreen(isDarkMode, primaryColor, textColor)
+            : _buildOnboardingScreen(isDarkMode, primaryColor, textColor),
+      ),
+    );
+  }
+
+  Widget _buildLanguageSelectionScreen(bool isDarkMode, Color primaryColor, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          // Theme toggle at the top
+          Align(
+            alignment: Alignment.topRight,
+            child: InkWell(
+              onTap: _handleThemeChange,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  color: primaryColor,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+
+          const Spacer(flex: 1),
+
+          // App logo or icon
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.language,
+              size: 70,
+              color: primaryColor,
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // Welcome title text (in both languages)
+          Text(
+            "مرحبا بك في طلبنا\nWelcome to Talbna",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Subtitle text (in both languages)
+          Text(
+            "الرجاء اختيار لغتك المفضلة\nPlease select your preferred language",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor.withOpacity(0.8),
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+
+          const Spacer(flex: 1),
+
+          // Language selection buttons
+          _buildLanguageOption('ar', 'العربية', 'Arabic', isDarkMode, primaryColor),
+          const SizedBox(height: 16),
+          _buildLanguageOption('en', 'English', 'الإنجليزية', isDarkMode, primaryColor),
+
+          const Spacer(flex: 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(String langCode, String primaryText, String secondaryText, bool isDarkMode, Color primaryColor) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: InkWell(
+              onTap: () => _updateLanguage(langCode),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.translate,
+                      color: primaryColor,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.language,
-                            color: primaryColor,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
                           Text(
-                            selectedLanguage,
+                            primaryText,
                             style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            secondaryText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDarkMode ? Colors.white70 : Colors.black54,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-
-                  // Theme toggle and skip
-                  Row(
-                    children: [
-                      // Theme toggle
-                      InkWell(
-                        onTap: () {
-                          BlocProvider.of<ThemeCubit>(context).toggleTheme();
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                            color: primaryColor,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Skip button
-                      TextButton(
-                        onPressed: _completeOnboarding,
-                        child: Text(
-                          _language.tSkipText(),
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Page view for welcome content
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                itemCount: _welcomeContent.length,
-                itemBuilder: (context, index) {
-                  return _buildWelcomePage(
-                    _welcomeContent[index]['title'],
-                    _welcomeContent[index]['description'],
-                    _welcomeContent[index]['icon'],
-                    primaryColor,
-                    textColor,
-                  );
-                },
-              ),
-            ),
-
-            // Pagination dots
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _welcomeContent.length,
-                      (index) => _buildDot(index, primaryColor),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: primaryColor,
+                      size: 16,
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
 
-            // Show auth buttons on last page, otherwise Next button
-            _currentPage == _welcomeContent.length - 1
-                ? _buildAuthButtons(context, primaryColor, isDarkMode)
-                : _buildNextButton(primaryColor, isDarkMode),
-
-            // Add padding at the bottom
-            const SizedBox(height: 24),
-          ],
+  Widget _buildOnboardingScreen(bool isDarkMode, Color primaryColor, Color textColor) {
+    return Column(
+      children: [
+        // Top toolbar with language and theme toggle
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Language and theme selector
+              LanguageThemeSelector(
+                compactMode: true,
+                showThemeToggle: true,
+                showConfirmationDialog: false,
+                onLanguageChanged: _onLanguageChanged,
+              ),
+              // Skip button
+              TextButton(
+                onPressed: _completeOnboarding,
+                child: Text(
+                  _language.tSkipText(),
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+
+        // Page view for welcome content
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: _welcomeContent.length,
+            itemBuilder: (context, index) {
+              return _buildWelcomePage(
+                _welcomeContent[index]['title'],
+                _welcomeContent[index]['description'],
+                _welcomeContent[index]['icon'],
+                primaryColor,
+                textColor,
+              );
+            },
+          ),
+        ),
+
+        // Pagination dots
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _welcomeContent.length,
+                  (index) => _buildDot(index, primaryColor),
+            ),
+          ),
+        ),
+
+        // Show auth buttons on last page, otherwise Next button
+        _currentPage == _welcomeContent.length - 1
+            ? _buildAuthButtons(context, primaryColor, isDarkMode)
+            : _buildNextButton(primaryColor, isDarkMode),
+
+        // Add padding at the bottom
+        const SizedBox(height: 24),
+      ],
     );
   }
 

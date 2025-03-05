@@ -6,8 +6,8 @@ import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/service_post/service_post_view.dart';
 import 'package:talbna/screens/widgets/user_avatar.dart';
-import 'package:talbna/utils/constants.dart';
 
+import '../../utils/photo_image_helper.dart';
 import '../widgets/image_grid.dart';
 
 class ServicePostCard extends StatefulWidget {
@@ -63,8 +63,9 @@ class _ServicePostCardState extends State<ServicePostCard> {
   Widget _buildHeader() {
     return ListTile(
       leading: UserAvatar(
-        imageUrl:
-            '${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+        imageUrl:ProfileImageHelper.getProfileImageUrl(
+            widget.servicePost.userPhoto,
+        ),
         radius: 20,
         fromUser: widget.userProfileId,
         toUser: widget.servicePost.userId!,
