@@ -51,11 +51,13 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.talabna.talabna"
         // You can update the following values to match your application needs.
+        //storage/subcategory/عاجل/zaOdBGbwsjc8aAojE5flhwr8KCmjRiFfT3xAcQA0.jpg
+        //storage/subcategory/عقارات/aymPmydrX1VQObaI0K5TcyBGwMYgrcjnj5XIcIeJ.jpg
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         multiDexEnabled true
         minSdkVersion 24
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 6
+        versionCode 17
         versionName flutterVersionName
     }
     signingConfigs {

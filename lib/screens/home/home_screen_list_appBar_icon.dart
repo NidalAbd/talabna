@@ -10,6 +10,7 @@ import 'package:talbna/screens/service_post/create_service_post_form.dart';
 import 'package:talbna/screens/service_post/favorite_post_screen.dart';
 import '../../utils/constants.dart';
 import '../../utils/photo_image_helper.dart';
+import '../profile/profile_completion_service.dart';
 import '../profile/profile_edit_screen.dart';
 import 'notification_alert_widget.dart';
 
@@ -35,40 +36,61 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
   bool _isProfileComplete = false;
   bool _isLoading = true;
   final language = Language();
+  final _profileCompletionService = ProfileCompletionService();
 
   @override
   void initState() {
     super.initState();
     _checkProfileCompletion();
+
+    // Listen for changes in profile completion status
+    _profileCompletionService.profileCompletionNotifier.addListener(_onProfileStatusChanged);
   }
 
-  Future<void> _checkProfileCompletion() async {
-    final prefs = await SharedPreferences.getInstance();
+  @override
+  void dispose() {
+    _profileCompletionService.profileCompletionNotifier.removeListener(_onProfileStatusChanged);
+    super.dispose();
+  }
 
-    // Check if profile is explicitly marked as completed
-    final isProfileCompleted = prefs.getBool('profileCompleted') ?? false;
-
+  void _onProfileStatusChanged() {
     if (mounted) {
       setState(() {
-        _isProfileComplete = isProfileCompleted;
+        _isProfileComplete = _profileCompletionService.profileCompletionNotifier.value;
         _isLoading = false;
       });
     }
   }
-  String _getProfileImageUrl(User user) {
-    print('is External ${user.photos!.first.isExternal}');
-    if (user.photos != null && user.photos!.isNotEmpty) {
-      final photo = user.photos!.first;
+  void _forceProfleCompletionCheck() async {
+    // Clear the cache to ensure we get the latest value
+    _profileCompletionService.clearCache();
 
-      if (photo.isExternal == true) {
-        return photo.src ?? 'https://via.placeholder.com/150';
-      }else {
-        return '${Constants.apiBaseUrl}/storage/${photo.src}';
-      }
+    // Check profile completion status
+    final isComplete = await _profileCompletionService.isProfileComplete();
+
+    if (mounted) {
+      setState(() {
+        _isProfileComplete = isComplete;
+        _isLoading = false;
+      });
+
+      // Trigger a global update for other widgets that might be listening
+      _profileCompletionService.updateProfileCompletionStatus();
+
+      print('VertIconAppBar: Forced profile completion check, status: $isComplete');
     }
-
-    return 'https://via.placeholder.com/150';
   }
+  Future<void> _checkProfileCompletion() async {
+    final isComplete = await _profileCompletionService.isProfileComplete();
+
+    if (mounted) {
+      setState(() {
+        _isProfileComplete = isComplete;
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -180,7 +202,7 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ServicePostFormScreen(userId: widget.userId),
+        builder: (context) => ServicePostFormScreen(userId: widget.userId, user: widget.user,),
       ),
     );
   }
@@ -364,8 +386,8 @@ class _VertIconAppBarState extends State<VertIconAppBar> {
         ),
       ),
     ).then((_) {
-      // Re-check profile completion when returning from profile update screen
-      _checkProfileCompletion();
+      // Force a refresh when returning from the profile update screen
+      _forceProfleCompletionCheck();
     });
   }
 

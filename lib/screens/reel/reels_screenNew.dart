@@ -39,7 +39,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     _userProfileBloc = context.read<UserProfileBloc>()
       ..add(UserProfileRequested(id: widget.userId));
     _servicePostBloc = context.read<ServicePostBloc>()
-      ..add(GetServicePostsRealsEvent(_currentPage));
+      ..add(GetServicePostsRealsEvent( page: _currentPage));
     _scrollCategoryPostController = PageController()
       ..addListener(_onScrollReelPost);
   }
@@ -47,7 +47,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   void _loadNextPage() {
     if (!_hasReachedMax) {
       _currentPage += 1;
-      _servicePostBloc.add(GetServicePostsRealsEvent(_currentPage));
+      _servicePostBloc.add(GetServicePostsRealsEvent( page: _currentPage));
     }
   }
 
@@ -64,7 +64,7 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     _currentPage = 1;
     _hasReachedMax = false;
     _servicePosts.clear();
-    _servicePostBloc.add(GetServicePostsRealsEvent(_currentPage));
+    _servicePostBloc.add(GetServicePostsRealsEvent( page: _currentPage));
   }
 
   void _handleReelPostLoadSuccess(

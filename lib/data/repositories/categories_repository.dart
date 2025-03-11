@@ -1,169 +1,172 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+// lib/data/repositories/categories_repository.dart
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/data/datasources/category_data_source.dart';
+import 'package:talbna/data/datasources/local/local_category_data_source.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/models/categories_selected_menu.dart';
 import 'package:talbna/data/models/category_menu.dart';
-import 'package:talbna/utils/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/utils/debug_logger.dart';
+
+import '../datasources/remote/remote_category_data_source.dart';
 
 class CategoriesRepository {
-  static const baseUrl = Constants.apiBaseUrl;
+  final CategoryDataSource remoteDataSource;
+  final LocalCategoryDataSource localDataSource;
 
-  CategoriesRepository();
+  CategoriesRepository({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
 
-  Future<List<Category>> getCategories() async {
-    print('CategoriesRepository: getCategories() started');
+  static Future<CategoriesRepository> legacy() async {
+    // Create direct instances of dependencies without service locator
+    return CategoriesRepository(
+      remoteDataSource: RemoteCategoryDataSource(),
+      localDataSource: LocalCategoryDataSource(
+        sharedPreferences: await SharedPreferences.getInstance(),
+      ),
+    );
+  }
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    if (token == null) {
-      print('Error: Auth token is null');
-      throw Exception('User is not authenticated');
-    }
-    print('Auth token retrieved: $token');
-
+  Future<List<Category>> getCategories({bool forceRefresh = false}) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/categories_list'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      print('API Response status code: ${response.statusCode}');
-      print('API Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final decodedResponse = jsonDecode(response.body);
-
-        print('Decoded JSON: $decodedResponse');
-
-        if (decodedResponse is! Map<String, dynamic>) {
-          print('Error: API response is not a JSON object');
-          throw Exception('Invalid API response format');
+      // Check if we have valid cache and forceRefresh is false
+      if (!forceRefresh && localDataSource.isCacheValid('cached_categories')) {
+        final cachedCategories = await localDataSource.getCategories();
+        if (cachedCategories.isNotEmpty) {
+          DebugLogger.log('Returning cached categories', category: 'REPOSITORY');
+          return cachedCategories;
         }
-
-        if (!decodedResponse.containsKey('categories')) {
-          print('Error: "categories" key is missing in the response');
-          throw Exception('Missing "categories" key in API response');
-        }
-
-        final categoriesJson = decodedResponse['categories'];
-        if (categoriesJson is! List) {
-          print('Error: "categories" is not a list');
-          throw Exception('"categories" field must be a list');
-        }
-
-        final categories = categoriesJson.map((json) {
-          try {
-            print('Parsing category: $json');
-            return Category.fromJson(json);
-          } catch (e) {
-            print('Error parsing category: $json - $e');
-            throw Exception('Failed to parse category');
-          }
-        }).toList();
-
-        print('Categories successfully parsed: $categories');
-        return categories;
-      } else {
-        print('Error: Failed to load categories, status: ${response.statusCode}');
-        throw Exception('Failed to load categories');
       }
-    } catch (e, stackTrace) {
-      print('Exception occurred in getCategories: $e');
-      print('StackTrace: $stackTrace');
-      throw Exception('Error fetching categories');
-    }
-  }
 
+      // Fetch fresh data from remote
+      DebugLogger.log('Fetching categories from API', category: 'REPOSITORY');
+      final remoteCategories = await remoteDataSource.getCategories();
 
-  Future<List<CategoryMenu>> getCategoryMenu() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
+      // Cache the new data
+      await localDataSource.cacheCategories(remoteCategories);
 
+      return remoteCategories;
+    } catch (e) {
+      DebugLogger.log('Error fetching categories from API: $e', category: 'REPOSITORY');
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/categories_menu'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseJson = jsonDecode(response.body);
-      final List<dynamic> categoriesJson = responseJson['categories'];
-
-      return categoriesJson.map((json) => CategoryMenu.fromJson(json)).toList();
-    } else {
-      throw Exception('فشل في تحميل الفئات الرئيسية');
-    }
-  }
-
-  Future<List<SubCategory>> getSubCategories(int categoryId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/categories_list/$categoryId/sub_categories/'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    print(response.statusCode);
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseJson = jsonDecode(response.body);
-      final List<dynamic> subcategoriesJson = responseJson['subcategories'];
-      return subcategoriesJson
-          .map((json) => SubCategory.fromJson(json))
-          .toList();
-    } else {
-      throw Exception(' فشل في تحميل الفئات الفرعية $categoryId');
-    }
-  }
-  Future<List<SubCategoryMenu>> getSubCategoriesMenu(int categoryId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/categories_list/$categoryId/sub_categories/'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    if (response.statusCode == 200) {
-      try {
-        final Map<String, dynamic> responseJson = jsonDecode(response.body);
-
-        // Debugging: Print the structure of responseJson
-        print('Response JSON: $responseJson');
-
-        // ✅ Case 1: Check if 'subcategories' exists and is a List
-        if (!responseJson.containsKey('subcategories') || responseJson['subcategories'] == null) {
-          throw Exception('⚠️ خطأ: لا توجد بيانات للفئات الفرعية');
-        }
-
-        final subcategoriesData = responseJson['subcategories'];
-
-        // ✅ Case 2: Check if subcategoriesData is a List
-        if (subcategoriesData is List) {
-          return subcategoriesData
-              .map((json) => SubCategoryMenu.fromJson(json))
-              .toList();
-        } else {
-          // If it's not a List, try printing its type for debugging
-          throw Exception('⚠️ خطأ: استجابة غير صحيحة من الخادم، البيانات ليست قائمة. هي من النوع: ${subcategoriesData.runtimeType}');
-        }
-      } catch (e) {
-        throw Exception('⚠️ خطأ أثناء معالجة الاستجابة: ${e.toString()}');
+      // If remote fetch fails, try to return cached data
+      final cachedCategories = await localDataSource.getCategories();
+      if (cachedCategories.isNotEmpty) {
+        DebugLogger.log('Returning cached categories after API error', category: 'REPOSITORY');
+        return cachedCategories;
       }
-    }else if (response.statusCode == 400) {
-      throw Exception('❌ طلب غير صالح (400): تحقق من بيانات الإدخال.');
-    } else if (response.statusCode == 401) {
-      throw Exception('🔒 غير مصرح لك بالوصول (401): يرجى تسجيل الدخول.');
-    } else if (response.statusCode == 403) {
-      throw Exception('🚫 لا تملك الصلاحية (403): لا يمكنك الوصول إلى هذه البيانات.');
-    } else if (response.statusCode == 404) {
-      throw Exception('🔍 لم يتم العثور على الفئات الفرعية (404): تحقق من ID الفئة.');
-    } else if (response.statusCode == 500) {
-      throw Exception('🔥 خطأ في الخادم (500): يرجى المحاولة لاحقًا.');
-    } else {
-      throw Exception('⚠️ خطأ غير معروف: ${response.statusCode}');
+
+      // If no cache, rethrow the error
+      rethrow;
     }
   }
 
+  Future<List<CategoryMenu>> getCategoryMenu({bool forceRefresh = false}) async {
+    try {
+      // Check if we have valid cache and forceRefresh is false
+      if (!forceRefresh && localDataSource.isCacheValid('cached_category_menu')) {
+        final cachedMenu = await localDataSource.getCategoryMenu();
+        if (cachedMenu.isNotEmpty) {
+          DebugLogger.log('Returning cached category menu', category: 'REPOSITORY');
+          return cachedMenu;
+        }
+      }
 
+      // Fetch fresh data from remote
+      DebugLogger.log('Fetching category menu from API', category: 'REPOSITORY');
+      final remoteMenu = await remoteDataSource.getCategoryMenu();
+
+      // Cache the new data
+      await localDataSource.cacheCategoryMenu(remoteMenu);
+
+      return remoteMenu;
+    } catch (e) {
+      DebugLogger.log('Error fetching category menu from API: $e', category: 'REPOSITORY');
+
+      // If remote fetch fails, try to return cached data
+      final cachedMenu = await localDataSource.getCategoryMenu();
+      if (cachedMenu.isNotEmpty) {
+        DebugLogger.log('Returning cached category menu after API error', category: 'REPOSITORY');
+        return cachedMenu;
+      }
+
+      // If no cache, rethrow the error
+      rethrow;
+    }
+  }
+
+  Future<List<SubCategory>> getSubCategories(int categoryId, {bool forceRefresh = false}) async {
+    try {
+      // Check if we have valid cache and forceRefresh is false
+      if (!forceRefresh && localDataSource.isCacheValid('cached_subcategories_$categoryId')) {
+        final cachedSubcategories = await localDataSource.getSubCategories(categoryId);
+        if (cachedSubcategories.isNotEmpty) {
+          DebugLogger.log('Returning cached subcategories for category $categoryId',
+              category: 'REPOSITORY');
+          return cachedSubcategories;
+        }
+      }
+
+      // Fetch fresh data from remote
+      DebugLogger.log('Fetching subcategories for category $categoryId from API',
+          category: 'REPOSITORY');
+      final remoteSubcategories = await remoteDataSource.getSubCategories(categoryId);
+
+      // Cache the new data
+      await localDataSource.cacheSubCategories(categoryId, remoteSubcategories);
+
+      return remoteSubcategories;
+    } catch (e) {
+      DebugLogger.log('Error fetching subcategories from API: $e', category: 'REPOSITORY');
+
+      // If remote fetch fails, try to return cached data
+      final cachedSubcategories = await localDataSource.getSubCategories(categoryId);
+      if (cachedSubcategories.isNotEmpty) {
+        DebugLogger.log('Returning cached subcategories after API error',
+            category: 'REPOSITORY');
+        return cachedSubcategories;
+      }
+
+      // If no cache, rethrow the error
+      rethrow;
+    }
+  }
+
+  Future<List<SubCategoryMenu>> getSubCategoriesMenu(int categoryId, {bool forceRefresh = false}) async {
+    try {
+      // Check if we have valid cache and forceRefresh is false
+      if (!forceRefresh && localDataSource.isCacheValid('cached_subcategory_menu_$categoryId')) {
+        final cachedMenu = await localDataSource.getSubCategoriesMenu(categoryId);
+        if (cachedMenu.isNotEmpty) {
+          DebugLogger.log('Returning cached subcategory menu for category $categoryId',
+              category: 'REPOSITORY');
+          return cachedMenu;
+        }
+      }
+
+      // Fetch fresh data from remote
+      DebugLogger.log('Fetching subcategory menu for category $categoryId from API',
+          category: 'REPOSITORY');
+      final remoteMenu = await remoteDataSource.getSubCategoriesMenu(categoryId);
+
+      // Cache the new data
+      await localDataSource.cacheSubCategoriesMenu(categoryId, remoteMenu);
+
+      return remoteMenu;
+    } catch (e) {
+      DebugLogger.log('Error fetching subcategory menu from API: $e', category: 'REPOSITORY');
+
+      // If remote fetch fails, try to return cached data
+      final cachedMenu = await localDataSource.getSubCategoriesMenu(categoryId);
+      if (cachedMenu.isNotEmpty) {
+        DebugLogger.log('Returning cached subcategory menu after API error',
+            category: 'REPOSITORY');
+        return cachedMenu;
+      }
+
+      // If no cache, rethrow the error
+      rethrow;
+    }
+  }
 }

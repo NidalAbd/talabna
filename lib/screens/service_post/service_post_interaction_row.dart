@@ -13,6 +13,8 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/screens/widgets/comment_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 
+import '../../utils/debug_logger.dart';
+
 class ServicePostInteractionRow extends StatefulWidget {
   const ServicePostInteractionRow({
     super.key,
@@ -70,6 +72,20 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
       return number.toString();
     }
   }
+
+  void _shareServicePost() {
+    final postId = widget.servicePost.id.toString();
+    final postTitle = widget.servicePost.title ?? 'منشور';
+    final url = 'https://talbna.cloud/api/deep-link/service-post/$postId';
+
+    DebugLogger.log('Sharing service post: ID=$postId, Title=$postTitle, URL=$url', category: 'SHARE');
+
+    Share.share(
+      'شاهد هذا المنشور: $postTitle\n$url',
+      subject: postTitle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ServicePostBloc, ServicePostState>(
@@ -163,14 +179,8 @@ class _ServicePostInteractionRowState extends State<ServicePostInteractionRow> {
                     ],
                   ),
                   IconButton(
-                    icon: Icon(
-                      Icons.share,
-
-                    ),
-                    onPressed: () async {
-                      await Share.share(
-                          '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePostId!}');
-                    },
+                    icon: const Icon(Icons.share),
+                    onPressed: _shareServicePost,
                   ),
                 ],
               ),

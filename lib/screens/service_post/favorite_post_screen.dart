@@ -45,7 +45,7 @@ class _FavoritePostScreenState extends State<FavoritePostScreen> {
 
     // Initialize bloc and fetch initial data
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(widget.userID, _currentPage));
+    _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(userId: widget.userID, page: _currentPage));
   }
 
   @override
@@ -59,7 +59,7 @@ class _FavoritePostScreenState extends State<FavoritePostScreen> {
         _scrollController.hasClients &&
         _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
       _currentPage++;
-      _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(widget.userID, _currentPage));
+      _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(userId: widget.userID, page: _currentPage));
     }
   }
 
@@ -69,7 +69,7 @@ class _FavoritePostScreenState extends State<FavoritePostScreen> {
       _hasReachedMax = false;
       _favoriteServicePosts.clear();
     });
-    _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(widget.userID, _currentPage));
+    _servicePostBloc.add(GetServicePostsByUserFavouriteEvent(userId: widget.userID, page: _currentPage));
   }
 
   void _handlePostDeleted(int postId) {

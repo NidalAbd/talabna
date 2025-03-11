@@ -7,6 +7,8 @@ import 'package:talbna/data/models/user.dart';
 import 'package:talbna/provider/language.dart';
 import 'package:talbna/utils/constants.dart';
 
+import '../../utils/photo_image_helper.dart';
+
 class UserCard extends StatefulWidget {
   final User follower;
   final int userId;
@@ -59,7 +61,7 @@ class _UserCardState extends State<UserCard> with SingleTickerProviderStateMixin
     if (widget.follower.photos != null &&
         widget.follower.photos!.isNotEmpty &&
         widget.follower.photos!.first.src != null) {
-      return '${Constants.apiBaseUrl}/storage/${widget.follower.photos!.first.src}';
+      return '${Constants.apiBaseUrl}/${widget.follower.photos!.first.src}';
     }
     return '';
   }
@@ -159,7 +161,7 @@ class _UserCardState extends State<UserCard> with SingleTickerProviderStateMixin
                             radius: 32,
                             backgroundColor: Colors.grey[300],
                             backgroundImage: photoUrl.isNotEmpty
-                                ? NetworkImage(photoUrl)
+                                ? NetworkImage(ProfileImageHelper.getProfileImageUrl(widget.follower.photos!.first),)
                                 : null,
                             child: photoUrl.isEmpty
                                 ? Icon(Icons.person, size: 32, color: Colors.grey[700])

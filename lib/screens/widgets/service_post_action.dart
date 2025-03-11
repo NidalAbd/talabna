@@ -11,6 +11,8 @@ import 'package:talbna/screens/service_post/change_badge.dart';
 import 'package:talbna/screens/service_post/change_category_subcategory.dart';
 import 'package:talbna/screens/service_post/update_service_post_form.dart';
 
+import '../../data/models/user.dart';
+
 class ServicePostAction extends StatefulWidget {
   const ServicePostAction({
     super.key,
@@ -18,9 +20,10 @@ class ServicePostAction extends StatefulWidget {
     this.userProfileId,
     this.servicePostId,
     required this.onPostDeleted,
-    required this.servicePost,
+    required this.servicePost, required this.user,
   });
   final ServicePost servicePost;
+  final User user;
   final int? servicePostUserId;
   final int? servicePostId;
   final int? userProfileId;
@@ -114,7 +117,7 @@ class _ServicePostActionState extends State<ServicePostAction>
                                 MaterialPageRoute(
                                   builder: (context) => UpdatePostScreen(
                                     userId: currentUserId!,
-                                    servicePostId: widget.servicePostId!, servicePost: widget.servicePost,
+                                    servicePostId: widget.servicePostId!, servicePost: widget.servicePost, user: widget.user,
                                   ),
                                 ),
                               );

@@ -1,8 +1,10 @@
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/repositories/service_post_repository.dart';
 
+import '../../core/service_locator.dart';
+
 class ServicePostService {
-  final ServicePostRepository _repository = ServicePostRepository();
+  final ServicePostRepository _repository = serviceLocator<ServicePostRepository>();
 
   Future<List<ServicePost>> getAllServicePosts() async {
     return await _repository.getAllServicePosts();
@@ -25,8 +27,5 @@ class ServicePostService {
       int category, int subCategory , int page) async {
     return await _repository.getServicePostsByCategorySubCategory( page: page, categories: category, subCategories: subCategory);
   }
-
-
-
 
 }

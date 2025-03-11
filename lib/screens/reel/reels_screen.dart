@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/blocs/comments/comment_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
@@ -19,70 +20,98 @@ import 'package:talbna/screens/widgets/contact_sheet.dart';
 import 'package:talbna/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
 import '../../data/models/photos.dart';
 import '../../utils/photo_image_helper.dart';
+import '../../utils/premium_badge.dart';
+import '../../utils/share_utils.dart';
 import 'like_button.dart';
 
 class ReelsHomeScreen extends StatefulWidget {
-  const ReelsHomeScreen({super.key, required this.userId, this.servicePost, required this.user});
+  const ReelsHomeScreen({
+    super.key,
+    required this.userId,
+    this.servicePost,
+    required this.user
+  });
   final int userId;
   final User user;
   final ServicePost? servicePost;
-
   @override
   State<ReelsHomeScreen> createState() => _ReelsHomeScreenState();
 }
 
-class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
+// Changed from SingleTickerProviderStateMixin to TickerProviderStateMixin
+class _ReelsHomeScreenState extends State<ReelsHomeScreen> with TickerProviderStateMixin {
+  // BLoC instances
   late UserProfileBloc _userProfileBloc;
   late ServicePostBloc _servicePostBloc;
   late CommentBloc _commentBloc;
 
+  // Animation controllers
+  late AnimationController _navigationAnimationController;
+
+  // Page control variables
   int _currentPage = 1;
   List<ServicePost> _servicePosts = [];
-  final Map<int, VideoPlayerController> _videoControllers = {};
-  final Map<int, int> _servicePostMediaIndices = {};
-  late PageController _scrollCategoryPostController = PageController();
+  late PageController _pageController;
   bool _hasReachedMax = false;
+  int _currentPostIndex = 0;
+
+  // Video control
+  final Map<int, VideoPlayerController> _videoControllers = {};
+  final Map<int, int> _mediaIndices = {};
   final ValueNotifier<Duration> _videoProgress = ValueNotifier(Duration.zero);
   bool _isUserChangingSlider = false;
-  final double iconSize = 40;
-  late final bool _autoPlay = true;
   final Map<int, bool> _videoLoadings = {};
   final Map<int, List<VoidCallback>> _videoListeners = {};
-  int _currentPostIndex = 0;
-  late bool isFavorite;
+
+  // UI settings
+  final double _iconSize = 32;
+  final bool _autoPlay = true;
+  final ScrollPhysics _pageScrollPhysics = const BouncingScrollPhysics();
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize Blocs
     _userProfileBloc = context.read<UserProfileBloc>()
       ..add(UserProfileRequested(id: widget.userId));
     _commentBloc = context.read<CommentBloc>();
     _servicePostBloc = context.read<ServicePostBloc>()
-      ..add(GetServicePostsRealsEvent(_currentPage));
-    _scrollCategoryPostController = PageController()
-      ..addListener(_onScrollReelPost);
+      ..add(GetServicePostsRealsEvent(page: _currentPage));
 
+    // Initialize controllers
+    _pageController = PageController()..addListener(_onScrollReelPost);
+    _navigationAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+
+    // Video progress update timer
+    _initVideoProgressTimer();
+  }
+
+  void _initVideoProgressTimer() {
     Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
-      final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
-      if (currentPage >= _servicePosts.length) {
-        // Avoid indexing out of bounds
+      if (!mounted) {
+        t.cancel();
         return;
       }
-      final post = _servicePosts[currentPage];
-      final mediaIndex = _servicePostMediaIndices[post.id!] ?? 0;
 
-      if (mediaIndex >= post.photos!.length) {
-        return;
-      }
+      final currentPage = _pageController.page?.round() ?? 0;
+      if (currentPage >= _servicePosts.length) return;
+
+      final post = _servicePosts[currentPage];
+      final mediaIndex = _mediaIndices[post.id!] ?? 0;
+
+      if (mediaIndex >= post.photos!.length) return;
 
       final media = post.photos![mediaIndex];
 
       if (!_isUserChangingSlider &&
           media.isVideo == true &&
-          _videoControllers[media.id!]!.value.isInitialized) {
+          _videoControllers[media.id!]?.value.isInitialized == true) {
         _videoProgress.value = _videoControllers[media.id!]!.value.position;
       }
     });
@@ -91,50 +120,51 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   void _loadNextPage() {
     if (!_hasReachedMax) {
       _currentPage += 1;
-      _servicePostBloc.add(GetServicePostsRealsEvent(_currentPage));
+      _servicePostBloc.add(GetServicePostsRealsEvent(page: _currentPage));
     }
   }
 
   void _onScrollReelPost() {
-    // Safely get the current page, defaulting to 0 if null
-    final currentPage = _scrollCategoryPostController.page?.round() ?? 0;
+    final currentPage = _pageController.page?.round() ?? 0;
 
-    // Only handle page change if there are service posts
     if (_servicePosts.isNotEmpty) {
       _handlePageChange(currentPage);
     }
 
-    // Check for loading more posts
+    // Load more if reaching the end
     if (!_hasReachedMax &&
-        _scrollCategoryPostController.hasClients &&
-        _scrollCategoryPostController.offset >=
-            _scrollCategoryPostController.position.maxScrollExtent &&
-        !_scrollCategoryPostController.position.outOfRange) {
+        _pageController.hasClients &&
+        _pageController.offset >= _pageController.position.maxScrollExtent - 300) {
       _loadNextPage();
     }
   }
 
-  Future<void> _handleRefreshReelPost() async {
+  Future<void> _handleRefresh() async {
     _currentPage = 1;
     _hasReachedMax = false;
+    _disposeAllVideoControllers();
     _servicePosts.clear();
-    _servicePostBloc.add(GetServicePostsRealsEvent(_currentPage));
+    _servicePostBloc.add(GetServicePostsRealsEvent(page: _currentPage));
+
+    // Return to the first page
+    if (_pageController.hasClients) {
+      _pageController.jumpTo(0);
+    }
   }
 
-  void _handleReelPostLoadSuccess(
-      List<ServicePost> servicePosts, bool hasReachedMax) {
+  void _handleReelPostLoadSuccess(List<ServicePost> servicePosts, bool hasReachedMax) {
     setState(() {
       _hasReachedMax = hasReachedMax;
-      final previousMediaIndices = Map.from(_servicePostMediaIndices);
+      final previousMediaIndices = Map.from(_mediaIndices);
       _servicePosts = [..._servicePosts, ...servicePosts];
+
       for (var post in servicePosts) {
         if (!previousMediaIndices.containsKey(post.id)) {
-          _servicePostMediaIndices[post.id!] = 0;
-        } else {
-          _servicePostMediaIndices[post.id!] =
-              previousMediaIndices[post.id]! + 1;
+          _mediaIndices[post.id!] = 0;
         }
       }
+
+      // Clean up unused controllers
       previousMediaIndices.keys
           .where((id) => !_servicePosts.any((post) => post.id == id))
           .toList()
@@ -142,389 +172,252 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     });
   }
 
-  Future<bool> _onWillPopReelPost() async {
-    if (_scrollCategoryPostController.offset > 0) {
-      _scrollCategoryPostController.animateTo(
-        0.0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInToLinear,
-      );
-      await Future.delayed(const Duration(milliseconds: 200));
-      _handleRefreshReelPost();
-      return false;
-    } else {
-      SystemNavigator.pop(); // Close the app
-      return true;
-    }
-  }
-
-  void _handleMediaScroll(ServicePost post, int mediaIndex) {
-    final media = post.photos![mediaIndex];
-    if (media.isVideo == true &&
-        _videoControllers[media.id!]!.value.isInitialized) {
-      _videoControllers[media.id!]?.pause();
-      _videoControllers[media.id!]?.seekTo(Duration.zero);
-    }
+  Future<bool> _onWillPop() async {
+    Navigator.of(context).pop(true);
+    return false;
   }
 
   @override
   void dispose() {
+    _navigationAnimationController.dispose();
+    _pageController.dispose();
+    _disposeAllVideoControllers();
     super.dispose();
-    _scrollCategoryPostController.dispose();
-    _servicePosts.clear();
+  }
+
+  void _disposeAllVideoControllers() {
     for (var controller in _videoControllers.values) {
       controller.setLooping(false);
       controller.pause();
       controller.dispose();
     }
     _videoControllers.clear();
+    _videoListeners.clear();
+    _videoLoadings.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return WillPopScope(
-      onWillPop: _onWillPopReelPost,
+      onWillPop: _onWillPop,
       child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: _buildAppBar(isDarkMode),
         body: BlocListener<ServicePostBloc, ServicePostState>(
-          listenWhen: (previous, current) =>
-          true, // Listen to all state changes
+          listenWhen: (previous, current) => true,
           bloc: _servicePostBloc,
           listener: (context, state) {
             if (state is ServicePostLoadSuccess) {
-              _handleReelPostLoadSuccess(
-                  state.servicePosts, state.hasReachedMax);
+              _handleReelPostLoadSuccess(state.servicePosts, state.hasReachedMax);
             } else if (state is ServicePostLoadFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('An error occurred: ${state.errorMessage}')));
-            } else if (state is ServicePostFavoriteToggled) {
-              setState(() {
-                isFavorite = state.isFavorite;
-              });
+              _showErrorSnackBar(state.errorMessage);
             }
           },
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels ==
-                  scrollInfo.metrics.maxScrollExtent) {
-                _onScrollReelPost();
-              }
-              return true;
-            },
-            child: PageView.builder(
-              controller: _scrollCategoryPostController,
-              itemCount: _servicePosts.length,
-              scrollDirection: Axis.vertical,
-              itemBuilder: (context, index) {
-                ServicePost post = _servicePosts[index];
-                if (post.photos == null || post.photos!.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                int mediaIndex = _servicePostMediaIndices[post.id!] ?? 0;
-                mediaIndex = min(mediaIndex, post.photos!.length - 1);
-                Photo media = post.photos![mediaIndex];
-                bool isFavorite = post.isFavorited!;
-                return Stack(
-                  children: <Widget>[
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        if (media.isVideo == true) {
-                          _toggleVideoPlayback(media);
-                        }
-                      },
-                      onHorizontalDragEnd: (details) {
-                        int currentPostId = _servicePosts[index].id!;
-                        if (details.primaryVelocity! > 0) {
-                          _showPreviousMedia(currentPostId);
-                        } else if (details.primaryVelocity! < 0) {
-                          _showNextMedia(currentPostId);
-                        }
-                      },
-                      onVerticalDragEnd: (details) {
-                        if (details.primaryVelocity! > 0) {
-                          if (_scrollCategoryPostController.page! > 0) {
-                            _scrollCategoryPostController.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        } else if (details.primaryVelocity! < 0) {
-                          if (_scrollCategoryPostController.page! <
-                              _servicePosts.length - 1) {
-                            _scrollCategoryPostController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        }
-                      },
-                      child: media.isVideo == true
-                          ? _buildVideoDisplay(media)
-                          : _buildImageDisplay(media),
-                    ),
-                    Positioned(
-                      bottom: 0.0,
-                      right: 0.0,
-                      left: 0,
-                      child: media.isVideo!
-                          ? ValueListenableBuilder(
-                        valueListenable: _videoProgress,
-                        builder: (context, value, child) {
-                          double maxSeconds =
-                          _videoControllers[media.id!]!
-                              .value
-                              .isInitialized
-                              ? _videoControllers[media.id!]!
-                              .value
-                              .duration
-                              .inSeconds
-                              .toDouble()
-                              : 0.0;
-                          double currentSeconds = min(
-                              _videoProgress.value.inSeconds.toDouble(),
-                              maxSeconds);
-                          return Slider(
-                            value: currentSeconds,
-                            min: 0.0,
-                            max: maxSeconds,
-                            onChanged: (double newValue) {
-                              setState(() {
-                                _isUserChangingSlider = true;
-                                _videoProgress.value =
-                                    Duration(seconds: newValue.toInt());
-                              });
-                            },
-                            onChangeEnd: (double newValue) {
-                              setState(() {
-                                _isUserChangingSlider = false;
-                                _videoControllers[media.id!]
-                                    ?.seekTo(_videoProgress.value);
-                              });
-                            },
-                          );
-                        },
-                      )
-                          : Container(),
-                    ),
-                    Positioned(
-                      top: 20.0,
-                      right: 16.0,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 25, 10, 0),
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            '   ${mediaIndex + 1} : ${post.photos?.length ?? 0}', style: const TextStyle(
-                            shadows: [
-                              Shadow(
-                                offset: Offset(1, 1),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 20,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            IconButton(
-                              icon:  const Icon(
-                                Icons.arrow_back,
-                                size: 30,
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(1, 1),
-                                    blurRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: 10,
-                      bottom: 60,
-                      child: Column(
-                        children: [
-                          Column(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor:
-                                const Color.fromARGB(238, 249, 230, 248),
-                                radius: 25,
-                                child: CircleAvatar(
-                                  radius: 23,
-                                  backgroundImage: Image.network(ProfileImageHelper.getProfileImageUrl(post.userPhoto),).image,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 0),
-                            child: Column(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    LikeButton(
-                                      isFavorite: post.isFavorited!,
-                                      favoritesCount: post.favoritesCount!,
-                                      onPressed: (newState) {
-                                        // Trigger the BLoC event to sync with the server
-                                        _servicePostBloc.add(
-                                          ToggleFavoriteServicePostEvent(servicePostId: post.id!),
-                                        );
-                                      },
-                                      onFavoritesCountChanged: (newCount) {
-                                        // Update the post's favorites count in the local state
-                                        setState(() {
-                                          post.favoritesCount = newCount;
-                                        });
-                                      },
-                                    ),
-                                    // IconButton(
-                                    //   icon: Icon(
-                                    //     Icons.favorite_rounded,
-                                    //     size: iconSize,
-                                    //     color: post.isFavorited == true ? Colors.red : Colors.white,
-                                    //     shadows: [
-                                    //       Shadow(
-                                    //         color: Colors.black.withOpacity(0.5), // Shadow color
-                                    //         offset: const Offset(0, 0), // Shadow offset (vertical, horizontal)
-                                    //         blurRadius: 2, // Blur radius of the shadow
-                                    //       ),
-                                    //     ],
-                                    //   ),
-                                    //   onPressed: () {
-                                    //     setState(() {
-                                    //       // Toggle the favorite status locally
-                                    //       post.isFavorited = !(post.isFavorited ?? false);
-                                    //
-                                    //       // Adjust the favorites count accordingly
-                                    //       if (post.isFavorited!) {
-                                    //         post.favoritesCount = (post.favoritesCount ?? 0) + 1;
-                                    //       } else {
-                                    //         post.favoritesCount = (post.favoritesCount ?? 1) - 1;
-                                    //       }
-                                    //     });
-                                    //
-                                    //     // Trigger the BLoC event to sync with the server
-                                    //     _servicePostBloc.add(
-                                    //       ToggleFavoriteServicePostEvent(servicePostId: post.id!),
-                                    //     );
-                                    //   },
-                                    // ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: Text(
-                                        post.favoritesCount.toString(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.black.withOpacity(
-                                                  1), // Shadow color
-                                              offset: const Offset(0,
-                                                  0), // Shadow offset (vertical, horizontal)
-                                              blurRadius:
-                                              4, // Blur radius of the shadow
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    CommentModalBottomSheet(
-                                      iconSize: iconSize,
-                                      userProfileBloc: _userProfileBloc,
-                                      commentBloc: _commentBloc,
-                                      servicePost: post, user: widget.user,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: Text(
-                                        post.commentsCount.toString(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.black.withOpacity(
-                                                  1), // Shadow color
-                                              offset: const Offset(1,
-                                                  0), // Shadow offset (vertical, horizontal)
-                                              blurRadius:
-                                              2, // Blur radius of the shadow
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                ContactModalBottomSheet(
-                                  iconSize: iconSize,
-                                  userProfileBloc: _userProfileBloc,
-                                  userId: widget.userId,
-                                  servicePost: post,
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.share,
-                                    size: iconSize,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black
-                                            .withOpacity(1), // Shadow color
-                                        offset: const Offset(0, 0),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                                  onPressed: () async {
-                                    await Share.share(
-                                        '${Constants.apiBaseUrl}/api/service_posts/${widget.servicePost?.id!}');
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
+          child: RefreshIndicator(
+            onRefresh: _handleRefresh,
+            color: AppTheme.lightPrimaryColor,
+            child: _buildReelsPageView(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(bool isDarkMode) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      leading: GestureDetector(
+        onTap: () => Navigator.of(context).pop(true),
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
+        ),
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: Colors.white,
+            ),
+            onPressed: _handleRefresh,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReelsPageView() {
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: _servicePosts.length,
+      scrollDirection: Axis.vertical,
+      physics: _pageScrollPhysics,
+      itemBuilder: (context, index) {
+        ServicePost post = _servicePosts[index];
+        if (post.photos == null || post.photos!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        int mediaIndex = _mediaIndices[post.id!] ?? 0;
+        mediaIndex = min(mediaIndex, post.photos!.length - 1);
+        Photo media = post.photos![mediaIndex];
+
+        return _buildReelContent(post, media, mediaIndex);
+      },
+    );
+  }
+
+  Widget _buildReelContent(ServicePost post, Photo media, int mediaIndex) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Main Media Content
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (media.isVideo == true) {
+              _toggleVideoPlayback(media);
+            }
+          },
+          onHorizontalDragEnd: (details) {
+            int currentPostId = post.id!;
+            if (details.primaryVelocity! > 0) {
+              _showPreviousMedia(currentPostId);
+            } else if (details.primaryVelocity! < 0) {
+              _showNextMedia(currentPostId);
+            }
+          },
+          child: Container(
+            color: Colors.black,
+            child: media.isVideo == true
+                ? _buildVideoDisplay(media)
+                : _buildImageDisplay(media),
+          ),
+        ),
+
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.6),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Video Progress Bar (conditionally shown for videos)
+        if (media.isVideo!)
+          _buildVideoProgressBar(media),
+
+        // Media Counter for multiple media
+        if (post.hasMultipleMedia)
+          _buildMediaCounter(post, mediaIndex),
+
+        // Side Action Buttons
+        _buildSideActionButtons(post, media),
+
+        // User Info and Post Description
+        _buildUserInfoAndDescription(post),
+      ],
+    );
+  }
+
+  Widget _buildVideoProgressBar(Photo media) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: ValueListenableBuilder(
+        valueListenable: _videoProgress,
+        builder: (context, value, child) {
+          double maxSeconds =
+          _videoControllers[media.id!]?.value.isInitialized == true
+              ? _videoControllers[media.id!]!.value.duration.inSeconds.toDouble()
+              : 0.0;
+          double currentSeconds = min(
+              _videoProgress.value.inSeconds.toDouble(),
+              maxSeconds);
+
+          return SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 3,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+              activeTrackColor: AppTheme.lightPrimaryColor,
+              inactiveTrackColor: Colors.white.withOpacity(0.3),
+              thumbColor: Colors.white,
+            ),
+            child: Slider(
+              value: currentSeconds,
+              min: 0.0,
+              max: maxSeconds,
+              onChanged: (double newValue) {
+                setState(() {
+                  _isUserChangingSlider = true;
+                  _videoProgress.value = Duration(seconds: newValue.toInt());
+                });
               },
+              onChangeEnd: (double newValue) {
+                setState(() {
+                  _isUserChangingSlider = false;
+                  _videoControllers[media.id!]?.seekTo(_videoProgress.value);
+                });
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMediaCounter(ServicePost post, int mediaIndex) {
+    return Positioned(
+      top: 100,
+      left: 0,
+      right: 0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          post.photos!.length,
+              (index) => Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: index == mediaIndex
+                  ? AppTheme.lightPrimaryColor
+                  : Colors.white.withOpacity(0.5),
             ),
           ),
         ),
@@ -532,11 +425,199 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     );
   }
 
+  Widget _buildSideActionButtons(ServicePost post, Photo media) {
+    return Positioned(
+      right: 16,
+      bottom: 100,
+      child: Column(
+        children: [
+          _buildUserAvatarWithFollowButton(post),
+          const SizedBox(height: 10),
+          _buildLikeButton(post),
+          _buildCommentButton(post),
+          const SizedBox(height: 10),
+          _buildContactButton(post),
+          const SizedBox(height: 10),
+          _buildShareButton(post),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserAvatarWithFollowButton(ServicePost post) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppTheme.lightPrimaryColor,
+              width: 2,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 25,
+            backgroundColor: Colors.grey[300],
+            backgroundImage: CachedNetworkImageProvider(
+              ProfileImageHelper.getProfileImageUrl(post.userPhoto),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLikeButton(ServicePost post) {
+    return Column(
+      children: [
+        LikeButton(
+          isFavorite: post.isFavorited ?? false,
+          favoritesCount: post.favoritesCount ?? 0,
+          onToggleFavorite: () async {
+            final completer = Completer<bool>();
+
+            // Create a stream subscription to listen for the result
+            StreamSubscription? subscription;
+            subscription = _servicePostBloc.stream.listen((state) {
+              if (state is ServicePostFavoriteToggled &&
+                  state.servicePostId == post.id) {
+                completer.complete(state.isFavorite);
+                subscription?.cancel();
+              } else if (state is ServicePostOperationFailure &&
+                  state.event == 'ToggleFavoriteServicePostEvent') {
+                completer.complete(false);
+                subscription?.cancel();
+              }
+            });
+
+            // Dispatch the toggle event
+            _servicePostBloc.add(ToggleFavoriteServicePostEvent(servicePostId: post.id!));
+
+            return completer.future;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommentButton(ServicePost post) {
+    return Column(
+      children: [
+        CommentModalBottomSheet(
+          iconSize: _iconSize,
+          userProfileBloc: _userProfileBloc,
+          commentBloc: _commentBloc,
+          servicePost: post,
+          user: widget.user,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactButton(ServicePost post) {
+    return Column(
+      children: [
+        ContactModalBottomSheet(
+          iconSize: _iconSize,
+          userProfileBloc: _userProfileBloc,
+          userId: widget.userId,
+          servicePost: post,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShareButton(ServicePost post) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.share_rounded,
+              size: 28,
+              color: Colors.white,
+            ),
+            onPressed: () async {
+              await ShareUtils.shareServicePost(post.id!, title: post.title, type: 'reels');
+            },
+          ),
+        ),
+
+      ],
+    );
+  }
+
+  Widget _buildUserInfoAndDescription(ServicePost post) {
+    return Positioned(
+      left: 16,
+      right: 80, // Make room for side action buttons
+      bottom: 40,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              PremiumBadge(badgeType: post.haveBadge ?? 'عادي'),
+              const SizedBox(width: 8),
+              Text(
+                '@${post.userName ?? 'username'}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      offset: Offset(0, 1),
+                      blurRadius: 3,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (post.description != null && post.description!.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 0.5,
+                ),
+              ),
+              child: Text(
+                post.description!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVideoDisplay(Photo media) {
     return VisibilityDetector(
-      key: Key('video_${media.id}'), // Ensure a unique key for each video
+      key: Key('video_${media.id}'),
       onVisibilityChanged: (VisibilityInfo info) {
-        // Retrieve the corresponding video controller
         final controller = _videoControllers[media.id];
         if (controller != null && controller.value.isInitialized) {
           if (info.visibleFraction > 0.5) {
@@ -547,49 +628,64 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
         }
       },
       child: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: VideoPlayer(_getVideoPlayerController(media)),
+        child: AspectRatio(
+          aspectRatio: _videoControllers[media.id!]?.value.isInitialized == true
+              ? _videoControllers[media.id!]!.value.aspectRatio
+              : 16 / 9,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              VideoPlayer(_getVideoPlayerController(media)),
+              if (_videoLoadings[media.id!] != true)
+                const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              if (_videoControllers[media.id!]?.value.isInitialized == true &&
+                  !_videoControllers[media.id!]!.value.isPlaying)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 50,
+                    ),
+                    onPressed: () => _toggleVideoPlayback(media),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildImageDisplay(Photo media) {
-    // Construct the full image URL, handling cases where the src might be a relative path
     String imageUrl = media.src!.startsWith('http')
         ? media.src!
-        : '${Constants.apiBaseUrl}/storage/${media.src!}';
+        : '${Constants.apiBaseUrl}/${media.src!}';
 
-    return Center(
-      child: Hero(
-        tag: 'photo_${widget.servicePost?.id}_${_servicePostMediaIndices[widget.servicePost?.id] ?? 0}',
-        child: FutureBuilder(
-          future: precacheImage(NetworkImage(imageUrl), context),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.lightPrimaryColor
-                      : AppTheme.darkPrimaryColor,
-                ),
-              );
-            }
-            return Image.network(
-              imageUrl,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 50,
-                );
-              },
-            );
-          },
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.contain,
+      placeholder: (context, url) => Center(
+        child: CircularProgressIndicator(
+          color: AppTheme.lightPrimaryColor,
+          strokeWidth: 3,
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        color: Colors.grey[900],
+        child: const Center(
+          child: Icon(
+            Icons.error_outline_rounded,
+            color: Colors.redAccent,
+            size: 50,
+          ),
         ),
       ),
     );
@@ -601,54 +697,120 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     } else {
       _videoControllers[media.id!]?.play();
     }
+    setState(() {}); // Update UI to show play/pause button
+  }
+
+  VideoPlayerController _getVideoPlayerController(Photo photo) {
+    if (photo.id == null || photo.src == null) {
+      throw ArgumentError('Photo must have a non-null ID and source.');
+    }
+
+    String videoUrl = photo.src!.startsWith('http')
+        ? photo.src!
+        : '${Constants.apiBaseUrl}/${photo.src!}';
+
+    VideoPlayerController? controller = _videoControllers[photo.id];
+
+    if (controller == null) {
+      _videoLoadings[photo.id!] = false; // Video is loading
+      controller = VideoPlayerController.network(videoUrl)
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _videoLoadings[photo.id!] = true; // Video has loaded
+            });
+            if (_autoPlay && _currentPostIndex < _servicePosts.length) {
+              final currentPost = _servicePosts[_currentPostIndex];
+              final currentMediaIndex = _mediaIndices[currentPost.id] ?? 0;
+              if (currentMediaIndex < currentPost.photos!.length) {
+                final currentMedia = currentPost.photos![currentMediaIndex];
+                if (currentMedia.id == photo.id) {
+                  controller?.play();
+                }
+              }
+            }
+            controller?.setLooping(true);
+          }
+        }).catchError((error) {
+          if (kDebugMode) {
+            print('Video initialization error: $error');
+          }
+          if (mounted) {
+            setState(() {
+              _videoLoadings[photo.id!] = false;
+            });
+          }
+        });
+
+      // Listeners
+      final List<VoidCallback> listeners = [
+        // Error listener
+            () {
+          if (controller!.value.hasError && kDebugMode) {
+            print('Video player error: ${controller.value.errorDescription}');
+          }
+        },
+
+        // Loop listener
+            () {
+          if (controller!.value.position >= controller.value.duration - const Duration(milliseconds: 300)) {
+            controller.seekTo(Duration.zero);
+            controller.play();
+          }
+        },
+
+        // Progress listener
+            () {
+          if (!_isUserChangingSlider && mounted) {
+            _videoProgress.value = controller!.value.position;
+          }
+        }
+      ];
+
+      // Add all listeners
+      for (var listener in listeners) {
+        controller.addListener(listener);
+      }
+
+      // Store listeners for cleanup
+      _videoListeners[photo.id!] = listeners;
+      _videoControllers[photo.id!] = controller;
+    }
+
+    return controller;
+  }
+
+  void _pauseAllVideos() {
+    for (var controller in _videoControllers.values) {
+      if (controller.value.isInitialized && controller.value.isPlaying) {
+        controller.pause();
+      }
+    }
   }
 
   void _handlePageChange(int pageIndex) {
-    // Early return if there are no service posts
-    if (_servicePosts.isEmpty) {
+    if (_servicePosts.isEmpty || pageIndex < 0 || pageIndex >= _servicePosts.length) {
       return;
     }
 
     _currentPostIndex = pageIndex;
+    final currentPost = _servicePosts[pageIndex];
 
-    // Ensure pageIndex is within bounds
-    if (pageIndex < 0 || pageIndex >= _servicePosts.length) {
-      return;
-    }
-
-    final currentPost = _servicePosts[_currentPostIndex];
-
-    // Check if the current post has photos
     if (currentPost.photos == null || currentPost.photos!.isEmpty) {
       return;
     }
 
-    final currentMediaIndex = _servicePostMediaIndices[currentPost.id] ?? 0;
-
-    // Ensure media index is within bounds
+    final currentMediaIndex = _mediaIndices[currentPost.id] ?? 0;
     if (currentMediaIndex < 0 || currentMediaIndex >= currentPost.photos!.length) {
       return;
     }
 
     final currentMedia = currentPost.photos![currentMediaIndex];
 
-    // Handle previous post's video
-    if (_currentPostIndex > 0) {
-      final previousPost = _servicePosts[_currentPostIndex - 1];
-      final previousMediaIndex = _servicePostMediaIndices[previousPost.id] ?? 0;
+    // Pause all videos first
+    _pauseAllVideos();
 
-      if (previousMediaIndex >= 0 && previousMediaIndex < previousPost.photos!.length) {
-        final previousMedia = previousPost.photos![previousMediaIndex];
-        if (previousMedia.isVideo == true &&
-            _videoControllers[previousMedia.id!] != null &&
-            _videoControllers[previousMedia.id!]!.value.isInitialized) {
-          _videoControllers[previousMedia.id!]?.pause();
-          _videoControllers[previousMedia.id!]?.seekTo(Duration.zero);
-        }
-      }
-    }
-
-    // Handle current post's video
+    // Play current video if applicable
     if (currentMedia.isVideo == true &&
         _videoControllers[currentMedia.id!] != null &&
         _videoControllers[currentMedia.id!]!.value.isInitialized) {
@@ -657,58 +819,78 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
   }
 
   void _showPreviousMedia(int postId) {
-    if (_servicePostMediaIndices[postId]! > 0) {
-      int currentMediaIndex = _servicePostMediaIndices[postId]!;
-      setState(() {
-        _servicePostMediaIndices[postId] = currentMediaIndex - 1;
-      });
-      Photo previousMedia = _servicePosts
-          .firstWhere((post) => post.id == postId)
-          .photos![currentMediaIndex];
-      if (previousMedia.isVideo == true &&
-          _videoControllers[previousMedia.id!]!.value.isInitialized) {
-        _videoControllers[previousMedia.id!]?.pause();
-        _videoControllers[previousMedia.id!]?.seekTo(Duration.zero);
+    // Check if we can go to previous media (index > 0)
+    if (_mediaIndices.containsKey(postId) && _mediaIndices[postId]! > 0) {
+      int currentMediaIndex = _mediaIndices[postId]!;
+      final post = _servicePosts.firstWhere((post) => post.id == postId);
+
+      // Handle current media
+      final currentMedia = post.photos![currentMediaIndex];
+      if (currentMedia.isVideo == true) {
+        _pauseAndResetVideo(currentMedia.id!);
       }
-      Photo newMedia = _servicePosts
-          .firstWhere((post) => post.id == postId)
-          .photos![currentMediaIndex - 1];
-      if (newMedia.isVideo == true &&
-          _videoControllers[newMedia.id!]!.value.isInitialized) {
-        _videoControllers[newMedia.id!]?.play();
-        _handleMediaScroll(
-            _servicePosts.firstWhere((post) => post.id == postId),
-            _servicePostMediaIndices[postId]!);
+
+      // Update index (DECREASE to go to previous media)
+      setState(() {
+        _mediaIndices[postId] = currentMediaIndex - 1;
+      });
+
+      // Handle previous media (use the new index)
+      final newIndex = _mediaIndices[postId]!;
+      if (newIndex >= 0 && newIndex < post.photos!.length) {
+        final newMedia = post.photos![newIndex];
+        if (newMedia.isVideo == true) {
+          _prepareAndPlayVideo(newMedia.id!);
+        }
       }
     }
   }
 
   void _showNextMedia(int postId) {
-    int currentMediaIndex = _servicePostMediaIndices[postId]!;
-    int totalMediaCount =
-        _servicePosts.firstWhere((post) => post.id == postId).photos!.length;
+    // Only proceed if the post exists in our data
+    if (!_mediaIndices.containsKey(postId)) return;
+
+    final post = _servicePosts.firstWhere((post) => post.id == postId);
+    int currentMediaIndex = _mediaIndices[postId]!;
+    int totalMediaCount = post.photos!.length;
+
+    // Check if we can go to next media
     if (currentMediaIndex < totalMediaCount - 1) {
+      // Handle current media
+      final currentMedia = post.photos![currentMediaIndex];
+      if (currentMedia.isVideo == true) {
+        _pauseAndResetVideo(currentMedia.id!);
+      }
+
+      // Update index
       setState(() {
-        _servicePostMediaIndices[postId] = currentMediaIndex + 1;
+        _mediaIndices[postId] = currentMediaIndex + 1;
       });
-      Photo previousMedia = _servicePosts
-          .firstWhere((post) => post.id == postId)
-          .photos![currentMediaIndex];
-      if (previousMedia.isVideo == true &&
-          _videoControllers[previousMedia.id!]!.value.isInitialized) {
-        _videoControllers[previousMedia.id!]?.pause();
-        _videoControllers[previousMedia.id!]?.seekTo(Duration.zero);
+
+      // Handle next media (use the new index)
+      final newIndex = _mediaIndices[postId]!;
+      if (newIndex >= 0 && newIndex < post.photos!.length) {
+        final newMedia = post.photos![newIndex];
+        if (newMedia.isVideo == true) {
+          _prepareAndPlayVideo(newMedia.id!);
+        }
       }
-      Photo newMedia = _servicePosts
-          .firstWhere((post) => post.id == postId)
-          .photos![currentMediaIndex + 1];
-      if (newMedia.isVideo == true &&
-          _videoControllers[newMedia.id!]!.value.isInitialized) {
-        _videoControllers[newMedia.id!]?.play();
-        _handleMediaScroll(
-            _servicePosts.firstWhere((post) => post.id == postId),
-            _servicePostMediaIndices[postId]!);
-      }
+    }
+  }
+
+  void _pauseAndResetVideo(int mediaId) {
+    final controller = _videoControllers[mediaId];
+    if (controller != null && controller.value.isInitialized) {
+      controller.pause();
+      controller.seekTo(Duration.zero);
+    }
+  }
+
+  void _prepareAndPlayVideo(int mediaId) {
+    final controller = _videoControllers[mediaId];
+    if (controller != null && controller.value.isInitialized) {
+      controller.seekTo(Duration.zero);
+      controller.play();
     }
   }
 
@@ -716,77 +898,52 @@ class _ReelsHomeScreenState extends State<ReelsHomeScreen> {
     VideoPlayerController? controller = _videoControllers[id];
     List<VoidCallback>? listeners = _videoListeners[id];
 
-    if (controller != null && listeners != null) {
-      for (var listener in listeners) {
-        controller.removeListener(listener); // remove the listener
+    if (controller != null) {
+      if (listeners != null) {
+        for (var listener in listeners) {
+          controller.removeListener(listener);
+        }
       }
       controller.setLooping(false);
       controller.pause();
       controller.dispose();
       _videoControllers.remove(id);
       _videoListeners.remove(id);
+      _videoLoadings.remove(id);
     }
   }
 
-  VideoPlayerController _getVideoPlayerController(Photo photo) {
-    if (photo.id == null || photo.src == null) {
-      throw ArgumentError('Photo must have a non-null ID and source.');
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: $message'),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        action: SnackBarAction(
+          label: 'Retry',
+          textColor: Colors.white,
+          onPressed: _handleRefresh,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to format count numbers (e.g., 1000 -> 1K)
+  String _formatCount(int count) {
+    if (count < 1000) {
+      return count.toString();
+    } else if (count < 1000000) {
+      return '${(count / 1000).toStringAsFixed(1)}K';
+    } else {
+      return '${(count / 1000000).toStringAsFixed(1)}M';
     }
+  }
+}
 
-    // Construct the full video URL, handling cases where the src might be a relative path
-    String videoUrl = photo.src!.startsWith('http')
-        ? photo.src!
-        : '${Constants.apiBaseUrl}/storage/${photo.src!}';
-
-    VideoPlayerController? controller = _videoControllers[photo.id];
-
-    if (controller == null) {
-      _videoLoadings[photo.id!] = false; // Indicate the video is loading
-      controller = VideoPlayerController.network(videoUrl)
-        ..initialize().then((_) {
-          setState(() {
-            _videoLoadings[photo.id!] = true; // Indicate the video has loaded
-          });
-          if (_autoPlay) {
-            controller?.play();
-          }
-          controller?.setLooping(true);
-        }).catchError((error) {
-          if (kDebugMode) {
-            print('Video initialization error: $error');
-          }
-          setState(() {
-            _videoLoadings[photo.id!] = false;
-          });
-        });
-
-      errorListener() {
-        if (controller!.value.hasError) {
-          if (kDebugMode) {
-            print(
-                'Video player had an error: ${controller.value.errorDescription}');
-          }
-        }
-      }
-
-      controller.addListener(errorListener);
-      completionListener() {
-        if (controller?.value.position == controller?.value.duration) {
-          controller?.seekTo(Duration.zero);
-        }
-      }
-
-      controller.addListener(completionListener);
-      positionListener() {
-        if (!_isUserChangingSlider) {
-          _videoProgress.value = controller!.value.position;
-        }
-      }
-
-      controller.addListener(positionListener);
-      // Remember these listeners.
-      _videoListeners[photo.id!] = [errorListener, completionListener, positionListener];
-      _videoControllers[photo.id!] = controller;
-    }
-    return controller;
-  }}
+// Extension for ServicePost to check if it has multiple media
+extension ServicePostExtension on ServicePost {
+  bool get hasMultipleMedia => photos != null && photos!.length > 1;
+}

@@ -207,7 +207,7 @@
 //                             crossAxisAlignment: CrossAxisAlignment.start,
 //                             children: [
 //                               UserAvatarProfile(
-//                                 imageUrl: '${Constants.apiBaseUrl}/storage/${comment.user.photos?.first.src}',
+//                                 imageUrl: '${Constants.apiBaseUrl}/${comment.user.photos?.first.src}',
 //                                 radius: 20,
 //                                 toUser: comment.user.id,
 //                                 canViewProfile: false,
@@ -256,7 +256,7 @@
 //                             if (state is UserProfileLoadSuccess) {
 //                               final user = state.user;
 //                               return UserAvatarProfile(
-//                                 imageUrl: '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+//                                 imageUrl: '${Constants.apiBaseUrl}/${user.photos?.first.src}',
 //                                 radius: 20,
 //                                 toUser: user.id,
 //                                 canViewProfile: false,

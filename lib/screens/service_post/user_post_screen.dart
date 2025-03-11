@@ -42,7 +42,7 @@ class UserPostScreenState extends State<UserPostScreen> {
         !_scrollController.position.outOfRange) {
       _currentPage++;
       _servicePostBloc
-          .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+          .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
     }
   }
 
@@ -51,7 +51,7 @@ class UserPostScreenState extends State<UserPostScreen> {
     _hasReachedMax = false;
     _servicePostsUser.clear();
     _servicePostBloc
-        .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+        .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
   }
   void _handleServicePostLoadSuccess(
       List<ServicePost> servicePosts, bool hasReachedMax) {

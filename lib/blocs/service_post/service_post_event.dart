@@ -1,119 +1,48 @@
 import 'package:equatable/equatable.dart';
+import 'package:http/http.dart';
 import 'package:talbna/data/models/service_post.dart';
-import 'package:http/http.dart' as http;
+import 'package:talbna/data/models/photos.dart';
 
 abstract class ServicePostEvent extends Equatable {
   const ServicePostEvent();
+
   @override
-  List<Object?> get props => []; // Change return type to List<Object?>
+  List<Object?> get props => [];
 }
 
-class GetAllServicePostsEvent extends ServicePostEvent {}
-
-class GetServicePostByIdEvent extends ServicePostEvent {
-  final int id;
-  const GetServicePostByIdEvent({required this.id});
-  @override
-  List<Object> get props => [id];
+class InitializeCachesEvent extends ServicePostEvent {
+  const InitializeCachesEvent();
 }
+
 class GetServicePostsByCategoryEvent extends ServicePostEvent {
   final int category;
   final int page;
-  const GetServicePostsByCategoryEvent(this.category, this.page);
-  @override
-  List<Object> get props => [category];
-}
-class GetServicePostsRealsEvent extends ServicePostEvent {
-  final int page;
-  const GetServicePostsRealsEvent( this.page);
-  @override
-  List<Object> get props => [page];
-}
-class GetServicePostsByCategorySubCategoryEvent extends ServicePostEvent {
-  final int category;
-  final int subCategory;
-  final int page;
-  const GetServicePostsByCategorySubCategoryEvent(this.category, this.subCategory, this.page);
-  @override
-  List<Object> get props => [category, subCategory];
-}
-class GetServicePostsByUserIdEvent extends ServicePostEvent {
-  final int userId;
-  final int page;
-  const GetServicePostsByUserIdEvent(this.userId, this.page);
-  @override
-  List<Object> get props => [userId];
-}
+  final bool forceRefresh;
 
-class GetServicePostsByUserFavouriteEvent extends ServicePostEvent {
-  final int userId;
-  final int page;
-  const GetServicePostsByUserFavouriteEvent(this.userId, this.page);
-  @override
-  List<Object> get props => [userId];
-}
-
-class CreateServicePostEvent extends ServicePostEvent {
-  final ServicePost servicePost;
-  final List<http.MultipartFile> imageFiles;
-  const CreateServicePostEvent(this.servicePost, this.imageFiles);
-  @override
-  List<Object> get props => [servicePost, imageFiles];
-}
-class UpdateServicePostEvent extends ServicePostEvent {
-  final ServicePost servicePost;
-  final List<http.MultipartFile> imageFiles;
-  const UpdateServicePostEvent(this.servicePost, this.imageFiles);
-  @override
-  List<Object> get props => [servicePost, imageFiles];
-}
-
-class UpdatePhotoServicePostEvent extends ServicePostEvent {
-  final int servicePost;
-  final List<http.MultipartFile> imageFiles;
-  const UpdatePhotoServicePostEvent(this.servicePost, this.imageFiles);
-  @override
-  List<Object> get props => [servicePost, imageFiles];
-}
-
-class DeleteServicePostEvent extends ServicePostEvent {
-  final int servicePostId;
-  const DeleteServicePostEvent({required this.servicePostId});
+  const GetServicePostsByCategoryEvent(
+      this.category,
+      this.page, {
+        this.forceRefresh = false,
+      });
 
   @override
-  List<Object> get props => [servicePostId];
+  List<Object> get props => [category, page, forceRefresh];
 }
-class ViewIncrementServicePostEvent extends ServicePostEvent {
-  final int servicePostId;
-  const ViewIncrementServicePostEvent({required this.servicePostId});
+
+class GetAllServicePostsEvent extends ServicePostEvent {
+  const GetAllServicePostsEvent();
+}
+
+class GetServicePostByIdEvent extends ServicePostEvent {
+  final int id;
+  final bool forceRefresh;
+
+  const GetServicePostByIdEvent(this.id, {this.forceRefresh = false});
 
   @override
-  List<Object> get props => [servicePostId];
-}
-class ToggleFavoriteServicePostEvent extends ServicePostEvent {
-  final int servicePostId;
-
-  const ToggleFavoriteServicePostEvent({required this.servicePostId});
-
-  @override
-  List<Object?> get props => [servicePostId];
-}
-class InitializeFavoriteServicePostEvent extends ServicePostEvent {
-  final int servicePostId;
-
-  const InitializeFavoriteServicePostEvent({required this.servicePostId});
-
-  @override
-  List<Object?> get props => [servicePostId];
+  List<Object> get props => [id, forceRefresh];
 }
 
-class DeleteServicePostImageEvent extends ServicePostEvent {
-  final int servicePostImageId;
-  const DeleteServicePostImageEvent({required this.servicePostImageId});
-
-  @override
-  List<Object> get props => [servicePostImageId];
-}
 class LoadOldOrNewFormEvent extends ServicePostEvent {
   final int? servicePostId;
 
@@ -122,20 +51,199 @@ class LoadOldOrNewFormEvent extends ServicePostEvent {
   @override
   List<Object?> get props => [servicePostId];
 }
-class ServicePostBadgeUpdateEvent extends ServicePostEvent {
-  final ServicePost servicePost;
-  final int servicePostID;
 
-  const ServicePostBadgeUpdateEvent(this.servicePost, this.servicePostID);
+class GetServicePostsByUserFavouriteEvent extends ServicePostEvent {
+  final int userId;
+  final int page;
+  final bool forceRefresh;
+
+  const GetServicePostsByUserFavouriteEvent({
+    required this.userId,
+    required this.page,
+    this.forceRefresh = false,
+  });
 
   @override
-  List<Object?> get props => [servicePost];
+  List<Object> get props => [userId, page, forceRefresh];
 }
-class ServicePostCategoryUpdateEvent extends ServicePostEvent {
-  final ServicePost servicePost;
-  final int servicePostID;
-  const ServicePostCategoryUpdateEvent(this.servicePost, this.servicePostID);
+
+class GetServicePostsRealsEvent extends ServicePostEvent {
+  final int page;
+  final bool forceRefresh;
+
+  const GetServicePostsRealsEvent({
+    required this.page,
+    this.forceRefresh = false,
+  });
 
   @override
-  List<Object?> get props => [servicePost , servicePostID];
+  List<Object> get props => [page, forceRefresh];
+}
+
+class GetServicePostsByCategorySubCategoryEvent extends ServicePostEvent {
+  final int category;
+  final int subCategory;
+  final int page;
+  final bool forceRefresh;
+
+  const GetServicePostsByCategorySubCategoryEvent({
+    required this.category,
+    required this.subCategory,
+    required this.page,
+    this.forceRefresh = false,
+  });
+
+  @override
+  List<Object> get props => [category, subCategory, page, forceRefresh];
+}
+
+class GetServicePostsByUserIdEvent extends ServicePostEvent {
+  final int userId;
+  final int page;
+  final bool forceRefresh;
+
+  const GetServicePostsByUserIdEvent({
+    required this.userId,
+    required this.page,
+    this.forceRefresh = false,
+  });
+
+  @override
+  List<Object> get props => [userId, page, forceRefresh];
+}
+
+class CreateServicePostEvent extends ServicePostEvent {
+  final ServicePost servicePost;
+  final List<MultipartFile> imageFiles;
+
+  const CreateServicePostEvent({
+    required this.servicePost,
+    required this.imageFiles,
+  });
+
+  @override
+  List<Object> get props => [servicePost, imageFiles];
+}
+
+class UpdateServicePostEvent extends ServicePostEvent {
+  final ServicePost servicePost;
+  final List<MultipartFile> imageFiles;
+
+  const UpdateServicePostEvent({
+    required this.servicePost,required this.imageFiles,
+  });
+
+  @override
+  List<Object> get props => [servicePost];
+}
+
+class UpdatePhotoServicePostEvent extends ServicePostEvent {
+  final int servicePost;
+  final List<MultipartFile> imageFiles;
+
+  const UpdatePhotoServicePostEvent({
+    required this.servicePost,
+    required this.imageFiles,
+  });
+
+  @override
+  List<Object> get props => [servicePost, imageFiles];
+}
+
+class ServicePostCategoryUpdateEvent extends ServicePostEvent {
+  final int servicePostID;
+  final ServicePost servicePost;
+
+  const ServicePostCategoryUpdateEvent({
+    required this.servicePostID,
+    required this.servicePost,
+  });
+
+  @override
+  List<Object> get props => [servicePostID, servicePost];
+}
+
+class ServicePostBadgeUpdateEvent extends ServicePostEvent {
+  final int servicePostID;
+  final ServicePost servicePost;
+
+  const ServicePostBadgeUpdateEvent({
+    required this.servicePostID,
+    required this.servicePost,
+  });
+
+  @override
+  List<Object> get props => [servicePostID, servicePost];
+}
+
+class DeleteServicePostEvent extends ServicePostEvent {
+  final int servicePostId;
+
+  const DeleteServicePostEvent({
+    required this.servicePostId,
+  });
+
+  @override
+  List<Object> get props => [servicePostId];
+}
+
+class ViewIncrementServicePostEvent extends ServicePostEvent {
+  final int servicePostId;
+
+  const ViewIncrementServicePostEvent({
+    required this.servicePostId,
+  });
+
+  @override
+  List<Object> get props => [servicePostId];
+}
+
+class ToggleFavoriteServicePostEvent extends ServicePostEvent {
+  final int servicePostId;
+
+  const ToggleFavoriteServicePostEvent({
+    required this.servicePostId,
+  });
+
+  @override
+  List<Object> get props => [servicePostId];
+}
+
+class InitializeFavoriteServicePostEvent extends ServicePostEvent {
+  final int servicePostId;
+
+  const InitializeFavoriteServicePostEvent({
+    required this.servicePostId,
+  });
+
+  @override
+  List<Object> get props => [servicePostId];
+}
+
+class DeleteServicePostImageEvent extends ServicePostEvent {
+  final int servicePostImageId;
+
+  const DeleteServicePostImageEvent({
+    required this.servicePostImageId,
+  });
+
+  @override
+  List<Object> get props => [servicePostImageId];
+}
+
+class ClearServicePostCacheEvent extends ServicePostEvent {
+  final int? categoryId;
+  final int? subcategoryId;
+  final int? userId;
+  final int? postId;
+
+  const ClearServicePostCacheEvent({
+    this.categoryId,
+    this.subcategoryId,
+    this.userId,
+    this.postId,
+  });
+
+  @override
+  List<Object?> get props => [categoryId, subcategoryId, userId, postId];
 }

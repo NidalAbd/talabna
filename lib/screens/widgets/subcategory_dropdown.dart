@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
+import '../../core/service_locator.dart';
 import '../../provider/language.dart';
 
 class SubCategoriesDropdown extends StatefulWidget {
@@ -83,8 +84,9 @@ class _SubCategoriesDropdownState extends State<SubCategoriesDropdown> {
         _error = null;
       });
 
-      CategoriesRepository repository = CategoriesRepository();
+      CategoriesRepository repository = serviceLocator<CategoriesRepository>();
       final fetchedSubCategories = await repository.getSubCategories(categoryId);
+
 
       if (mounted) {
         setState(() {

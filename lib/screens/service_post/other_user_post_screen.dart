@@ -32,7 +32,7 @@ class OtherUserPostScreenState extends State<OtherUserPostScreen> {
   void initState() {
     super.initState();
     _servicePostBloc = BlocProvider.of<ServicePostBloc>(context);
-    _servicePostBloc.add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+    _servicePostBloc.add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
     _scrollUserController.addListener(_onScrollUserPost);
   }
 
@@ -43,7 +43,7 @@ class OtherUserPostScreenState extends State<OtherUserPostScreen> {
         !_scrollUserController.position.outOfRange) {
       _currentPage++;
       _servicePostBloc
-          .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+          .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
     }
   }
 
@@ -52,7 +52,7 @@ class OtherUserPostScreenState extends State<OtherUserPostScreen> {
     _hasReachedMax = false;
     _servicePostsUser.clear();
     _servicePostBloc
-        .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+        .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
   }
   void _handleUserPostLoadSuccess(
       List<ServicePost> servicePosts, bool hasReachedMax) {

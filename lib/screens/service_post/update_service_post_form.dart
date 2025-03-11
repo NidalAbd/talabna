@@ -17,18 +17,20 @@ import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import '../../data/models/photos.dart';
+import '../../data/models/user.dart';
 import '../../provider/language.dart';
 
 class UpdatePostScreen extends StatefulWidget {
   final int userId;
   final int servicePostId;
   final ServicePost servicePost;
+  final User user;
 
   const UpdatePostScreen({
     super.key,
     required this.userId,
     required this.servicePostId,
-    required this.servicePost,
+    required this.servicePost, required this.user,
   });
 
   @override
@@ -85,7 +87,6 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     _priceController.addListener(_markFormDirty);
 
     // Initialize state variables
-    _selectedPriceCurrency = post.priceCurrency ?? 'دولار امريكي';
     _selectedCategory = post.category;
     _selectedSubCategory = post.subCategory;
 
@@ -280,52 +281,53 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
   Widget _buildCategorySection() {
     return SingleChildScrollView(
         child: Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CategoriesDropdown(
-              onCategorySelected: (newCategory) {
-                if (!mounted) return;
-                Future.microtask(() {
-                  setState(() {
-                    _selectedCategory = newCategory;
-                    // Only reset subcategory if category changed
-                    if (newCategory.id != widget.servicePost.category?.id) {
-                      _selectedSubCategory = null;
-                    }
-                    _markFormDirty();
-                  });
-                });
-              },
-              language: _language.toString(),
-              initialValue: widget.servicePost.category,
-            ),
-            const SizedBox(height: 16),
-            SubCategoriesDropdown(
-              selectedCategory:
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CategoriesDropdown(
+                  onCategorySelected: (newCategory) {
+                    if (!mounted) return;
+                    Future.microtask(() {
+                      setState(() {
+                        _selectedCategory = newCategory;
+                        // Only reset subcategory if category changed
+                        if (newCategory.id != widget.servicePost.category?.id) {
+                          _selectedSubCategory = null;
+                        }
+                        _markFormDirty();
+                      });
+                    });
+                  },
+                  language: _language.toString(),
+                  initialValue: widget.servicePost.category,
+                  // Set this to true to hide categories 6 and 7 in update screen
+                  hideServicePostCategories: true,
+                ),
+                const SizedBox(height: 16),
+                SubCategoriesDropdown(
+                  selectedCategory:
                   _selectedCategory ?? widget.servicePost.category,
-              onSubCategorySelected: (newSubCategory) {
-                if (!mounted) return;
-                Future.microtask(() {
-                  setState(() {
-                    _selectedSubCategory = newSubCategory;
-                    _markFormDirty();
-                  });
-                });
-              },
-              initialValue: widget.servicePost.subCategory,
-              selectedSubCategory:
+                  onSubCategorySelected: (newSubCategory) {
+                    if (!mounted) return;
+                    Future.microtask(() {
+                      setState(() {
+                        _selectedSubCategory = newSubCategory;
+                        _markFormDirty();
+                      });
+                    });
+                  },
+                  initialValue: widget.servicePost.subCategory,
+                  selectedSubCategory:
                   _selectedSubCategory ?? widget.servicePost.subCategory,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
-
   Widget _buildPriceSection() {
     return SingleChildScrollView(
       child: Card(
@@ -358,29 +360,40 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: _language.tCurrencyText(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+      Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.monetization_on, color: Colors.grey),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _language.tCurrencyText(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
                 ),
-                value: _selectedPriceCurrency,
-                onChanged: (newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _markFormDirty();
-                    });
-                  }
-                },
-                items: const ['دولار امريكي', 'دينار اردني', 'شيكل']
-                    .map((value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ))
-                    .toList(),
               ),
+              const SizedBox(height: 4),
+              Text(
+                widget.user.country!.currencyCode.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
               const SizedBox(height: 16),
+              // Type Dropdown
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: _language.tTypeText(),
@@ -397,12 +410,11 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                     });
                   }
                 },
-                items: const ['عرض', 'طلب']
-                    .map((value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ))
-                    .toList(),
+                items: EnumTranslations.getTypeOptions(_language.getLanguage())
+                    .map((option) => DropdownMenuItem<String>(
+                  value: option['value'],
+                  child: Text(option['display']!),
+                )).toList(),
               ),
             ],
           ),
@@ -425,7 +437,6 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         title: _titleController.text,
         description: _descriptionController.text,
         price: double.tryParse(_priceController.text) ?? 0,
-        priceCurrency: _selectedPriceCurrency,
         locationLatitudes: widget.servicePost.locationLatitudes,
         locationLongitudes: widget.servicePost.locationLongitudes,
         userId: widget.userId,
@@ -435,46 +446,61 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         photos: _pickedImages,
       );
 
-      // Convert photos to MultipartFile objects
-      final List<http.MultipartFile> imageFiles = [];
+      // Process images directly from _pickedImages like in create screen
+      final imageFiles = <http.MultipartFile>[];
+
+      // Process images if any are selected
       if (_pickedImages != null) {
-        for (var photo in _pickedImages!) {
+        for (final photo in _pickedImages!) {
           // Only process new photos (ones without an ID)
           if (photo.id == null && photo.src != null) {
             try {
               final file = File(photo.src!);
               if (await file.exists()) {
                 final bytes = await file.readAsBytes();
-                final mimeType = lookupMimeType(photo.src!) ??
-                    (photo.isVideo ?? false ? 'video/mp4' : 'image/jpeg');
+
+                // Handle video files explicitly
+                final bool isVideo = photo.isVideo ?? false;
+                final String mimeType;
+
+                // Set the correct mime type based on file type
+                if (isVideo) {
+                  mimeType = 'video/mp4';
+                  print('Processing video file: ${photo.src}, isVideo: ${photo.isVideo}');
+                } else {
+                  mimeType = lookupMimeType(photo.src!) ?? 'image/jpeg';
+                  print('Processing image file: ${photo.src}, type: $mimeType');
+                }
+
+                final filename = p.basename(photo.src!);
+                print('Creating MultipartFile for $filename with type $mimeType');
 
                 final multipartFile = http.MultipartFile.fromBytes(
                   'images[]',
                   bytes,
-                  filename: p.basename(photo.src!),
+                  filename: filename,
                   contentType: MediaType.parse(mimeType),
                 );
                 imageFiles.add(multipartFile);
+              } else {
+                print('File does not exist: ${photo.src}');
               }
             } catch (e) {
-              print('Error processing image: $e');
+              print('Error processing media file: $e');
             }
           }
         }
       }
 
+      print('Sending update with ${imageFiles.length} new media files');
+
       // Add the update events
       context.read<ServicePostBloc>().add(
-          UpdateServicePostEvent(updatedPost, imageFiles)
+          UpdateServicePostEvent(
+            servicePost: updatedPost,
+            imageFiles: imageFiles,
+          )
       );
-
-      // Show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_language.tPostUpdatedSuccessfully()))
-        );
-        Navigator.pop(context);
-      }
     } catch (e) {
       print('Submit error: $e');
       if (mounted) {
@@ -490,20 +516,44 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
     final imageFiles = <http.MultipartFile>[];
     final localImages = _imagePickerButtonKey.currentState?.getLocalImages();
 
+    print('Processing local images: ${localImages?.length ?? 0}');
+
     if (localImages == null || localImages.isEmpty) return imageFiles;
 
+    int processedCount = 0;
+    int skipCount = 0;
+
     for (final photo in localImages) {
-      if (photo.src == null) continue;
+      if (photo.src == null) {
+        print('Skipping image with null src');
+        skipCount++;
+        continue;
+      }
+
+      if (photo.id != null) {
+        print('Skipping image with ID: ${photo.id}');
+        skipCount++;
+        continue;
+      }
 
       // Skip if it's a server URL
-      if (photo.src!.startsWith('http')) continue;
+      if (photo.src!.startsWith('http')) {
+        print('Skipping server URL: ${photo.src}');
+        skipCount++;
+        continue;
+      }
 
       try {
         final file = File(photo.src!);
-        final bytes = await file.readAsBytes();
-        final mimeType = lookupMimeType(photo.src!) ?? 'image/jpeg';
+        if (await file.exists()) {
+          final bool isVideo = photo.isVideo ?? false;
+          print('Processing ${isVideo ? "video" : "image"}: ${file.path}');
 
-        if (_isValidImageType(mimeType)) {
+          final bytes = await file.readAsBytes();
+          final String mimeType = isVideo ? 'video/mp4' : (lookupMimeType(photo.src!) ?? 'image/jpeg');
+
+          print('File size: ${bytes.length} bytes, MIME type: $mimeType');
+
           final imageFile = http.MultipartFile.fromBytes(
             'images[]',
             bytes,
@@ -511,15 +561,20 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
             contentType: MediaType.parse(mimeType),
           );
           imageFiles.add(imageFile);
+          processedCount++;
+        } else {
+          print('File does not exist: ${photo.src}');
+          skipCount++;
         }
       } catch (e) {
-        print('Error processing image: $e');
+        print('Error processing media file: $e');
+        skipCount++;
       }
     }
 
+    print('Total files: ${localImages.length}, Processed: $processedCount, Skipped: $skipCount');
     return imageFiles;
   }
-
   bool _isValidImageType(String mimeType) {
     return ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4']
         .contains(mimeType);
@@ -545,11 +600,34 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         listener: (context, state) {
           print('Current state: $state'); // Debug state changes
 
-          if (state is ServicePostOperationSuccess) {
+          if (state is ServicePostLoading) {
+            // Keep the loading state active
+            print('ServicePost loading: ${state.event}');
+          }
+          else if (state is ServicePostOperationSuccess) {
             if (mounted) {
               setState(() => _isLoading = false);
-              showCustomSnackBar(context, 'success',
-                  type: SnackBarType.success);
+
+              // Check if there were videos in the update
+              final hasVideos = _pickedImages?.any((photo) =>
+              photo.id == null && (photo.isVideo ?? false)) ?? false;
+
+              if (hasVideos) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_language.tVideoUploadedText()),
+                    duration: const Duration(seconds: 5),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else {
+                showCustomSnackBar(
+                  context,
+                  _language.tPostUpdatedSuccessfully(),
+                  type: SnackBarType.success,
+                );
+              }
+
               Navigator.of(context).pop();
             }
           } else if (state is ServicePostImageDeletingSuccess) {
@@ -557,8 +635,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
               showCustomSnackBar(context, 'info', type: SnackBarType.info);
             }
           } else if (state is ServicePostOperationFailure) {
-            print(
-                'Operation failure: ${state.errorMessage}'); // Debug error message
+            print('Operation failure: ${state.errorMessage}'); // Debug error message
             if (mounted) {
               setState(() => _isLoading = false);
               ErrorCustomWidget.show(context, message: state.errorMessage);
@@ -596,13 +673,16 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
   }
 
   Widget _buildNavigationButtons() {
+    final bool isImageProcessing = _imagePickerButtonKey.currentState?.isProcessing ?? false;
+    final bool isButtonDisabled = _isLoading || isImageProcessing;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -612,74 +692,79 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (_currentStep > 0)
-            ElevatedButton.icon(
-              onPressed: _isLoading
+            OutlinedButton.icon(
+              onPressed: isButtonDisabled
                   ? null
                   : () {
-                      if (mounted) {
-                        setState(() {
-                          _currentStep--;
-                          _pageController.previousPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        });
-                      }
-                    },
+                if (mounted) {
+                  setState(() {
+                    _currentStep--;
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  });
+                }
+              },
               icon: const Icon(Icons.arrow_back),
               label: Text(_language.tPreviousText()),
-              style: ElevatedButton.styleFrom(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
           ElevatedButton.icon(
-            onPressed: _isLoading
+            onPressed: isButtonDisabled
                 ? null
                 : () {
-                    if (_currentStep < _steps.length - 1) {
-                      if (_validateCurrentStep()) {
-                        if (mounted) {
-                          setState(() {
-                            _currentStep++;
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          });
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(_language.tFillAllFieldsText())),
-                        );
-                      }
-                    } else {
-                      if (_validateForm()) {
-                        handleSubmit();
-                      }
-                    }
-                  },
-            icon: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
+              if (_currentStep < _steps.length - 1) {
+                if (_validateCurrentStep()) {
+                  if (mounted) {
+                    setState(() {
+                      _currentStep++;
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    });
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(_language.tFillAllFieldsText())),
+                  );
+                }
+              } else {
+                if (_validateForm()) {
+                  handleSubmit();
+                }
+              }
+            },
+            icon: isButtonDisabled
+                ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            )
                 : Icon(_currentStep < _steps.length - 1
-                    ? Icons.arrow_forward
-                    : Icons.check),
-            label: Text(_currentStep < _steps.length - 1
-                ? _language.tNextText()
-                : _language.tUpdateText()),
+                ? Icons.arrow_forward
+                : Icons.check),
+            label: Text(
+              _currentStep < _steps.length - 1
+                  ? _language.tNextText()
+                  : _language.tUpdateText(),
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
@@ -687,7 +772,6 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
       ),
     );
   }
-
   bool _validateForm() {
     if (_selectedCategory == null || _selectedSubCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(

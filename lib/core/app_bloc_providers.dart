@@ -13,7 +13,9 @@ import 'package:talbna/blocs/user_action/user_action_bloc.dart';
 import 'package:talbna/blocs/user_contact/user_contact_bloc.dart';
 import 'package:talbna/blocs/user_follow/user_follow_bloc.dart';
 import 'package:talbna/blocs/user_profile/user_profile_bloc.dart';
+import 'package:talbna/core/service_locator.dart';
 import 'package:talbna/theme_cubit.dart';
+import '../data/datasources/local/local_category_data_source.dart';
 import 'app_repositories.dart';
 
 class AppBlocProviders {
@@ -81,6 +83,7 @@ class AppBlocProviders {
       BlocProvider<SubcategoryBloc>(
         create: (context) => SubcategoryBloc(
           categoriesRepository: repositories.categoriesRepository,
+          localDataSource: serviceLocator<LocalCategoryDataSource>(), // Assuming you've registered LocalCategoryDataSource in your service locator
         ),
       ),
       BlocProvider<ReportBloc>(

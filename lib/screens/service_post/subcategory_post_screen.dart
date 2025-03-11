@@ -8,9 +8,13 @@ import 'package:talbna/blocs/user_action/user_action_event.dart';
 import 'package:talbna/blocs/user_action/user_action_state.dart';
 import 'package:talbna/data/models/service_post.dart';
 import 'package:talbna/data/models/user.dart';
+import 'package:talbna/provider/language.dart';
+import 'package:talbna/screens/profile/profile_check_builder.dart';
 import 'package:talbna/screens/service_post/service_post_card.dart';
 
 import '../../blocs/user_profile/user_profile_bloc.dart';
+import '../profile/profile_completion_service.dart';
+import '../service_post/create_service_post_form.dart';
 
 class SubCategoryPostScreen extends StatefulWidget {
   const SubCategoryPostScreen({
@@ -43,12 +47,34 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
   bool isFollowing = false;
   bool _isRefreshing = false;
   List<ServicePost> _posts = [];
+  final _profileCompletionService = ProfileCompletionService();
+  final language = Language();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _loadInitialData();
+  }
+
+  Future<void> _handleAddPost(BuildContext context) async {
+    // Use the context extension to check profile completion
+    context.performWithProfileCheck(
+      action: () {
+        _navigateToServicePost(context);
+      },
+      user: widget.user,
+      userId: widget.userID,
+    );
+  }
+
+  void _navigateToServicePost(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ServicePostFormScreen(userId: widget.userID, user: widget.user,),
+      ),
+    );
   }
 
   void _loadInitialData() {
@@ -58,9 +84,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
 
     widget.servicePostBloc.add(
         GetServicePostsByCategorySubCategoryEvent(
-            widget.categoryId,
-            widget.subcategoryId,
-            _currentPage
+            category: widget.categoryId, subCategory: widget.subcategoryId, page: _currentPage
         )
     );
   }
@@ -72,9 +96,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
       _currentPage++;
       widget.servicePostBloc.add(
           GetServicePostsByCategorySubCategoryEvent(
-              widget.categoryId,
-              widget.subcategoryId,
-              _currentPage
+              category: widget.categoryId, subCategory: widget.subcategoryId, page: _currentPage
           )
       );
     }
@@ -100,8 +122,8 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
           isFollowing = state.followSuccess;
 
           final message = state.followSuccess
-              ? 'Following ${widget.titleSubcategory}'
-              : 'Unfollowed ${widget.titleSubcategory}';
+              ? language.getFollowingText(widget.titleSubcategory)
+              : language.getUnfollowedText(widget.titleSubcategory);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -133,10 +155,17 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
           duration: const Duration(milliseconds: 300),
           child: ElevatedButton(
             onPressed: () {
-              context.read<UserActionBloc>().add(
-                  UserMakeFollowSubcategories(
-                      subCategoryId: widget.subcategoryId
-                  )
+              // Check profile completion before allowing follow action
+              context.performWithProfileCheck(
+                action: () {
+                  context.read<UserActionBloc>().add(
+                      UserMakeFollowSubcategories(
+                          subCategoryId: widget.subcategoryId
+                      )
+                  );
+                },
+                user: widget.user,
+                userId: widget.userID,
               );
             },
             style: ElevatedButton.styleFrom(
@@ -167,7 +196,9 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isFollowing ? 'Following' : 'Follow',
+                  isFollowing
+                      ? language.getFollowingButtonText()
+                      : language.getFollowButtonText(),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -217,7 +248,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
             ElevatedButton.icon(
               onPressed: _handleRefresh,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
+              label: Text(language.getTryAgainText()),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -280,7 +311,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Get notified of new posts by following',
+                      language.getNotificationFollowingText(),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white70,
                       ),
@@ -296,7 +327,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Latest Posts',
+                language.getLatestPostsText(),
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -309,7 +340,7 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${_posts.length} posts',
+                  language.getPostsCountText(_posts.length),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
@@ -337,26 +368,23 @@ class SubCategoryPostScreenState extends State<SubCategoryPostScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No posts yet in this category',
+            language.getNoPostsText(),
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.hintColor,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Be the first to post something!',
+            language.getBeFirstToPostText(),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.hintColor.withOpacity(0.7),
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {
-              // Navigate to create post screen
-              // Add your navigation code here
-            },
+            onPressed: () => _handleAddPost(context),
             icon: const Icon(Icons.add),
-            label: const Text('Create Post'),
+            label: Text(language.getCreatePostText()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,

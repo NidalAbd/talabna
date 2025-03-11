@@ -115,13 +115,15 @@ class User {
     data['name'] = name;
     data['gender'] = gender;
 
-    // Only include nested objects if they're not null
-    if (city != null) {
-      data['city_id'] = city?.id;
+    // Include the full objects AND their IDs as expected by the server
+    if (country != null) {
+      data['country'] = {'id': country!.id};
+      data['country_id'] = country!.id;
     }
 
-    if (country != null) {
-      data['country_id'] = country?.id;
+    if (city != null) {
+      data['city'] = {'id': city!.id};
+      data['city_id'] = city!.id;
     }
 
     data['device_token'] = deviceToken;

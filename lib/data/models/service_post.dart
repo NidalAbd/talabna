@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:talbna/data/models/photos.dart';
 import 'categories.dart';
 
@@ -13,8 +15,9 @@ class ServicePost {
   final String? description;
   final Category? category;
   final SubCategory? subCategory; // Change this to a proper object instead of String
-  final double? price;
-  final String? priceCurrency;
+  double? price;
+  final String? priceCurrencyCode;
+  final Map<String, String>? priceCurrencyName;
   final double? locationLatitudes;
   final double? locationLongitudes;
   final double? distance;
@@ -49,7 +52,8 @@ class ServicePost {
      this.subCategory,
     this.country,
      this.price,
-     this.priceCurrency,
+     this.priceCurrencyCode,
+     this.priceCurrencyName,
      this.locationLatitudes,
      this.locationLongitudes,
      this.distance,
@@ -97,8 +101,13 @@ class ServicePost {
           ? SubCategory.fromJson(json['sub_category'])
           : SubCategory(id: 0, name: {'ar': json['sub_category']}, categoryId: 0),
       country: json['country'] ?? '',
-      price: (json['price'] is int ? json['price'].toDouble() : json['price']) ?? 0.0,
-      priceCurrency: json['price_currency'] ?? '',
+      price: (json['price'] ?? 0).toDouble()  ?? 0,
+      priceCurrencyCode: json['price_currency_code'],
+      priceCurrencyName: json['price_currency_name'] is String && json['price_currency_name'] != null
+          ? Map<String, String>.from(jsonDecode(json['price_currency_name']))
+          : (json['price_currency_name'] != null
+          ? Map<String, String>.from(json['price_currency_name'])
+          : null),
       locationLatitudes: double.tryParse(json['location_latitudes'] ?? '') ?? 0.0,
       locationLongitudes: double.tryParse(json['location_longitudes'] ?? '') ?? 0.0,
       distance: (json['distance'] is int ? json['distance'].toDouble() : json['distance']) ?? 0.0,
@@ -119,7 +128,18 @@ class ServicePost {
       photos: (json['photos'] as List<dynamic>?)?.map((photoJson) => Photo.fromJson(photoJson)).toList() ?? [],
     );
   }
+  String getCurrencyCode() => priceCurrencyCode ?? "USD";
 
+  // Helper method to get the currency name with fallback
+  String getCurrencyName(String lang) {
+    if (priceCurrencyName == null) return lang == 'ar' ? 'دولار امريكي' : 'US Dollar';
+    return priceCurrencyName![lang] ??
+        priceCurrencyName!['en'] ??
+        (lang == 'ar' ? 'دولار امريكي' : 'US Dollar');
+  }
+
+  // Format price with currency (e.g., "100 USD" or "100 دولار امريكي")
+  String getFormattedPrice(String lang) => "$price ${getCurrencyName(lang)}";
 
 
   Map<String, dynamic> toJson() => {
@@ -131,9 +151,9 @@ class ServicePost {
     'categories_id': categoriesId,
     'sub_categories_id': subCategoriesId,
     'country': country,
-
     'price': price,
-    'price_currency': priceCurrency,
+    'price_currency_code': priceCurrencyCode,
+    'price_currency_name': priceCurrencyName,
     'location_latitudes': locationLatitudes,
     'location_longitudes': locationLongitudes,
     'type': type,

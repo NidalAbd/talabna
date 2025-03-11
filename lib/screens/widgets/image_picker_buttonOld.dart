@@ -47,7 +47,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
         _pickedImages = widget.initialPhotosNotifier.value!
             .map((photo) => Photo.fromJson({
           'id': photo.id,
-          'src': '${Constants.apiBaseUrl}/storage/${photo.src}',
+          'src': '${Constants.apiBaseUrl}/${photo.src}',
         }))
             .toList();
         _localImages = List<String?>.filled(_pickedImages.length, null, growable: true);

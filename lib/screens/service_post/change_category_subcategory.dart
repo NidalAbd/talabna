@@ -89,7 +89,7 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
     );
 
     context.read<ServicePostBloc>().add(
-      ServicePostCategoryUpdateEvent(servicePost, widget.servicePostId),
+      ServicePostCategoryUpdateEvent(servicePost: servicePost, servicePostID: widget.servicePostId),
     );
   }
 
@@ -130,6 +130,8 @@ class _ChangeCategoryScreenState extends State<ChangeCategoryScreen> {
                     onCategorySelected: _handleCategorySelected,
                     language: _language.getLanguage(),
                     initialValue: _selectedCategory,
+                    // Add the hideServicePostCategories parameter with value true
+                    hideServicePostCategories: true,
                   ),
                   const SizedBox(height: 16.0),
                   if (_selectedCategory != null)

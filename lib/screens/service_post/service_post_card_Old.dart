@@ -174,7 +174,7 @@
 //                             : AppTheme.darkPrimaryColor.withOpacity(0.2),
 //                         child: UserAvatar
 //                           (
-//                             imageUrl:'${Constants.apiBaseUrl}/storage/${widget.servicePost.userPhoto}',
+//                             imageUrl:'${Constants.apiBaseUrl}/${widget.servicePost.userPhoto}',
 //                             radius: 16,
 //                             fromUser: widget.userProfileId,
 //                             toUser: widget.servicePost.userId!,

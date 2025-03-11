@@ -6,12 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talbna/screens/profile/profile_completion_service.dart';
 
 import '../../blocs/user_profile/user_profile_bloc.dart';
 import '../../blocs/user_profile/user_profile_event.dart';
 import '../../blocs/user_profile/user_profile_state.dart';
 import '../../data/models/countries.dart';
 import '../../data/models/user.dart';
+import '../../main.dart';
 import '../../provider/language.dart';
 import '../../utils/constants.dart';
 import '../../utils/fcm_handler.dart';
@@ -39,6 +41,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   final _whatsAppController = TextEditingController();
   final _dateOfBirthController = TextEditingController();
   final _countryCodeController = TextEditingController(text: '');
+  final Language _language = Language();
 
   // BLoC and Services
   late final UserProfileBloc _userProfileBloc;
@@ -62,7 +65,6 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
   bool _isLoading = false;
   bool _hasChanges = false;
   bool _isMounted = true;
-  final _language = Language();
 
   @override
   void initState() {
@@ -121,7 +123,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
       _selectedDate = user.dateOfBirth;
       _dateOfBirthController.text = _dateFormat.format(user.dateOfBirth!);
     }
-    _gender = user.gender ?? '';
+    _gender = GenderTranslations.convertToFrontendGender(user.gender);
 
     // Location
     _locationLatitudes = user.locationLatitudes ?? 0.0;
@@ -181,28 +183,28 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
 
     try {
       final updatedUser = User(
-        id: widget.user.id,
-        userName: widget.user.userName,
-        name: widget.user.name,
-        gender: _gender,
-        country: _newCountrySelected ?? _selectedCountry,
-        city: _newCitySelected ?? _selectedCity,
-        deviceToken: _deviceToken,
-        dateOfBirth: _selectedDate ?? widget.user.dateOfBirth,
-        locationLatitudes: _locationLatitudes,
-        locationLongitudes: _locationLongitudes,
-        phones: '${_countryCodeController.text}${_phoneController.text}',
-        watsNumber: '${_countryCodeController.text}${_whatsAppController.text}',
-        email: widget.user.email,
-        emailVerifiedAt: widget.user.emailVerifiedAt,
-        isActive: widget.user.isActive,
-        createdAt: widget.user.createdAt,
-        updatedAt: widget.user.updatedAt,
-        followingCount: widget.user.followingCount,
-        followersCount: widget.user.followersCount,
-        servicePostsCount: widget.user.servicePostsCount,
-        pointsBalance: widget.user.pointsBalance,
-        photos: widget.user.photos, dataSaverEnabled: widget.user.dataSaverEnabled, authType: widget.user.authType, googleId: widget.user.googleId
+          id: widget.user.id,
+          userName: widget.user.userName,
+          name: widget.user.name,
+          gender: GenderTranslations.convertToBackendGender(_gender),
+          country: _newCountrySelected ?? _selectedCountry,
+          city: _newCitySelected ?? _selectedCity,
+          deviceToken: _deviceToken,
+          dateOfBirth: _selectedDate ?? widget.user.dateOfBirth,
+          locationLatitudes: _locationLatitudes,
+          locationLongitudes: _locationLongitudes,
+          phones: '${_countryCodeController.text}${_phoneController.text}',
+          watsNumber: '${_countryCodeController.text}${_whatsAppController.text}',
+          email: widget.user.email,
+          emailVerifiedAt: widget.user.emailVerifiedAt,
+          isActive: widget.user.isActive,
+          createdAt: widget.user.createdAt,
+          updatedAt: widget.user.updatedAt,
+          followingCount: widget.user.followingCount,
+          followersCount: widget.user.followersCount,
+          servicePostsCount: widget.user.servicePostsCount,
+          pointsBalance: widget.user.pointsBalance,
+          photos: widget.user.photos, dataSaverEnabled: widget.user.dataSaverEnabled, authType: widget.user.authType, googleId: widget.user.googleId
       );
 
       // Pass context to the event for localization
@@ -294,7 +296,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
           child: ClipOval(
             child: (user.photos != null && user.photos!.isNotEmpty)
                 ? Image.network(
-              '${Constants.apiBaseUrl}/storage/${user.photos?.first.src}',
+              '${Constants.apiBaseUrl}/${user.photos?.first.src}',
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
               loadingBuilder: (_, child, loadingProgress) {
@@ -577,14 +579,23 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
     // First validate if all required fields are actually complete
     final bool isComplete = await _validateProfileForCompletion();
 
-    if (isComplete) {
+    try {
+      // Update SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('profileCompleted', true);
-      print('Profile marked as completed in UpdateUserProfile');
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('profileCompleted', false);
-      print('Profile still incomplete in UpdateUserProfile');
+      await prefs.setBool('profileCompleted', isComplete);
+
+      // Get the ProfileCompletionService singleton
+      final profileCompletionService = ProfileCompletionService();
+
+      // Update the service state
+      await profileCompletionService.setProfileComplete(isComplete);
+
+      // Explicitly trigger the notification to update any listeners
+      profileCompletionService.updateProfileCompletionStatus();
+
+      print('Profile completion status updated: $isComplete in UpdateUserProfile');
+    } catch (e) {
+      print('Error updating profile completion status: $e');
     }
   }
 
@@ -645,18 +656,20 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                       setState(() {
                         _newCountrySelected = country;
                         _countryCodeController.text = country?.countryCode ?? '';
-                        _selectedCountry = _newCountrySelected;
+                        _selectedCountry = country; // Use the direct value to avoid any reference issues
                         _hasChanges = true;
                       });
+                      print('Country changed to: ${country?.id} - ${country?.getCountryName('en')}');
                     }
                   },
                   onCityChanged: (city) {
                     if (mounted) {
                       setState(() {
                         _newCitySelected = city;
-                        _selectedCity = _newCitySelected;
+                        _selectedCity = city; // Use the direct value to avoid any reference issues
                         _hasChanges = true;
                       });
+                      print('City changed to: ${city?.id} - ${city?.getName('en')}');
                     }
                   },
                   updateCountryCode: (code) {
@@ -689,6 +702,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
             const SizedBox(height: 16),
 
             // Gender Dropdown
+// Gender Dropdown
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -700,7 +714,7 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _language.tGenderText(),
+                      GenderTranslations.getGenderText(_language.getLanguage()),
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).hintColor,
@@ -708,7 +722,8 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _gender.isNotEmpty ? _gender : null,
+                      // Always use 'male' or 'female' as the value
+                      value: ['male', 'female'].contains(_gender) ? _gender : null,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
@@ -724,16 +739,17 @@ class _UpdateUserProfileState extends State<UpdateUserProfile> {
                           ),
                         ),
                       ),
-                      items: ['ذكر', 'انثى'].map((String value) {
+                      items: GenderTranslations.getGenderOptions(_language.getLanguage())
+                          .map((option) {
                         return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
+                          value: option['value'],
+                          child: Text(option['display']!),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
                         if (newValue != null && mounted) {
                           setState(() {
-                            _gender = newValue;
+                            _gender = newValue; // Always 'male' or 'female'
                             _hasChanges = true;
                           });
                         }

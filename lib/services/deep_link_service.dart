@@ -14,6 +14,8 @@ class DeepLinkService {
   static final DeepLinkService _instance = DeepLinkService._internal();
   factory DeepLinkService() => _instance;
   DeepLinkService._internal();
+  static const String CONTENT_TYPE_REELS = 'reels';
+  static const String CONTENT_TYPE_POST = 'service-post';
 
   // Reference to navigator key
   GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -149,33 +151,104 @@ class DeepLinkService {
     return true;
   }
 
-  // Helper methods to parse URI components
   String? _parseRoute(Uri uri) {
     final pathSegments = uri.pathSegments;
+    final contentType = _parseContentType(uri);
 
+    // Handle talabna:// scheme
     if (uri.scheme == 'talabna') {
       if (pathSegments.isNotEmpty) {
-        if (pathSegments[0] == 'service-post') {
-          return 'service-post';
+        if (pathSegments[0] == 'reels' || pathSegments[0] == 'service-post') {
+          return pathSegments[0]; // Return the actual route type
         } else if (_isValidNumericId(pathSegments[0])) {
-          return 'service-post';  // Default to service-post for numeric IDs
+          // Default numeric IDs to service-post for backward compatibility
+          return CONTENT_TYPE_POST;
         }
+      }
+    }
+    // Handle https://talbna.cloud/api/deep-link/TYPE/ID format
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 4) {
+      if (pathSegments[0] == 'api' && pathSegments[1] == 'deep-link') {
+        if (pathSegments[2] == 'reels' || pathSegments[2] == 'service-post') {
+          return pathSegments[2];
+        }
+      }
+    }
+    // Handle https://talbna.cloud/api/service_posts/ID format (legacy)
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 3) {
+      if (pathSegments[0] == 'api' &&
+          pathSegments[1] == 'service_posts' &&
+          _isValidNumericId(pathSegments[2])) {
+        return CONTENT_TYPE_POST; // Default to post view
       }
     }
 
     return null;
   }
 
+  // Helper method to specifically extract content type
+  String? _parseContentType(Uri uri) {
+    final pathSegments = uri.pathSegments;
+
+    // Handle talabna:// scheme
+    if (uri.scheme == 'talabna') {
+      if (pathSegments.isNotEmpty) {
+        if (pathSegments[0] == 'reels') {
+          return CONTENT_TYPE_REELS;
+        } else if (pathSegments[0] == 'service-post') {
+          return CONTENT_TYPE_POST;
+        } else if (_isValidNumericId(pathSegments[0])) {
+          return CONTENT_TYPE_POST; // Default
+        }
+      }
+    }
+    // Handle https://talbna.cloud/api/deep-link/TYPE/ID format
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 4) {
+      if (pathSegments[0] == 'api' && pathSegments[1] == 'deep-link') {
+        if (pathSegments[2] == 'reels') {
+          return CONTENT_TYPE_REELS;
+        } else if (pathSegments[2] == 'service-post') {
+          return CONTENT_TYPE_POST;
+        }
+      }
+    }
+    // Handle https://talbna.cloud/api/service_posts/ID format (legacy)
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 3) {
+      if (pathSegments[0] == 'api' && pathSegments[1] == 'service_posts') {
+        return CONTENT_TYPE_POST;
+      }
+    }
+
+    return CONTENT_TYPE_POST; // Default to post view for backward compatibility
+  }
+
   String? _parseId(Uri uri) {
     final pathSegments = uri.pathSegments;
 
+    // Handle talabna:// scheme
     if (uri.scheme == 'talabna') {
       if (pathSegments.isNotEmpty) {
-        if (pathSegments.length >= 2 && pathSegments[0] == 'service-post') {
+        if (pathSegments.length >= 2 &&
+            (pathSegments[0] == 'reels' || pathSegments[0] == 'service-post')) {
           return pathSegments[1];
         } else if (_isValidNumericId(pathSegments[0])) {
           return pathSegments[0];
         }
+      }
+    }
+    // Handle https://talbna.cloud/api/deep-link/TYPE/ID format
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 4) {
+      if (pathSegments[0] == 'api' && pathSegments[1] == 'deep-link' &&
+          (pathSegments[2] == 'reels' || pathSegments[2] == 'service-post') &&
+          _isValidNumericId(pathSegments[3])) {
+        return pathSegments[3];
+      }
+    }
+    // Handle https://talbna.cloud/api/service_posts/ID format (legacy)
+    else if (uri.host == 'talbna.cloud' && pathSegments.length >= 3) {
+      if (pathSegments[0] == 'api' && pathSegments[1] == 'service_posts' &&
+          _isValidNumericId(pathSegments[2])) {
+        return pathSegments[2];
       }
     }
 
@@ -197,6 +270,7 @@ class DeepLinkService {
     _currentlyNavigatingTo = '$route/$id';
     _lastNavigationTime = DateTime.now();
     DebugLogger.log('Starting navigation to: $_currentlyNavigatingTo', category: 'DEEPLINK');
+
 
     try {
       // Check if navigation context is available
@@ -220,8 +294,47 @@ class DeepLinkService {
           userId = authState.userId;
           DebugLogger.log('User authenticated via BLoC: $userId', category: 'DEEPLINK');
         }
-      } catch (e) {
-        DebugLogger.log('Error checking BLoC auth state: $e', category: 'DEEPLINK');
+
+        if (route == CONTENT_TYPE_REELS) {
+          if (isAuthenticated && userId != null) {
+            DebugLogger.log('Navigating to reels view: $id for user: $userId', category: 'DEEPLINK');
+
+            _navigatorKey.currentState?.pushNamed(
+                Routes.reels, // New route for Reels
+                arguments: {'postId': id, 'userId': userId}
+            );
+          } else {
+            // Store deep link for after login
+            await storePendingDeepLink(route, id);
+            _navigatorKey.currentState?.pushReplacementNamed(Routes.login);
+          }
+        }
+        else if (route == CONTENT_TYPE_POST || route == 'service-post') {
+          if (isAuthenticated && userId != null) {
+            DebugLogger.log('Navigating to service post view: $id for user: $userId', category: 'DEEPLINK');
+
+            _navigatorKey.currentState?.pushNamed(
+                Routes.servicePost,
+                arguments: {'postId': id}
+            );
+          } else {
+            // Store deep link for after login
+            await storePendingDeepLink(route, id);
+            _navigatorKey.currentState?.pushReplacementNamed(Routes.login);
+          }
+        }
+        else {
+          DebugLogger.log('Unhandled route: $route', category: 'DEEPLINK');
+        }
+      }  catch (e) {
+        DebugLogger.log('Deep Link Navigation Error: $e', category: 'DEEPLINK');
+      } finally {
+        // Reset navigation state after a delay
+        Future.delayed(const Duration(seconds: 2), () {
+          _isNavigating = false;
+          _currentlyNavigatingTo = null;
+          DebugLogger.log('Navigation lock released', category: 'DEEPLINK');
+        });
       }
 
       // If not authenticated via BLoC, check if pre-authenticated
@@ -286,6 +399,7 @@ class DeepLinkService {
     await prefs.setString('pending_deep_link_id', id);
     DebugLogger.log('Stored pending deep link: $route/$id', category: 'DEEPLINK');
   }
+
 
   // Clear pending deep links
   Future<void> clearPendingDeepLinks() async {

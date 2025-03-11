@@ -40,7 +40,7 @@ class LocationButtonWidget extends StatelessWidget {
                 const Icon(Icons.location_on_outlined,size: 25),
                SizedBox(width: width), // Add some space between the icon and text
                Text(
-                'show location on google map',
+                'view google map',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,

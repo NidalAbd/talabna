@@ -26,7 +26,7 @@ class ProfileImageHelper {
     }
 
     // For internal images, prepend the base API URL
-    return '${baseApiUrl ?? Constants.apiBaseUrl}/storage/${photo.src}';
+    return '${baseApiUrl ?? Constants.apiBaseUrl}/${photo.src}';
   }
 
   /// Creates a customizable profile image widget

@@ -44,7 +44,7 @@ class UserPostScreenState extends State<UserPostScreen> {
             _scrollOtherUserController.position.maxScrollExtent - 200) {
       _currentPage++;
       _servicePostBloc
-          .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+          .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
     }
   }
 
@@ -55,7 +55,7 @@ class UserPostScreenState extends State<UserPostScreen> {
       _servicePostsOtherUser.clear();
     });
     _servicePostBloc
-        .add(GetServicePostsByUserIdEvent(widget.userID, _currentPage));
+        .add(GetServicePostsByUserIdEvent(userId: widget.userID, page: _currentPage));
   }
 
   void _handleOtherUserPostLoadSuccess(

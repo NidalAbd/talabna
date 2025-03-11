@@ -18,11 +18,13 @@ import 'package:talbna/screens/widgets/subcategory_dropdown.dart';
 import 'package:talbna/screens/widgets/success_widget.dart';
 import 'package:talbna/utils/functions.dart';
 import '../../data/models/photos.dart';
+import '../../data/models/user.dart';
 import '../../provider/language.dart';
 
 class ServicePostFormScreen extends StatefulWidget {
-  const ServicePostFormScreen({super.key, required this.userId});
+  const ServicePostFormScreen({super.key, required this.userId, required this.user});
   final int userId;
+  final User user;
 
   @override
   State<ServicePostFormScreen> createState() => _ServicePostFormScreenState();
@@ -354,6 +356,8 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                 },
                 language: _language.toString(),
                 initialValue: _selectedCategory,
+                // Set this to true since we're in ServicePostFormScreen
+                hideServicePostCategories: true,
               ),
               const SizedBox(height: 16),
               if (_selectedCategory != null)
@@ -405,28 +409,37 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: _language.tCurrencyText(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                value: _selectedPriceCurrency,
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedPriceCurrency = newValue;
-                      _saveFormData('priceCurrency', newValue);
-                    });
-                  }
-                },
-                items: ['دولار امريكي', 'دينار اردني', 'شيكل']
-                    .map((String value) => DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                ))
-                    .toList(),
+                child: Row(
+                  children: [
+                    const Icon(Icons.monetization_on, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _language.tCurrencyText(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.user.country!.currencyCode.toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -445,12 +458,11 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     });
                   }
                 },
-                items: ['عرض', 'طلب']
-                    .map((String value) => DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                ))
-                    .toList(),
+                items: EnumTranslations.getTypeOptions(_language.getLanguage())
+                    .map((option) => DropdownMenuItem<String>(
+                  value: option['value'],
+                  child: Text(option['display']!),
+                )).toList(),
               ),
             ],
           ),
@@ -496,12 +508,11 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
                     });
                   }
                 },
-                items: ['عادي', 'ذهبي', 'ماسي']
-                    .map((String value) => DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                ))
-                    .toList(),
+                items: EnumTranslations.getBadgeOptions(_language.getLanguage())
+                    .map((option) => DropdownMenuItem<String>(
+                  value: option['value'],
+                  child: Text(option['display']!),
+                )).toList(),
               ),
               if (_selectedHaveBadge != 'عادي') ...[
                 const SizedBox(height: 16),
@@ -681,7 +692,6 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         title: _title,
         description: _description,
         price: _price,
-        priceCurrency: _selectedPriceCurrency,
         locationLatitudes: _locationLatitudes,
         locationLongitudes: _locationLongitudes,
         userId: widget.userId,
@@ -693,7 +703,7 @@ class _ServicePostFormScreenState extends State<ServicePostFormScreen> {
         photos: _pickedImages,
       );
 
-      context.read<ServicePostBloc>().add(CreateServicePostEvent(servicePost, imageFiles));
+      context.read<ServicePostBloc>().add(CreateServicePostEvent(servicePost: servicePost, imageFiles: imageFiles));
     } catch (e) {
       print('Error submitting form: $e');
       ScaffoldMessenger.of(context).showSnackBar(

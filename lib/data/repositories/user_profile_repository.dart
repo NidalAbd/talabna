@@ -184,6 +184,8 @@ class UserProfileRepository {
       if (response.statusCode == 200 || response.statusCode == 201) {
         try {
           if (responseData.containsKey('user')) {
+            final jsonData = user.toJson();
+            print('Sending user data to server: ${jsonEncode(jsonData)}');
             return User.fromJson(responseData['user']);
           } else if (responseData['status'] == 'success') {
             return user; // Return original if no user data returned

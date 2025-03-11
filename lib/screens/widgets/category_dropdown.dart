@@ -4,16 +4,22 @@ import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/categories.dart';
 import 'package:talbna/data/repositories/categories_repository.dart';
 
+import '../../core/service_locator.dart';
+
 class CategoriesDropdown extends StatefulWidget {
   final Function(Category) onCategorySelected;
   final Category? initialValue;
   final String language;
+  // Add a new parameter to identify if the widget is being called from service post
+  final bool hideServicePostCategories;
 
   const CategoriesDropdown({
     super.key,
     required this.onCategorySelected,
     required this.language,
     this.initialValue,
+    // Default to false to maintain backward compatibility
+    this.hideServicePostCategories = false,
   });
 
   @override
@@ -21,7 +27,7 @@ class CategoriesDropdown extends StatefulWidget {
 }
 
 class _CategoriesDropdownState extends State<CategoriesDropdown> {
-  final CategoriesRepository _repository = CategoriesRepository();
+  final CategoriesRepository _repository = serviceLocator<CategoriesRepository>();
   List<Category> _categories = [];
   Category? _selectedCategory;
   bool _isLoading = false;
@@ -61,13 +67,24 @@ class _CategoriesDropdownState extends State<CategoriesDropdown> {
       if (!mounted) return;
 
       setState(() {
+        // Filter out categories 6 and 7 if hideServicePostCategories is true
+        var filteredCategories = widget.hideServicePostCategories
+            ? fetchedCategories.where((cat) => cat.id != 6 && cat.id != 7).toList()
+            : fetchedCategories;
+
         if (widget.initialValue != null) {
-          _categories = fetchedCategories
-              .where((cat) => cat.id != widget.initialValue!.id)
-              .toList();
-          _categories.insert(0, widget.initialValue!);
+          // Only include initialValue if it's not supposed to be hidden
+          if (!widget.hideServicePostCategories ||
+              (widget.initialValue!.id != 6 && widget.initialValue!.id != 7)) {
+            _categories = filteredCategories
+                .where((cat) => cat.id != widget.initialValue!.id)
+                .toList();
+            _categories.insert(0, widget.initialValue!);
+          } else {
+            _categories = filteredCategories;
+          }
         } else {
-          _categories = fetchedCategories;
+          _categories = filteredCategories;
           if (_selectedCategory == null && _categories.isNotEmpty) {
             _selectedCategory = _categories.first;
             WidgetsBinding.instance.addPostFrameCallback((_) {

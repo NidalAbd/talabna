@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:talbna/blocs/service_post/service_post_bloc.dart';
 import 'package:talbna/blocs/service_post/service_post_event.dart';
 import 'package:path_provider/path_provider.dart';
@@ -42,6 +44,12 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
   bool _processing = false;
   final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
 
+  bool get isProcessing => _processing;
+
+  Future<String?> convertVideoToMp4FromOutside(File file) {
+    return convertVideoToMp4(file);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -50,7 +58,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
         setState(() {
           _pickedImages = widget.initialPhotosNotifier.value!
               .map((photo) {
-            final url = photo.src?.replaceAll('${Constants.apiBaseUrl}/storage/', '');
+            final url = photo.src?.replaceAll('${Constants.apiBaseUrl}/', '');
             return Photo(
               id: photo.id,
               src: url,
@@ -83,23 +91,139 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     }
 
     // Otherwise, construct the full URL
-    return '${Constants.apiBaseUrl}/storage/$src';
+    return '${Constants.apiBaseUrl}/$src';
+  }
+
+  // Enhanced permission handling for different Android & iOS versions
+  Future<bool> _requestPermissions(bool isVideo) async {
+    Map<Permission, PermissionStatus> statuses = {};
+
+    if (Platform.isAndroid) {
+      // For Android 13+ (SDK 33+)
+      if (isVideo) {
+        statuses = await [
+          Permission.photos,
+          Permission.videos,
+          Permission.storage,
+        ].request();
+      } else {
+        statuses = await [
+          Permission.photos,
+          Permission.storage,
+        ].request();
+      }
+
+      // Check if any permission is permanently denied
+      if (statuses.values.any((status) => status.isPermanentlyDenied)) {
+        await _showPermissionPermanentlyDeniedDialog();
+        return false;
+      }
+
+      // Check if any required permission is denied
+      return !statuses.values.any((status) => status.isDenied);
+    }
+    else if (Platform.isIOS) {
+      // For iOS, request photo library permission
+      PermissionStatus photoStatus;
+
+      if (isVideo) {
+        statuses = await [
+          Permission.photos,
+          Permission.videos
+        ].request();
+
+        return !statuses.values.any((status) => status.isDenied);
+      } else {
+        photoStatus = await Permission.photos.request();
+        return photoStatus.isGranted;
+      }
+    }
+
+    return true; // Default for other platforms
+  }
+
+  // Show permission denied dialog
+  Future<void> _showPermissionDeniedDialog() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(_language.tPermissionDeniedText()),
+          content: Text(_language.tStoragePermissionExplanationText()),
+          actions: <Widget>[
+            TextButton(
+              child: Text(_language.tCancelText()),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(_language.tOpenSettingsText()),
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show permanently denied permission dialog
+  Future<void> _showPermissionPermanentlyDeniedDialog() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(_language.tPermissionPermanentlyDeniedText()),
+          content: Text(_language.tPermanentStoragePermissionExplanationText()),
+          actions: <Widget>[
+            TextButton(
+              child: Text(_language.tCancelText()),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(_language.tOpenSettingsText()),
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _pickImages() async {
-    final ImagePicker picker = ImagePicker();
-    final List<XFile> imageFiles = await picker.pickMultiImage(imageQuality: 50);
-
-    if (_pickedImages.length + imageFiles.length > widget.maxImages) {
-      _showMaxImagesSnackBar(widget.maxImages);
+    // Request permissions specifically for photos
+    bool hasPermission = await _requestPermissions(false);
+    if (!hasPermission) {
+      await _showPermissionDeniedDialog();
       return;
     }
 
-    setState(() {
-      _processing = true;
-    });
-
+    final ImagePicker picker = ImagePicker();
     try {
+      final List<XFile> imageFiles = await picker.pickMultiImage(imageQuality: 50);
+
+      if (imageFiles.isEmpty) {
+        // User cancelled selection
+        return;
+      }
+
+      if (_pickedImages.length + imageFiles.length > widget.maxImages) {
+        _showMaxImagesSnackBar(widget.maxImages);
+        return;
+      }
+
+      setState(() {
+        _processing = true;
+      });
+
       List<Photo> newImages = [];
       List<String?> newLocalPaths = [];
 
@@ -137,59 +261,85 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     }
   }
 
-// Update _pickVideo to maintain existing media
   Future<void> _pickVideo() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
-
-    if (_pickedImages.length + 1 > widget.maxImages) {
-      _showMaxImagesSnackBar(widget.maxImages);
+    // Request permissions specifically for videos
+    bool hasPermission = await _requestPermissions(true);
+    if (!hasPermission) {
+      await _showPermissionDeniedDialog();
       return;
     }
 
-    if (pickedFile != null) {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+
+      if (pickedFile == null) {
+        // User cancelled selection
+        return;
+      }
+
+      if (_pickedImages.length + 1 > widget.maxImages) {
+        _showMaxImagesSnackBar(widget.maxImages);
+        return;
+      }
+
       setState(() {
         _processing = true;
+        _progressNotifier.value = 0.1; // Start progress
       });
 
-      try {
-        File file = File(pickedFile.path);
-        String videoPath = file.path;
+      File file = File(pickedFile.path);
+      String videoPath = file.path;
+      print('Original video path: $videoPath');
 
-        if (!file.path.toLowerCase().endsWith('.mp4')) {
-          final convertedPath = await convertVideoToMp4(file);
-          if (convertedPath != null) {
-            videoPath = convertedPath;
-          } else {
-            throw Exception('Failed to convert video');
-          }
+      setState(() {
+        _progressNotifier.value = 0.3; // Update progress
+      });
+
+      if (!file.path.toLowerCase().endsWith('.mp4')) {
+        final convertedPath = await convertVideoToMp4(file);
+        if (convertedPath != null) {
+          videoPath = convertedPath;
+          print('Converted video path: $videoPath');
+        } else {
+          throw Exception('Failed to convert video');
         }
-
-        final thumbnailPath = await _generateVideoThumbnail(videoPath);
-        if (thumbnailPath == null) {
-          throw Exception('Failed to generate thumbnail');
-        }
-
-        setState(() {
-          _pickedImages.add(Photo(
-            src: videoPath,
-            isVideo: true,
-          ));
-          _localMedia.add(thumbnailPath);
-          _thumbnails.add(thumbnailPath);
-        });
-
-        _submitLocalImages();
-      } catch (e) {
-        print('Error processing video: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing video: $e')),
-        );
-      } finally {
-        setState(() {
-          _processing = false;
-        });
       }
+
+      setState(() {
+        _progressNotifier.value = 0.7; // Update progress
+      });
+
+      final thumbnailPath = await _generateVideoThumbnail(videoPath);
+      if (thumbnailPath == null) {
+        throw Exception('Failed to generate thumbnail');
+      }
+
+      // Explicitly set isVideo to true
+      final videoPhoto = Photo(
+        src: videoPath,
+        isVideo: true,
+      );
+
+      print('Adding video: ${videoPhoto.src}, isVideo: ${videoPhoto.isVideo}');
+
+      setState(() {
+        _pickedImages.add(videoPhoto);
+        _localMedia.add(thumbnailPath);
+        _thumbnails.add(thumbnailPath);
+        _progressNotifier.value = 1.0; // Complete progress
+      });
+
+      _submitLocalImages();
+    } catch (e) {
+      print('Error processing video: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error processing video: $e')),
+      );
+    } finally {
+      setState(() {
+        _processing = false;
+      });
     }
   }
 
@@ -213,7 +363,6 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     widget.onImagesPicked(updatedImages);
   }
 
-// Update the remove image function
   void _removeImage(int index) async {
     final Photo photo = _pickedImages[index];
     final String? localPath = _localMedia[index];
@@ -255,20 +404,22 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     _submitLocalImages();
   }
 
-// Update initState to properly set up initial media
   List<Photo> getLocalImages() {
-    final List<Photo> allImages = [];
-
+    // Return all images, both from API and locally added
+    print('Retrieving local images: ${_pickedImages.length}');
     for (int i = 0; i < _pickedImages.length; i++) {
       final photo = _pickedImages[i];
-      final localPath = _localMedia[i];
+      final isLocal = photo.id == null && photo.src != null;
+      final isVideo = photo.isVideo ?? false;
 
-      if (photo.id != null || localPath != null) {
-        allImages.add(photo);
-      }
+      // Use Dart's min function from dart:math
+      final displaySrc = photo.src != null
+          ? '${photo.src!.substring(0, math.min(20, photo.src!.length))}...'
+          : 'null';
+
+      print('Image $i: id=${photo.id}, isLocal=$isLocal, isVideo=$isVideo, src=$displaySrc');
     }
-
-    return allImages;
+    return _pickedImages;
   }
 
   Future<img.Image?> _compressImage(File file) async {
@@ -278,7 +429,7 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       final int originalSize = await file.length();
       if (originalSize > maxSize) {
         final img.Image compressedImage =
-            img.copyResize(originalImage, width: 1920);
+        img.copyResize(originalImage, width: 1920);
         final double compressionRatio = maxSize / originalSize;
         final List<int> compressedImageData = img.encodeJpg(
           compressedImage,
@@ -455,12 +606,17 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
                   padding: const EdgeInsets.only(top: 16),
                   child: Column(
                     children: [
-                      LinearProgressIndicator(
-                        value: _progressNotifier.value,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor,
-                        ),
+                      ValueListenableBuilder<double>(
+                          valueListenable: _progressNotifier,
+                          builder: (context, value, child) {
+                            return LinearProgressIndicator(
+                              value: value,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).primaryColor,
+                              ),
+                            );
+                          }
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -563,7 +719,6 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     );
   }
 
-// Update _buildMediaPreview to handle thumbnails correctly
   Widget _buildMediaPreview(Photo photo, String? localPath) {
     final bool isVideo = photo.isVideo ?? false;
     final bool isLocalFile = photo.src?.startsWith('/') ?? false;
@@ -651,23 +806,6 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
     );
   }
 
-  Widget _buildLoadingPlaceholder() {
-    return Container(
-      color: Colors.grey[200],
-      child: const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorPlaceholder() {
-    return Container(
-      color: Colors.grey[200],
-      child: const Icon(Icons.error),
-    );
-  }
   Future<String?> _generateVideoThumbnail(String path) async {
     try {
       print('Starting thumbnail generation for: $path');  // Debug print
@@ -715,8 +853,8 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       return null;
     }
   }
-// Add this method to generate thumbnails for API videos
-// Add method to generate thumbnails for API videos
+
+  // Generate thumbnails for API videos
   Future<void> _generateThumbnailsForApiVideos() async {
     for (int i = 0; i < _pickedImages.length; i++) {
       final photo = _pickedImages[i];
@@ -746,7 +884,6 @@ class ImagePickerButtonState extends State<ImagePickerButton> {
       }
     }
   }
-
 }
 
 class DashedBorderPainter extends CustomPainter {

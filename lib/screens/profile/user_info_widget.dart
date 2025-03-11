@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talbna/app_theme.dart';
 import 'package:talbna/data/models/user.dart';
 import 'package:talbna/main.dart';
+import 'package:talbna/provider/language.dart';
 import 'package:talbna/screens/interaction_widget/email_tile.dart';
 import 'package:talbna/screens/interaction_widget/phone_tile.dart';
 import 'package:talbna/screens/interaction_widget/user_contact.dart';
@@ -23,6 +24,8 @@ class UserInfoWidget extends StatefulWidget {
 }
 
 class _UserInfoWidgetState extends State<UserInfoWidget> {
+  final Language _language = Language();
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -41,7 +44,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       children: [
         // Contact Information Section
         _buildSectionHeader(
-            'Contact Information',
+            _language.getContactInformationText(),
             Icons.contact_page_outlined,
             primaryColor
         ),
@@ -50,7 +53,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
         // Personal Details Section
         _buildSectionHeader(
-            'Personal Details',
+            _language.getPersonalDetailsText(),
             Icons.person_outline_rounded,
             primaryColor
         ),
@@ -63,7 +66,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
         // Additional Information Section
         _buildSectionHeader(
-            'Additional Information',
+            _language.getAdditionalInformationText(),
             Icons.info_outline_rounded,
             primaryColor
         ),
@@ -102,7 +105,29 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       ),
     );
   }
+// Replace the _getLocalizedGender method in the UserInfoWidget class
 
+  String _getLocalizedGender(String? gender) {
+    if (gender == null || gender.isEmpty) {
+      return _language.getNotSpecifiedText();
+    }
+
+    // Direct mapping for Arabic values to display in correct language
+    // This handles when backend only returns Arabic values
+    if (gender == 'ذكر') {
+      return _language.getLanguage() == 'ar' ? 'ذكر' : 'Male';
+    } else if (gender == 'انثى') {
+      return _language.getLanguage() == 'ar' ? 'انثى' : 'Female';
+    }
+
+    // If it's already in the 'male'/'female' format, use the translation class
+    if (gender == 'male' || gender == 'female') {
+      return GenderTranslations.getDisplayText(gender, _language.getLanguage());
+    }
+
+    // Fallback - just return whatever we have
+    return gender;
+  }
   Widget _buildContactInfoCard(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -153,22 +178,22 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
         children: [
           _buildDetailTile(
             icon: Icons.person_outline_rounded,
-            title: 'Gender',
-            subtitle: widget.user.gender ?? 'Not Specified',
+            title: _language.getGenderText(),
+            subtitle: _getLocalizedGender(widget.user.gender),
             primaryColor: primaryColor,
           ),
           _buildDetailTile(
             icon: Icons.location_city_outlined,
-            title: 'City',
-            subtitle: widget.user.city?.getName(language) ?? 'Not Specified',
+            title: _language.getCityText(),
+            subtitle: widget.user.city?.getName(_language.getLanguage()) ?? _language.getNotSpecifiedText(),
             primaryColor: primaryColor,
           ),
           _buildDetailTile(
             icon: Icons.cake_outlined,
-            title: 'Date of Birth',
+            title: _language.getDateOfBirthText(),
             subtitle: widget.user.dateOfBirth != null
-                ? DateFormat('MMMM dd, yyyy').format(widget.user.dateOfBirth!)
-                : 'Not Specified',
+                ? _language.formatDateLocalized(widget.user.dateOfBirth!)
+                : _language.getNotSpecifiedText(),
             primaryColor: primaryColor,
             showDivider: false,
           ),
@@ -176,6 +201,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       ),
     );
   }
+
 
   Widget _buildAdditionalInfoSection(Color primaryColor, Color backgroundColor, Color textColor) {
     return Container(
@@ -193,8 +219,10 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: _buildDetailTile(
         icon: Icons.check_circle_outline_rounded,
-        title: 'Account Status',
-        subtitle: widget.user.isActive == true ? 'Active' : 'Inactive',
+        title: _language.getAccountStatusText(),
+        subtitle: widget.user.isActive == true
+            ? _language.getActiveText()
+            : _language.getInactiveText(),
         primaryColor: primaryColor,
         showDivider: false,
         highlightSubtitle: true,

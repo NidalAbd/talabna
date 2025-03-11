@@ -12,6 +12,7 @@ import '../../blocs/authentication/authentication_bloc.dart';
 import '../../blocs/authentication/authentication_event.dart';
 import '../../provider/language_theme_selector.dart';
 import 'about_screen.dart';
+import 'app_data_clear_service.dart';
 import 'help_center_screen.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -30,6 +31,7 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   bool _dataSaverEnabled = false;
+  final _appDataClearService = AppDataClearService();
 
   @override
   void initState() {
@@ -263,6 +265,93 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
     );
   }
 
+  Future<void> _handleLogout() async {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
+
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          _language.tConfirmLogoutText(),
+          style: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(_language.tConfirmLogoutDescText()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              _language.tCancelText(),
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Close dialog first
+              Navigator.of(context).pop();
+
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => Center(
+                  child: CircularProgressIndicator(
+                    color: primaryColor,
+                  ),
+                ),
+              );
+
+              try {
+                // Dispatch LoggedOut event to authentication bloc
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+
+                // Clear all app data
+                await _appDataClearService.clearAllData();
+
+                // Close loading indicator
+                Navigator.of(context).pop();
+
+                // Navigate to login screen and clear navigation stack
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                      (route) => false,
+                );
+
+                // Optional: restart app to ensure clean state
+                // RestartHelper.restartApp(context);
+              } catch (e) {
+                // Close loading indicator
+                Navigator.of(context).pop();
+
+                // Show error
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_language.getLanguage() == 'ar'
+                        ? 'حدث خطأ أثناء تسجيل الخروج: $e'
+                        : 'Error during logout: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(_language.tLogoutText()),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -485,64 +574,7 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
                 _buildSettingCard(
                   icon: Icons.logout,
                   title: _language.tLogoutText(),
-                  onTap: () {
-                    // Show logout confirmation dialog
-                    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-                    final primaryColor = isDarkMode ? AppTheme.darkSecondaryColor : AppTheme.lightPrimaryColor;
-
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        title: Text(
-                          _language.tConfirmLogoutText(),
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        content: Text(_language.tConfirmLogoutDescText()),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(
-                              _language.tCancelText(),
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Dispatch LoggedOut event to the authentication bloc
-                              BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
-
-                              // Close the dialog
-                              Navigator.of(context).pop();
-
-                              // Clear any stored credentials or tokens
-                              SharedPreferences.getInstance().then((prefs) {
-                                prefs.remove('token');
-                                prefs.remove('user_id');
-                                // Keep language preference but clear other settings
-                              });
-
-                              // Navigate to login screen and clear navigation stack
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                '/login', // Your login route
-                                    (route) => false,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(_language.tLogoutText()),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onTap: _handleLogout,
                   iconColor: Colors.redAccent,
                 ),
 
@@ -553,53 +585,5 @@ class _SettingScreenState extends State<SettingScreen> with SingleTickerProvider
         ),
       ),
     );
-  }
-}
-
-
-class NotificationService {
-  static const String _notificationsKey = 'notifications_enabled';
-
-  // Get current notification status
-  static Future<bool> getNotificationStatus() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Default to true if not set
-    return prefs.getBool(_notificationsKey) ?? true;
-  }
-
-  // Set notification status
-  static Future<bool> setNotificationStatus(bool isEnabled) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setBool(_notificationsKey, isEnabled);
-  }
-
-  // Toggle notification status
-  static Future<bool> toggleNotifications() async {
-    final currentStatus = await getNotificationStatus();
-    return await setNotificationStatus(!currentStatus);
-  }
-}
-
-// Add this method to your NotificationService class
-class DataSaverService {
-  static const String _dataSaverKey = 'data_saver_enabled';
-
-  // Get current data saver status
-  static Future<bool> getDataSaverStatus() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Default to false if not set
-    return prefs.getBool(_dataSaverKey) ?? false;
-  }
-
-  // Set data saver status
-  static Future<bool> setDataSaverStatus(bool isEnabled) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setBool(_dataSaverKey, isEnabled);
-  }
-
-  // Toggle data saver status
-  static Future<bool> toggleDataSaver() async {
-    final currentStatus = await getDataSaverStatus();
-    return await setDataSaverStatus(!currentStatus);
   }
 }

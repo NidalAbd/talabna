@@ -39,7 +39,7 @@ class _ChangeBadgeState extends State<ChangeBadge> {
       );
       context
           .read<ServicePostBloc>()
-          .add(ServicePostBadgeUpdateEvent(servicePost, widget.servicePostId));
+          .add(ServicePostBadgeUpdateEvent(servicePost: servicePost, servicePostID: widget.servicePostId));
     }
   }
 

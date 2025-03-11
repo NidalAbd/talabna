@@ -14,6 +14,7 @@ import 'package:talbna/screens/auth/register_screen_new.dart';
 import 'package:talbna/screens/auth/reset_password.dart';
 import 'package:talbna/screens/home/home_screen.dart';
 import 'package:talbna/screens/home/select_language.dart';
+import 'package:talbna/screens/reel/reels_screen.dart';
 import 'package:talbna/screens/service_post/service_post_view.dart';
 import 'package:talbna/utils/debug_logger.dart';
 import 'package:talbna/services/deep_link_service.dart';
@@ -27,6 +28,7 @@ class Routes {
   static const String language = '/language';
   static const String resetPassword = '/reset-password';
   static const String servicePost = '/service-post';
+  static const String reels = '/reels'; // Add new route for reels
 
   // Global navigation tracking to prevent duplicate service post loads
   static final Map<String, DateTime> _navigationHistory = {};
@@ -37,7 +39,7 @@ class Routes {
     return PageRouteBuilder(
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: const Duration(milliseconds: 200),
+      transitionDuration: const Duration(milliseconds: 100),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
           opacity: animation,
@@ -64,30 +66,40 @@ class Routes {
           return _handleServicePostRoute({'postId': postId});
         }
 
-        // Talabna scheme handling
+        // Handle "talabna://" deep links with special route detection
         if (settings.name!.startsWith('talabna://')) {
           final uri = Uri.parse(settings.name!);
           final pathSegments = uri.pathSegments;
 
           if (pathSegments.isNotEmpty) {
             String postId;
-            if (pathSegments.length >= 2 && pathSegments[0] == 'service-post') {
+
+            // Check if it's a reels link
+            if (pathSegments.length >= 2 && pathSegments[0] == 'reels') {
               postId = pathSegments[1];
-            } else if (pathSegments.length == 1 && _isNumeric(pathSegments[0])) {
+              DebugLogger.log('Detected talabna:// reels scheme with ID: $postId', category: 'NAVIGATION');
+              return _handleReelsRoute({'postId': postId});
+            }
+            // Check if it's a service-post link
+            else if (pathSegments.length >= 2 && pathSegments[0] == 'service-post') {
+              postId = pathSegments[1];
+              DebugLogger.log('Detected talabna:// service-post scheme with ID: $postId', category: 'NAVIGATION');
+              return _handleServicePostRoute({'postId': postId});
+            }
+            // Default numeric ID behavior (backward compatibility)
+            else if (pathSegments.length == 1 && _isNumeric(pathSegments[0])) {
               postId = pathSegments[0];
+              DebugLogger.log('Detected talabna:// numeric ID scheme: $postId', category: 'NAVIGATION');
+              return _handleServicePostRoute({'postId': postId});
             } else {
               return _errorRoute('Invalid deep link format');
             }
-
-            DebugLogger.log('Detected talabna:// scheme with ID: $postId', category: 'NAVIGATION');
-            return _handleServicePostRoute({'postId': postId});
           }
         }
 
         // Navigation guard to prevent rapid duplicate navigations
         if (!_shouldAllowNavigation(settings.name!)) {
           DebugLogger.log('Blocking duplicate navigation to: ${settings.name}', category: 'NAVIGATION');
-          // Instead of showing a CircularProgressIndicator, return an empty route
           return _createEmptyRoute(settings);
         }
       }
@@ -113,6 +125,9 @@ class Routes {
         case servicePost:
           return _handleServicePostRoute(args);
 
+        case reels:
+          return _handleReelsRoute(args);
+
         default:
           return _errorRoute('Route not found: ${settings.name}');
       }
@@ -121,6 +136,107 @@ class Routes {
       return _errorRoute('Error processing route: ${settings.name}');
     }
   }
+
+  static Route<dynamic> _handleReelsRoute(Map<String, dynamic>? args) {
+    final postId = args?['postId'] as String?;
+    final userId = args?['userId'] as int?;
+
+    if (postId == null) {
+      return _errorRoute('postId is required for Reels route');
+    }
+
+    // Ensure postId is numeric
+    if (!_isNumeric(postId)) {
+      return _errorRoute('Invalid postId format');
+    }
+
+    // Check for required userId or fallback to authenticated user
+    int? userIdToUse = userId;
+
+    // Create unique route key for reels
+    final now = DateTime.now();
+    final routeKey = 'reels-$postId';
+
+    if (_navigationHistory.containsKey(routeKey)) {
+      final lastNavigation = _navigationHistory[routeKey]!;
+      if (now.difference(lastNavigation).inMilliseconds < 500) {
+        DebugLogger.log('Debouncing reels navigation for ID: $postId', category: 'NAVIGATION');
+        return _createEmptyRoute(RouteSettings(name: routeKey));
+      }
+    }
+
+    _navigationHistory[routeKey] = now;
+
+    DebugLogger.log('Creating route for reels ID: $postId', category: 'NAVIGATION');
+
+    return PageRouteBuilder(
+      settings: RouteSettings(name: reels, arguments: args),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        // Check authentication if userId wasn't provided
+        if (userIdToUse == null) {
+          final authState = BlocProvider.of<AuthenticationBloc>(context).state;
+          if (authState is! AuthenticationSuccess) {
+            DebugLogger.log('User not authenticated for reels', category: 'NAVIGATION');
+
+            // Store the deep link before redirecting to login
+            DeepLinkService().storePendingDeepLink('reels', postId);
+            return const LoginScreenNew();
+          }
+          userIdToUse = authState.userId!;
+        }
+
+        // Load the user profile for reels view
+        context.read<UserProfileBloc>().add(UserProfileRequested(id: userIdToUse!));
+
+        // First try to fetch the specific service post
+        context.read<ServicePostBloc>().add(GetServicePostByIdEvent(
+          int.parse(postId),
+          forceRefresh: true, // Force refresh for shared content
+        ));
+
+        // Build the Reels UI
+        return _buildReelsView(context, userIdToUse!, int.parse(postId));
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  // New method to build the Reels view
+  static Widget _buildReelsView(BuildContext context, int userId, int postId) {
+    return BlocBuilder<ServicePostBloc, ServicePostState>(
+      builder: (context, servicePostState) {
+        return BlocBuilder<UserProfileBloc, UserProfileState>(
+          builder: (context, userProfileState) {
+            if (servicePostState is ServicePostLoadSuccess &&
+                userProfileState is UserProfileLoadSuccess) {
+
+              final servicePost = _findServicePost(servicePostState.servicePosts, postId);
+              final user = userProfileState.user;
+
+              if (servicePost != null) {
+                DebugLogger.log('Successfully loaded service post for reels: $postId', category: 'NAVIGATION');
+                return ReelsHomeScreen(
+                  userId: userId,
+                  servicePost: servicePost,
+                  user: user,
+                );
+              }
+            }
+
+            // Handle loading or error states
+            return _buildLoadingOrErrorState(servicePostState, userProfileState);
+          },
+        );
+      },
+    );
+  }
+
 
   // Empty route for blocking duplicate navigations
   static Route<dynamic> _createEmptyRoute(RouteSettings settings) {
@@ -176,28 +292,34 @@ class Routes {
   }
 
   // Simplified service post route handler
+// Update this method in your Routes.dart file
+
   static Route<dynamic> _handleServicePostRoute(Map<String, dynamic>? args) {
     final postId = args?['postId'] as String?;
     if (postId == null) {
       return _errorRoute('postId is required for ServicePost route');
     }
 
-    // Prevent concurrent loads of the same service post
+    // Ensure postId is numeric
+    if (!_isNumeric(postId)) {
+      return _errorRoute('Invalid postId format');
+    }
+
+    // Use a more lenient debounce time for deep links
     final now = DateTime.now();
     final routeKey = 'service-post-$postId';
 
     if (_navigationHistory.containsKey(routeKey)) {
       final lastNavigation = _navigationHistory[routeKey]!;
-      if (now.difference(lastNavigation).inMilliseconds < 1500) {
+      if (now.difference(lastNavigation).inMilliseconds < 500) {
         DebugLogger.log('Debouncing service post navigation for ID: $postId', category: 'NAVIGATION');
         return _createEmptyRoute(RouteSettings(name: routeKey));
       }
     }
 
-    // If already loading a service post, don't show loading indicator
+    // Reset loading state if needed
     if (_isCurrentlyLoadingServicePost) {
-      DebugLogger.log('Another service post is already loading, blocking navigation', category: 'NAVIGATION');
-      return _createEmptyRoute(RouteSettings(name: routeKey));
+      _isCurrentlyLoadingServicePost = false;
     }
 
     _navigationHistory[routeKey] = now;
@@ -227,9 +349,15 @@ class Routes {
         // Clear any pending deep links to avoid duplicate processing
         DeepLinkService().clearPendingDeepLinks();
 
-        // Load the data via BLoCs
+        // Load the user profile
         context.read<UserProfileBloc>().add(UserProfileRequested(id: userId));
-        context.read<ServicePostBloc>().add(GetServicePostByIdEvent(id: int.parse(postId)));
+
+        // Update to use non-forcing load that will use cache first:
+        // This is important for offline support:
+        context.read<ServicePostBloc>().add(GetServicePostByIdEvent(
+          int.parse(postId),
+          forceRefresh: false, // Use cache first
+        ));
 
         // Return the service post view with a better loading state
         return BlocListener<ServicePostBloc, ServicePostState>(
@@ -251,7 +379,28 @@ class Routes {
       },
     );
   }
+  // Add navigation helper for reels
+  static void navigateToReels(BuildContext context, String postId, int userId) {
+    // Check for duplicate navigation
+    final routeKey = 'reels-$postId';
+    final now = DateTime.now();
 
+    if (_navigationHistory.containsKey(routeKey)) {
+      final lastNavigation = _navigationHistory[routeKey]!;
+      if (now.difference(lastNavigation).inMilliseconds < 500) {
+        DebugLogger.log('Skipping duplicate navigation to reels: $postId', category: 'NAVIGATION');
+        return;
+      }
+    }
+
+    _navigationHistory[routeKey] = now;
+
+    Navigator.pushNamed(
+      context,
+      reels,
+      arguments: {'postId': postId, 'userId': userId},
+    );
+  }
   // Improved service post view builder
   static Widget _buildServicePostView(BuildContext context, int userId, int postId) {
     return BlocBuilder<ServicePostBloc, ServicePostState>(

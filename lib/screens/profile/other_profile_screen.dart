@@ -127,7 +127,7 @@ class _OtherProfileScreenState extends State<OtherProfileScreen>
 
     if (user.country != null) {
       try {
-        locationParts.add(user.country!.getName(currentLang));
+        locationParts.add(user.country!.getCountryName(currentLang));
       } catch (e) {
         // Fallback if getName method fails
         locationParts.add(user.country.toString());

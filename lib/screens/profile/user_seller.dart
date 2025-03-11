@@ -56,10 +56,10 @@ class UserSellerScreenState extends State<UserSellerScreen> {
     final String currentLang = _language.getLanguage();
 
     if (follower.country != null && follower.city != null) {
-      return '${follower.country?.getName(currentLang) ?? ""}, ${follower.city?.getName(currentLang) ?? ""}';
+      return '${follower.country?.getCurrencyName(currentLang) ?? ""}, ${follower.city?.getName(currentLang) ?? ""}';
     }
     else if (follower.country != null) {
-      return follower.country?.getName(currentLang) ?? "";
+      return follower.country?.getCurrencyName(currentLang) ?? "";
     }
     else if (follower.city != null) {
       return follower.city?.getName(currentLang) ?? "";
@@ -142,7 +142,7 @@ class UserSellerScreenState extends State<UserSellerScreen> {
                                 CircleAvatar(
                                   radius: 25,
                                   backgroundImage: Image.network(
-                                    '${Constants.apiBaseUrl}/storage/${follower.photos!.first.src}',
+                                    '${Constants.apiBaseUrl}/${follower.photos!.first.src}',
                                     errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                                       return const CircleAvatar(
                                         radius: 30,

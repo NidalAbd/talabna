@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart' as app_main;
 
@@ -40,6 +41,7 @@ class Language extends ChangeNotifier {
     // 4. Notify listeners for UI updates
     notifyListeners();
   }
+
   String tJobTextHome() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -67,6 +69,124 @@ class Language extends ChangeNotifier {
         return '';
     }
   }
+  String username() {
+    return _lang == 'ar' ? 'اسم المستخدم' : 'Username';
+  }
+
+  String addToContacts() {
+    return _lang == 'ar' ? 'إضافة إلى جهات الاتصال' : 'Add to Contacts';
+  }
+
+  String addContact() {
+    return _lang == 'ar' ? 'إضافة جهة اتصال' : 'Add Contact';
+  }
+
+  String addContactConfirmation(String name) {
+    return _lang == 'ar'
+        ? 'هل ترغب في إضافة $name إلى جهات الاتصال الخاصة بك؟'
+        : 'Would you like to add $name to your contacts?';
+  }
+  String tPermissionDeniedText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم رفض الإذن';
+      case 'en':
+        return 'Permission Denied';
+      default:
+        return 'Permission Denied';
+    }
+  }
+
+  String tStoragePermissionExplanationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'يحتاج التطبيق إلى إذن للوصول إلى الصور والفيديوهات الخاصة بك لتتمكن من تحميلها. يرجى منح الإذن في إعدادات التطبيق.';
+      case 'en':
+        return 'The app needs permission to access your photos and videos in order to upload them. Please grant permission in app settings.';
+      default:
+        return 'The app needs permission to access your photos and videos in order to upload them. Please grant permission in app settings.';
+    }
+  }
+
+  String tCancelText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إلغاء';
+      case 'en':
+        return 'Cancel';
+      default:
+        return 'Cancel';
+    }
+  }
+
+  String tOpenSettingsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'فتح الإعدادات';
+      case 'en':
+        return 'Open Settings';
+      default:
+        return 'Open Settings';
+    }
+  }
+  String cancel() {
+    return _lang == 'ar' ? 'إلغاء' : 'Cancel';
+  }
+
+  String add() {
+    return _lang == 'ar' ? 'إضافة' : 'Add';
+  }
+
+  String permissionRequired() {
+    return _lang == 'ar' ? 'الإذن مطلوب' : 'Permission Required';
+  }
+
+  String contactsPermissionExplanation() {
+    return _lang == 'ar'
+        ? 'لإضافة هذا المستخدم إلى جهات الاتصال الخاصة بك، نحتاج إلى إذن للوصول إلى جهات الاتصال الخاصة بك.'
+        : 'To add this user to your contacts, we need permission to access your contacts.';
+  }
+
+  String contactAddedSuccess(String name) {
+    return _lang == 'ar'
+        ? 'تمت إضافة $name إلى جهات الاتصال الخاصة بك'
+        : '$name has been added to your contacts';
+  }
+
+  String contactAddError() {
+    return _lang == 'ar' ? 'فشل في إضافة جهة الاتصال' : 'Failed to add contact';
+  }
+
+  String permissionDenied() {
+    return _lang == 'ar' ? 'تم رفض الإذن' : 'Permission Denied';
+  }
+
+  String openSettingsExplanation() {
+    return _lang == 'ar'
+        ? 'يرجى فتح الإعدادات لمنح إذن جهات الاتصال.'
+        : 'Please open settings to grant contacts permission.';
+  }
+
+  String openSettings() {
+    return _lang == 'ar' ? 'فتح الإعدادات' : 'Open Settings';
+  }
+
+  String permissionDeniedMessage() {
+    return _lang == 'ar' ? 'إذن جهات الاتصال مطلوب' : 'Contact permission is required';
+  }
+
+  String success() {
+    return _lang == 'ar' ? 'تم بنجاح' : 'Success';
+  }
+
+  String error() {
+    return _lang == 'ar' ? 'خطأ' : 'Error';
+  }
+
   String tConfirmLogoutText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -94,7 +214,17 @@ class Language extends ChangeNotifier {
         return 'Confirm Logout';
     }
   }
-
+  String chooseLanguageText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'اختر لغتك';
+      case 'en':
+        return 'Choose Your Language';
+      default:
+        return 'Choose Your Language';
+    }
+  }
   String tConfirmLogoutDescText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -122,15 +252,402 @@ class Language extends ChangeNotifier {
         return 'Are you sure you want to logout?';
     }
   }
-  String chooseLanguageText() {
+  String contactDetails() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
       case 'ar':
-        return 'اختر لغتك';
+        return 'بيانات التواصل';
       case 'en':
-        return 'Choose Your Language';
+        return 'Contact Details';
       default:
-        return 'Choose Your Language';
+        return 'Contact Details';
+    }
+  }
+  String getShareText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'مشاركة';
+      case 'en':
+        return 'Share';
+      default:
+        return 'Share';
+    }
+  }
+  String getFollowingText(String categoryName) {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'متابعة $categoryName';
+      case 'en':
+        return 'Following $categoryName';
+      default:
+        return 'Following $categoryName';
+    }
+  }
+
+  String getUnfollowedText(String categoryName) {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إلغاء متابعة $categoryName';
+      case 'en':
+        return 'Unfollowed $categoryName';
+      default:
+        return 'Unfollowed $categoryName';
+    }
+  }
+
+  String getFollowingButtonText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'متابعة';
+      case 'en':
+        return 'Following';
+      default:
+        return 'Following';
+    }
+  }
+
+  String getFollowButtonText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'متابعة';
+      case 'en':
+        return 'Follow';
+      default:
+        return 'Follow';
+    }
+  }
+
+  String getNotificationFollowingText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'احصل على إشعارات للمنشورات الجديدة بالمتابعة';
+      case 'en':
+        return 'Get notified of new posts by following';
+      default:
+        return 'Get notified of new posts by following';
+    }
+  }
+
+  String getLatestPostsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'أحدث المنشورات';
+      case 'en':
+        return 'Latest Posts';
+      default:
+        return 'Latest Posts';
+    }
+  }
+
+  String getPostsCountText(int count) {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return '$count منشور';
+      case 'en':
+        return '$count posts';
+      default:
+        return '$count posts';
+    }
+  }
+
+  String getNoPostsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'لا توجد منشورات في هذه الفئة حتى الآن';
+      case 'en':
+        return 'No posts yet in this category';
+      default:
+        return 'No posts yet in this category';
+    }
+  }
+
+  String getBeFirstToPostText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'كن أول من ينشر شيئًا!';
+      case 'en':
+        return 'Be the first to post something!';
+      default:
+        return 'Be the first to post something!';
+    }
+  }
+
+  String getCreatePostText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إنشاء منشور';
+      case 'en':
+        return 'Create Post';
+      default:
+        return 'Create Post';
+    }
+  }
+  String getReportText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إبلاغ';
+      case 'en':
+        return 'Report';
+      default:
+        return 'Report';
+    }
+  }
+
+  String getLikeText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إعجاب';
+      case 'en':
+        return 'Like';
+      default:
+        return 'Like';
+    }
+  }
+
+  String getCommentText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تعليق';
+      case 'en':
+        return 'Comment';
+      default:
+        return 'Comment';
+    }
+  }
+
+  String getLikesLabel() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return ' إعجابات';
+      case 'en':
+        return ' likes';
+      default:
+        return ' likes';
+    }
+  }
+
+  String getCommentsLabel() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return ' تعليقات';
+      case 'en':
+        return ' comments';
+      default:
+        return ' comments';
+    }
+  }
+
+  String getViewsLabel() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return ' مشاهدات';
+      case 'en':
+        return ' views';
+      default:
+        return ' views';
+    }
+  }
+
+  String getUnknownUserText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'مستخدم غير معروف';
+      case 'en':
+        return 'Unknown User';
+      default:
+        return 'Unknown User';
+    }
+  }
+
+  String getUnknownTimeText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'وقت غير معروف';
+      case 'en':
+        return 'Unknown time';
+      default:
+        return 'Unknown time';
+    }
+  }
+
+  String getTimeAgoText(int value, String unit) {
+    final currentLanguage = getLanguage();
+
+    if (currentLanguage == 'ar') {
+      switch (unit) {
+        case 'second':
+          return 'منذ $value ثانية';
+        case 'minute':
+          return 'منذ $value دقيقة';
+        case 'hour':
+          return 'منذ $value ساعة';
+        case 'day':
+          return 'منذ $value يوم';
+        case 'month':
+          return 'منذ $value شهر';
+        case 'year':
+          return 'منذ $value سنة';
+        case 'just_now':
+          return 'الآن';
+        default:
+          return 'منذ $value $unit';
+      }
+    } else {
+      switch (unit) {
+        case 'second':
+          return '${value}sec ago';
+        case 'minute':
+          return '${value}m ago';
+        case 'hour':
+          return '${value}h ago';
+        case 'day':
+          return '${value}d ago';
+        case 'month':
+          return '${value}M ago';
+        case 'year':
+          return '${value}Y ago';
+        case 'just_now':
+          return 'Just now';
+        default:
+          return '$value $unit ago';
+      }
+    }
+  }
+
+  String getUserLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'موقع المستخدم';
+      case 'en':
+        return 'User Location';
+      default:
+        return 'User Location';
+    }
+  }
+
+  String getDeleteText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'حذف';
+      case 'en':
+        return 'Delete';
+      default:
+        return 'Delete';
+    }
+  }
+
+  String getAddCommentText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'أضف تعليقًا...';
+      case 'en':
+        return 'Add a comment...';
+      default:
+        return 'Add a comment...';
+    }
+  }
+
+  String getNoCommentsYetText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'لا توجد تعليقات حتى الآن. كن أول من يعلق!';
+      case 'en':
+        return 'No comments yet. Be the first to comment!';
+      default:
+        return 'No comments yet. Be the first to comment!';
+    }
+  }
+
+  String getCommentsLoadFailedText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'فشل تحميل التعليقات. يرجى المحاولة مرة أخرى.';
+      case 'en':
+        return 'Failed to load comments. Please try again.';
+      default:
+        return 'Failed to load comments. Please try again.';
+    }
+  }
+
+  String getTryAgainText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'حاول مرة أخرى';
+      case 'en':
+        return 'Try Again';
+      default:
+        return 'Try Again';
+    }
+  }
+
+  String getViewPostShareText(String postTitle) {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'شاهد هذا المنشور: $postTitle';
+      case 'en':
+        return 'Check out this post: $postTitle';
+      default:
+        return 'Check out this post: $postTitle';
+    }
+  }
+
+  String getLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'الموقع';
+      case 'en':
+        return 'Location';
+      default:
+        return 'Location';
+    }
+  }
+  String tVideoUploadedText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تحديث المنشور بالفيديو بنجاح. قد يستغرق الفيديو لحظة للمعالجة.';
+      case 'en':
+        return 'Post with video was updated successfully. Video may take a moment to process.';
+      default:
+        return 'Post with video was updated successfully. Video may take a moment to process.';
+    }
+  }
+  String viewGoogleMap() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'عرض في قوقل';
+      case 'en':
+        return 'view google map';
+      default:
+        return 'view google map';
     }
   }
   String tReportTitle() {
@@ -828,34 +1345,226 @@ class Language extends ChangeNotifier {
     }
   }
 
-  String tCancelText() {
+  String tLocationPermissionExplanationText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
       case 'ar':
-        return 'إلغاء';
+        return 'يحتاج التطبيق إلى إذن الوصول إلى موقعك لعرض الخريطة وتحديد موقعك. يرجى منح الإذن في إعدادات التطبيق.';
       case 'en':
-        return 'Cancel';
-      case 'Español':
-        return 'Cancelar';
-      case '中文':
-        return '取消';
-      case 'हिन्दी':
-        return 'रद्द करें';
-      case 'Português':
-        return 'Cancelar';
-      case 'Русский':
-        return 'Отмена';
-      case '日本語':
-        return 'キャンセル';
-      case 'Français':
-        return 'Annuler';
-      case 'Deutsch':
-        return 'Abbrechen';
+        return 'The app needs location permission to show the map and locate your position. Please grant permission in app settings.';
       default:
-        return 'Cancel';
+        return 'The app needs location permission to show the map and locate your position. Please grant permission in app settings.';
     }
   }
 
+  String tCheckingPermissionsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'جارٍ التحقق من الأذونات...';
+      case 'en':
+        return 'Checking permissions...';
+      default:
+        return 'Checking permissions...';
+    }
+  }
+
+  String tRetryText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'إعادة المحاولة';
+      case 'en':
+        return 'Retry';
+      default:
+        return 'Retry';
+    }
+  }
+
+  String tLocationPermissionRequiredText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'يلزم إذن الموقع لاستخدام هذه الميزة';
+      case 'en':
+        return 'Location permission is required to use this feature';
+      default:
+        return 'Location permission is required to use this feature';
+    }
+  }
+
+  String tGrantPermissionText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'منح الإذن';
+      case 'en':
+        return 'Grant Permission';
+      default:
+        return 'Grant Permission';
+    }
+  }
+
+  String tSelectedLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'الموقع المحدد';
+      case 'en':
+        return 'Selected Location';
+      default:
+        return 'Selected Location';
+    }
+  }
+
+  String tLocationServicesDisabledText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'خدمات الموقع معطلة';
+      case 'en':
+        return 'Location Services Disabled';
+      default:
+        return 'Location Services Disabled';
+    }
+  }
+  String tGrantLocationAccessText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'السماح بالوصول إلى الموقع';
+      case 'en':
+        return 'Grant Location Access';
+      default:
+        return 'Grant Location Access';
+    }
+  }
+
+  String tTryAgainText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'حاول مرة أخرى';
+      case 'en':
+        return 'Try Again';
+      default:
+        return 'Try Again';
+    }
+  }
+
+  String tUseDefaultLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'استخدم موقع افتراضي';
+      case 'en':
+        return 'Use Default Location';
+      default:
+        return 'Use Default Location';
+    }
+  }
+
+  String tManualLocationSetText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تم تعيين موقع افتراضي';
+      case 'en':
+        return 'Default location has been set';
+      default:
+        return 'Default location has been set';
+    }
+  }
+// Permission related texts to add to your Language class
+
+
+  String tPermissionPermanentlyDeniedText() {
+    return _lang == 'ar'
+        ? 'تم رفض الإذن بشكل دائم'
+        : 'Permission Permanently Denied';
+  }
+
+  String tPermanentStoragePermissionExplanationText() {
+    return _lang == 'ar'
+        ? 'لقد رفضت إذن الوصول إلى معرض الصور بشكل دائم. يرجى فتح إعدادات التطبيق والسماح بالوصول إلى الصور والفيديوهات للاستمرار.'
+        : 'You have permanently denied access to your gallery. Please open app settings and allow access to photos and videos to continue.';
+  }
+
+
+
+  String tOkText() {
+    return _lang == 'ar' ? 'حسناً' : 'OK';
+  }
+
+
+
+
+  String tAddMediaText() {
+    return _lang == 'ar' ? 'إضافة وسائط' : 'Add Media';
+  }
+
+
+  String tChoosePhotosText() {
+    return _lang == 'ar' ? 'اختر الصور' : 'Choose Photos';
+  }
+
+  String tLocationPermissionManualEnableText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'يبدو أنك رفضت إذن الموقع عدة مرات. يمكنك استخدام موقع افتراضي أو محاولة منح الإذن مرة أخرى.';
+      case 'en':
+        return 'It seems you have denied location permission multiple times. You can use a default location or try granting permission again.';
+      default:
+        return 'It seems you have denied location permission multiple times. You can use a default location or try granting permission again.';
+    }
+  }
+  String tLocationServicesExplanationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'يرجى تمكين خدمات الموقع في إعدادات جهازك لاستخدام هذه الميزة.';
+      case 'en':
+        return 'Please enable location services in your device settings to use this feature.';
+      default:
+        return 'Please enable location services in your device settings to use this feature.';
+    }
+  }
+
+  String tErrorGettingLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'حدث خطأ أثناء محاولة الحصول على موقعك';
+      case 'en':
+        return 'An error occurred while trying to get your location';
+      default:
+        return 'An error occurred while trying to get your location';
+    }
+  }
+
+  String tGettingYourLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'جارٍ الحصول على موقعك...';
+      case 'en':
+        return 'Getting your location...';
+      default:
+        return 'Getting your location...';
+    }
+  }
+  String tTapMapToSelectLocationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'انقر على الخريطة لتحديد الموقع';
+      case 'en':
+        return 'Tap on the map to select a location';
+      default:
+        return 'Tap on the map to select a location';
+    }
+  }
   String tConfirmText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -960,7 +1669,125 @@ class Language extends ChangeNotifier {
         return 'No following found';
     }
   }
+  String getContactInformationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'معلومات الاتصال';
+      case 'en':
+        return 'Contact Information';
+      default:
+        return 'Contact Information';
+    }
+  }
 
+  String getPersonalDetailsText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'البيانات الشخصية';
+      case 'en':
+        return 'Personal Details';
+      default:
+        return 'Personal Details';
+    }
+  }
+
+  String getAdditionalInformationText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'معلومات إضافية';
+      case 'en':
+        return 'Additional Information';
+      default:
+        return 'Additional Information';
+    }
+  }
+
+  String getGenderText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'الجنس';
+      case 'en':
+        return 'Gender';
+      default:
+        return 'Gender';
+    }
+  }
+
+  String getCityText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'المدينة';
+      case 'en':
+        return 'City';
+      default:
+        return 'City';
+    }
+  }
+
+  String getDateOfBirthText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'تاريخ الميلاد';
+      case 'en':
+        return 'Date of Birth';
+      default:
+        return 'Date of Birth';
+    }
+  }
+
+  String getAccountStatusText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'حالة الحساب';
+      case 'en':
+        return 'Account Status';
+      default:
+        return 'Account Status';
+    }
+  }
+
+  String getActiveText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'نشط';
+      case 'en':
+        return 'Active';
+      default:
+        return 'Active';
+    }
+  }
+
+  String getInactiveText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'غير نشط';
+      case 'en':
+        return 'Inactive';
+      default:
+        return 'Inactive';
+    }
+  }
+
+  String getNotSpecifiedText() {
+    final currentLanguage = getLanguage();
+    switch (currentLanguage) {
+      case 'ar':
+        return 'غير محدد';
+      case 'en':
+        return 'Not Specified';
+      default:
+        return 'Not Specified';
+    }
+  }
   String tPullToRefreshText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -1822,28 +2649,8 @@ class Language extends ChangeNotifier {
         return '';
     }
   }
-  String tAddMediaText() {
-    final currentLanguage = getLanguage();
-    switch (currentLanguage) {
-      case 'ar':
-        return 'إضافة وسائط';
-      case 'es':
-        return 'Agregar medios';
-      default:
-        return 'Add Media';
-    }
-  }
-  String tChoosePhotosText() {
-    final currentLanguage = getLanguage();
-    switch (currentLanguage) {
-      case 'ar':
-        return 'اختر الصور';
-      case 'es':
-        return 'Elegir fotos';
-      default:
-        return 'Choose Photos';
-    }
-  }
+
+
   String tChooseVideoText() {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -1888,17 +2695,7 @@ class Language extends ChangeNotifier {
         return 'You have exceeded the maximum allowed number of selected images ($max images).';
     }
   }
-  String tOkText() {
-    final currentLanguage = getLanguage();
-    switch (currentLanguage) {
-      case 'ar':
-        return 'موافق';
-      case 'es':
-        return 'Aceptar';
-      default:
-        return 'OK';
-    }
-  }
+
   String tRemainingImagesText(int count) {
     final currentLanguage = getLanguage();
     switch (currentLanguage) {
@@ -4698,5 +5495,186 @@ class Language extends ChangeNotifier {
       default:
         return 'Notification'; // Default to en if the language is not recognized
     }
+  }
+
+  String formatDateLocalized(DateTime date) {
+    final currentLanguage = getLanguage();
+    if (currentLanguage == 'ar') {
+      // Arabic date format
+      final String day = date.day.toString();
+      final String year = date.year.toString();
+
+      // Arabic month names
+      final List<String> arabicMonths = [
+        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+      ];
+      final String month = arabicMonths[date.month - 1];
+
+      return '$day $month، $year';
+    } else {
+      // English date format (or default)
+      return DateFormat('MMMM dd, yyyy').format(date);
+    }
+  }
+
+}
+
+class GenderTranslations {
+  // Converts between database/backend values and frontend values
+  static String convertToFrontendGender(String? backendGender) {
+    switch (backendGender) {
+      case 'ذكر':
+        return 'male';
+      case 'انثى':
+        return 'female';
+      default:
+        return '';
+    }
+  }
+
+  // Converts frontend values back to backend values
+  static String convertToBackendGender(String frontendGender) {
+    switch (frontendGender) {
+      case 'male':
+        return 'ذكر';
+      case 'female':
+        return 'انثى';
+      default:
+        return '';
+    }
+  }
+
+  // This method returns the display text for a given gender value based on current language
+  static String getDisplayText(String genderValue, String lang) {
+    switch (lang) {
+      case 'ar':
+        return genderValue == 'male'
+            ? 'ذكر'
+            : genderValue == 'female'
+            ? 'انثى'
+            : '';
+      case 'en':
+        return genderValue == 'male'
+            ? 'Male'
+            : genderValue == 'female'
+            ? 'Female'
+            : '';
+      default:
+        return genderValue == 'male'
+            ? 'Male'
+            : genderValue == 'female'
+            ? 'Female'
+            : '';
+    }
+  }
+
+  // This method returns the label for the gender dropdown
+  static String getGenderText(String lang) {
+    switch (lang) {
+      case 'ar':
+        return 'الجنس';
+      case 'en':
+        return 'Gender';
+      default:
+        return 'Gender';
+    }
+  }
+
+  // This method returns the list of gender options for display
+  static List<Map<String, String>> getGenderOptions(String lang) {
+    switch (lang) {
+      case 'ar':
+        return [
+          {'value': 'male', 'display': 'ذكر'},
+          {'value': 'female', 'display': 'انثى'}
+        ];
+      case 'en':
+        return [
+          {'value': 'male', 'display': 'Male'},
+          {'value': 'female', 'display': 'Female'}
+        ];
+      default:
+        return [
+          {'value': 'male', 'display': 'Male'},
+          {'value': 'female', 'display': 'Female'}
+        ];
+    }
+  }
+}
+
+class EnumTranslations {
+  // Converts type between frontend and backend values
+  static String convertTypeToFrontend(String backendType) {
+    return backendType; // In this case, the values are the same
+  }
+
+  static String convertTypeToBackend(String frontendType) {
+    return frontendType; // In this case, the values are the same
+  }
+
+  // Converts badge type between frontend and backend values
+  static String convertBadgeToFrontend(String backendBadge) {
+    return backendBadge; // In this case, the values are the same
+  }
+
+  static String convertBadgeToBackend(String frontendBadge) {
+    return frontendBadge; // In this case, the values are the same
+  }
+
+  // Helper method to get type display options based on language
+  static List<Map<String, String>> getTypeOptions(String lang) {
+    switch (lang) {
+      case 'en':
+        return [
+          {'value': 'عرض', 'display': 'Offer'},
+          {'value': 'طلب', 'display': 'Request'}
+        ];
+      case 'ar':
+      default:
+        return [
+          {'value': 'عرض', 'display': 'عرض'},
+          {'value': 'طلب', 'display': 'طلب'}
+        ];
+    }
+  }
+
+  // Helper method to get badge options based on language
+  static List<Map<String, String>> getBadgeOptions(String lang) {
+    switch (lang) {
+      case 'en':
+        return [
+          {'value': 'عادي', 'display': 'Normal'},
+          {'value': 'ذهبي', 'display': 'Gold'},
+          {'value': 'ماسي', 'display': 'Diamond'}
+        ];
+      case 'ar':
+      default:
+        return [
+          {'value': 'عادي', 'display': 'عادي'},
+          {'value': 'ذهبي', 'display': 'ذهبي'},
+          {'value': 'ماسي', 'display': 'ماسي'}
+        ];
+    }
+  }
+
+  // Helper method to get display text based on current language
+  static String getTypeDisplayText(String value, String lang) {
+    final options = getTypeOptions(lang);
+    final matchingOption = options.firstWhere(
+            (option) => option['value'] == value,
+        orElse: () => options.first
+    );
+    return matchingOption['display']!;
+  }
+
+  // Helper method to get badge display text based on current language
+  static String getBadgeDisplayText(String value, String lang) {
+    final options = getBadgeOptions(lang);
+    final matchingOption = options.firstWhere(
+            (option) => option['value'] == value,
+        orElse: () => options.first
+    );
+    return matchingOption['display']!;
   }
 }
